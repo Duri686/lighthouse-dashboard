@@ -47,6 +47,9 @@ jobs:
           mkdir -p reports
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
+          echo "Cleaning reports directory..."
+          rm -rf reports/*
+          
           # 运行桌面版测试
           echo "Running Desktop test..."
           lhci collect \
@@ -74,22 +77,30 @@ jobs:
             --numberOfRuns=1
 
           echo "Processing Lighthouse results..."
+          echo "Files in .lighthouseci:"
+          ls -la .lighthouseci/
           
           # 处理所有JSON报告文件
-          for file in .lighthouseci/lhr-*.json; do
+          found_desktop=false
+          found_mobile=false
+          
+          for file in .lighthouseci/*.json; do
             if [ -f "$file" ]; then
-              echo "Processing report: $file"
-              if grep -q "\"formFactor\": \"mobile\"" "$file"; then
+              echo "Analyzing report: $file"
+              content=$(cat "$file")
+              if echo "$content" | grep -q "\"formFactor\": \"mobile\""; then
                 device_type="mobile"
+                found_mobile=true
               else
                 device_type="desktop"
+                found_desktop=true
               fi
               
-              # 复制到reports目录并重命名
+              echo "Processing ${device_type} report..."
+              
+              # 复制并处理报告
               new_file="./reports/$(basename "${file%.json}")-${device_type}.json"
               cp "$file" "$new_file"
-              
-              # 处理报告
               DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_file"
               
               # 复制HTML报告
@@ -100,14 +111,17 @@ jobs:
             fi
           done
 
-          # 验证报告是否生成
-          report_count=$(find ./reports -name "lhr-*-*.json" | wc -l)
-          if [ "$report_count" -eq 0 ]; then
-            echo "Error: No reports were generated!"
+          if ! $found_desktop; then
+            echo "Warning: No desktop report was generated!"
+          fi
+          if ! $found_mobile; then
+            echo "Warning: No mobile report was generated!"
+          fi
+          
+          if ! $found_desktop && ! $found_mobile; then
+            echo "Error: No reports were generated at all!"
             exit 1
           fi
-
-          echo "Generated $report_count reports successfully."
 
       - name: List Reports Directory
         run: |
@@ -124,14 +138,17 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 添加所有JSON文件
-          find reports -name "*.json" -exec git add {} \;
+          # 添加所有报告文件
+          git add reports/*.json reports/*.html || true
           git add .gitignore || true
           
-          # 提交前检查文件状态
-          git status
+          echo "Files staged for commit:"
+          git diff --staged --name-status
           
-          git diff --staged --quiet || git commit -m "Update Lighthouse report $(date -u)"
-          git push origin HEAD:${{ github.ref }}
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update Lighthouse reports $(date -u)"
+            git push origin HEAD:${{ github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
