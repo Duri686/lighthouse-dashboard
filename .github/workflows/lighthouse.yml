@@ -44,7 +44,6 @@ jobs:
 
       - name: Run Lighthouse and Process Reports
         run: |
-          # 确保报告目录存在
           mkdir -p reports
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
@@ -56,7 +55,7 @@ jobs:
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
-            --outDir=./reports \
+            --outDir=.lighthouseci \
             --numberOfRuns=1
 
           # 运行移动版测试
@@ -71,40 +70,44 @@ jobs:
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
-            --outDir=./reports \
+            --outDir=.lighthouseci \
             --numberOfRuns=1
 
-          echo "Moving Lighthouse results to reports directory:"
-          echo "Checking .lighthouseci contents:"
-          ls -la .lighthouseci/ || true
+          echo "Processing Lighthouse results..."
           
-          # 直接将新报告输出到 reports 目录
-          # 为新报告添加设备类型标识
+          # 处理所有JSON报告文件
           for file in .lighthouseci/lhr-*.json; do
             if [ -f "$file" ]; then
-              FILENAME=$(basename "$file")
-              if grep -q "formFactor\": \"mobile\"" "$file"; then
-                cp "$file" "./reports/${FILENAME%.json}-mobile.json"
+              echo "Processing report: $file"
+              if grep -q "\"formFactor\": \"mobile\"" "$file"; then
+                device_type="mobile"
               else
-                cp "$file" "./reports/${FILENAME%.json}-desktop.json"
+                device_type="desktop"
+              fi
+              
+              # 复制到reports目录并重命名
+              new_file="./reports/$(basename "${file%.json}")-${device_type}.json"
+              cp "$file" "$new_file"
+              
+              # 处理报告
+              DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_file"
+              
+              # 复制HTML报告
+              html_file="${file%.json}.html"
+              if [ -f "$html_file" ]; then
+                cp "$html_file" "./reports/$(basename "${html_file%.html}")-${device_type}.html"
               fi
             fi
           done
 
-          # 如果没有生成新报告则报错
-          if [ ! -f "./reports/*-desktop.json" ] && [ ! -f "./reports/*-mobile.json" ]; then
+          # 验证报告是否生成
+          report_count=$(find ./reports -name "lhr-*-*.json" | wc -l)
+          if [ "$report_count" -eq 0 ]; then
             echo "Error: No reports were generated!"
             exit 1
           fi
 
-          # 处理新生成的报告
-          for report in ./reports/*-{desktop,mobile}.json; do
-            if [ -f "$report" ]; then
-              type=$(echo "$report" | grep -o '\(desktop\|mobile\)')
-              echo "Processing $type report: $report"
-              DEVICE_TYPE=$type DATE_WITH_TIME=$NOW node process-report.js "$report"
-            fi
-          done
+          echo "Generated $report_count reports successfully."
 
       - name: List Reports Directory
         run: |
