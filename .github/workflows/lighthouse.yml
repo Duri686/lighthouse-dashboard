@@ -17,6 +17,10 @@ jobs:
         site:
           - url: 'https://www.fadada.com'
             name: '法大大官网'
+            device: 'mobile'
+          - url: 'https://www.fadada.com'
+            name: '法大大官网 (PC)'
+            device: 'desktop'
           # 要添加更多网站，请复制上面两行并修改值
     steps:
       - name: Checkout repo
@@ -28,9 +32,8 @@ jobs:
         with:
           urls: '${{ matrix.site.url }}'
           configPath: '.lighthouserc.json'
-          uploadArtifacts: false # 禁用工件上传，避免出现上传错误
-          temporaryPublicStorage: true # 使用临时公共存储来保存详细报告
-          chromeFlags: '--no-sandbox --disable-dev-shm-usage --disable-gpu' # 更稳定的Chrome配置
+          chromeFlags: '--no-sandbox --disable-dev-shm-usage --disable-gpu'
+          settings: '{"emulatedFormFactor": "${{ matrix.site.device }}"}'
         continue-on-error: true # 即使lighthouse测试失败也继续执行后续步骤
 
       - name: Debug Lighthouse Output
@@ -52,131 +55,27 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           SITE_NAME="${{ matrix.site.name }}"
           SITE_URL="${{ matrix.site.url }}"
-          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
-
-          # 检查lighthouse输出是否存在
-          if [ -z "$LIGHTHOUSE_MANIFEST" ]; then
-            echo "警告: Lighthouse没有为 $SITE_NAME 产生有效的输出。创建空的报告文件。"
-            echo "{" > "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"performance\": 0," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"accessibility\": 0," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"best-practices\": 0," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"seo\": 0," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"reportUrl\": \"\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"detailedData\": null" >> "reports/data-$SITE_ID-$DATE.json"
-            echo "}" >> "reports/data-$SITE_ID-$DATE.json"
+          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
+      
+          # 检查 LIGHTHOUSE_LINKS 并提取 REPORT_URL
+          if echo "$LIGHTHOUSE_LINKS" | jq -e 'type == "object"' > /dev/null; then
+            REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r 'to_entries[0].value // ""')
           else
-            # 尝试解析lighthouse输出
-            echo "调试输出 LIGHTHOUSE_MANIFEST:"
-            echo "$LIGHTHOUSE_MANIFEST" | jq '.'
-            
-            # 检查JSON格式并安全提取值
-            if echo "$LIGHTHOUSE_MANIFEST" | jq -e 'type == "array"' > /dev/null; then
-              # 如果是数组格式
-              PERF=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.performance // 0')
-              ACC=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.accessibility // 0')
-              BP=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.bestPractices // 0')
-              SEO=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.seo // 0')
-            else
-              # 如果是对象格式
-              PERF=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.performance // 0')
-              ACC=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.accessibility // 0')
-              BP=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.bestPractices // 0')
-              SEO=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.seo // 0')
-            fi
-            
-            # 对LIGHTHOUSE_LINKS也做同样的处理
-            echo "调试输出 LIGHTHOUSE_LINKS:"
-            echo "$LIGHTHOUSE_LINKS" | jq '.'
-            
-            if echo "$LIGHTHOUSE_LINKS" | jq -e 'type == "array"' > /dev/null; then
-              REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r '.[0].url // ""')
-            else
-              REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r '.url // ""')
-            fi
-            
-            # 如果任何值为null，设置为0
-            [ "$PERF" = "null" ] && PERF=0
-            [ "$ACC" = "null" ] && ACC=0
-            [ "$BP" = "null" ] && BP=0
-            [ "$SEO" = "null" ] && SEO=0
-            [ "$REPORT_URL" = "null" ] && REPORT_URL=""
-            
-            # 获取完整的Lighthouse JSON报告
-            mkdir -p tmp
-            FULL_REPORT=$(find . -name "*.report.json" | head -n 1)
-            
-            if [ ! -z "$FULL_REPORT" ] && [ -f "$FULL_REPORT" ]; then
-              echo "找到完整报告: $FULL_REPORT"
-              
-              # 提取详细性能指标
-              FCP=$(cat "$FULL_REPORT" | jq -r '.audits["first-contentful-paint"].numericValue // 0')
-              LCP=$(cat "$FULL_REPORT" | jq -r '.audits["largest-contentful-paint"].numericValue // 0')
-              TBT=$(cat "$FULL_REPORT" | jq -r '.audits["total-blocking-time"].numericValue // 0')
-              CLS=$(cat "$FULL_REPORT" | jq -r '.audits["cumulative-layout-shift"].numericValue // 0')
-              TTI=$(cat "$FULL_REPORT" | jq -r '.audits["interactive"].numericValue // 0')
-              SI=$(cat "$FULL_REPORT" | jq -r '.audits["speed-index"].numericValue // 0')
-              
-              # 提取优化建议（最多5项）
-              OPPORTUNITIES=$(cat "$FULL_REPORT" | jq -c '[.audits | to_entries[] | select(.value.score != null and .value.score < 0.9 and .value.details.type == "opportunity") | {id: .key, title: .value.title, description: .value.description} | select(.title != null and .description != null)] | [.[0:5][]]' 2>/dev/null || echo "[]")
-              
-              # 提取资源类型分布
-              RESOURCE_SUMMARY=$(cat "$FULL_REPORT" | jq -c '.audits["resource-summary"].details.items // []' 2>/dev/null || echo "[]")
-              
-              # 直接创建详细数据JSON字符串，避免使用heredoc
-              DETAILED_DATA="{\"fcp\": $FCP, \"lcp\": $LCP, \"tbt\": $TBT, \"cls\": $CLS, \"tti\": $TTI, \"si\": $SI, \"opportunities\": $OPPORTUNITIES, \"resourceSummary\": $RESOURCE_SUMMARY}"
-            else
-              echo "未找到完整报告文件"
-              # 尝试从temporaryPublicStorage URL获取数据
-              if [ ! -z "$REPORT_URL" ]; then
-                echo "尝试从公共存储URL获取数据: $REPORT_URL"
-                REPORT_JSON_URL="${REPORT_URL}.json"
-                echo "尝试下载报告JSON: $REPORT_JSON_URL"
-                # 尝试下载报告JSON
-                curl -s -L -o "tmp/report.json" "$REPORT_JSON_URL" || echo "无法下载报告JSON"
-                if [ -f "tmp/report.json" ]; then
-                  echo "成功下载报告JSON，提取数据"
-                  FULL_REPORT="tmp/report.json"
-                  # 再次提取详细性能指标
-                  FCP=$(cat "$FULL_REPORT" | jq -r '.audits["first-contentful-paint"].numericValue // 0')
-                  LCP=$(cat "$FULL_REPORT" | jq -r '.audits["largest-contentful-paint"].numericValue // 0')
-                  TBT=$(cat "$FULL_REPORT" | jq -r '.audits["total-blocking-time"].numericValue // 0')
-                  CLS=$(cat "$FULL_REPORT" | jq -r '.audits["cumulative-layout-shift"].numericValue // 0')
-                  TTI=$(cat "$FULL_REPORT" | jq -r '.audits["interactive"].numericValue // 0')
-                  SI=$(cat "$FULL_REPORT" | jq -r '.audits["speed-index"].numericValue // 0')
-                  
-                  # 提取优化建议
-                  OPPORTUNITIES=$(cat "$FULL_REPORT" | jq -c '[.audits | to_entries[] | select(.value.score != null and .value.score < 0.9 and .value.details.type == "opportunity") | {id: .key, title: .value.title, description: .value.description} | select(.title != null and .description != null)] | [.[0:5][]]' 2>/dev/null || echo "[]")
-                  
-                  # 提取资源类型分布
-                  RESOURCE_SUMMARY=$(cat "$FULL_REPORT" | jq -c '.audits["resource-summary"].details.items // []' 2>/dev/null || echo "[]")
-                  
-                  # 创建详细数据
-                  DETAILED_DATA="{\"fcp\": $FCP, \"lcp\": $LCP, \"tbt\": $TBT, \"cls\": $CLS, \"tti\": $TTI, \"si\": $SI, \"opportunities\": $OPPORTUNITIES, \"resourceSummary\": $RESOURCE_SUMMARY}"
-                else
-                  DETAILED_DATA="null"
-                fi
-              else
-                DETAILED_DATA="null"
-              fi
-            fi
-            
-            # 创建报告JSON
-            echo "{" > "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"performance\": $PERF," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"accessibility\": $ACC," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"best-practices\": $BP," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"seo\": $SEO," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"reportUrl\": \"$REPORT_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"detailedData\": $DETAILED_DATA" >> "reports/data-$SITE_ID-$DATE.json"
-            echo "}" >> "reports/data-$SITE_ID-$DATE.json"
+            REPORT_URL=""
           fi
+      
+          # 创建报告 JSON
+          echo "{" > "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"performance\": $PERF," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"accessibility\": $ACC," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"best-practices\": $BP," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"seo\": $SEO," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"reportUrl\": \"$REPORT_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
+          echo "  \"detailedData\": $DETAILED_DATA" >> "reports/data-$SITE_ID-$DATE.json"
+          echo "}" >> "reports/data-$SITE_ID-$DATE.json"
         env:
           LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
@@ -185,7 +84,7 @@ jobs:
         run: |
           DATE=$(date +%Y-%m-%d)
           SITE_URL="${{ matrix.site.url }}"
-          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
+          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
 
           # jq已在GitHub Actions环境中预装
 
