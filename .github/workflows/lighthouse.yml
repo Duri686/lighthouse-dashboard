@@ -46,11 +46,12 @@ jobs:
 
       - name: Run Lighthouse and Process Reports
         run: |
-          chmod +x process-report.js
+          # 确保目录存在
+          mkdir -p reports
           
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
-          # 使用更稳定的配置运行 Lighthouse
+          # 使用更稳定的配置运行 Lighthouse 并重定向输出
           lhci collect \
             --url https://www.fadada.com \
             --settings.preset=desktop \
@@ -58,14 +59,25 @@ jobs:
             --settings.maxWaitForLoad=30000 \
             --output=json \
             --outDir=./reports
+
+          # 显示生成的文件
+          echo "Generated files in reports directory:"
+          ls -la ./reports/
           
           # 处理生成的报告
           for f in ./reports/lighthouse-*.json; do
             if [ -f "$f" ]; then
               echo "Processing report: $f"
               DATE_WITH_TIME=$NOW node process-report.js "$f"
+            else
+              echo "No JSON files found in reports directory"
             fi
           done
+
+      - name: List Reports Directory
+        run: |
+          echo "Contents of reports directory:"
+          ls -la ./reports/
 
       - name: Cleanup and Prepare
         run: |
