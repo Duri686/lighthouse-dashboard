@@ -63,12 +63,11 @@ jobs:
           echo "Initial reports directory contents:"
           ls -la ./reports/
           
-          # 处理所有生成的报告文件
-          for f in ./reports/data-*.json ./reports/lighthouse-*.json; do
+          # 只处理 lighthouse- 开头的报告文件
+          for f in ./reports/lighthouse-*.json; do
             if [ -f "$f" ]; then
-              echo "Found report file: $f"
-              chmod 644 "$f"
-              DATE_WITH_TIME=$NOW node process-report.js "$f"
+              echo "Processing Lighthouse report: $f"
+              DATE_WITH_TIME=$NOW node process-report.js "$f" || true
             fi
           done
           
