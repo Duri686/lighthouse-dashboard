@@ -88,34 +88,42 @@ jobs:
           
           for file in .lighthouseci/*.json; do
             if [ -f "$file" ]; then
-              echo "Analyzing report: $file"
+              echo "Processing file: $file"
               content=$(cat "$file")
               if echo "$content" | grep -q "\"formFactor\": \"mobile\""; then
                 device_type="mobile"
                 found_mobile=true
-                # 生成带时间戳的文件名
-                new_json="./reports/data-https___www_fadada_com_${device_type}-${DATE}.json"
-                new_html="./reports/data-https___www_fadada_com_${device_type}-${DATE}.html"
               else
                 device_type="desktop"
                 found_desktop=true
-                # 生成带时间戳的文件名
-                new_json="./reports/data-https___www_fadada_com_${device_type}-${DATE}.json"
-                new_html="./reports/data-https___www_fadada_com_${device_type}-${DATE}.html"
               fi
               
-              # 复制并处理报告
+              # 生成带时间戳的文件名
+              new_json="./reports/data-https___www_fadada_com_${device_type}-${DATE}.json"
+              new_html="./reports/data-https___www_fadada_com_${device_type}-${DATE}.html"
+              
+              echo "Copying JSON report to: $new_json"
               cp "$file" "$new_json"
               DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_json"
               
-              # 复制HTML报告
+              # 复制HTML报告（修复语法错误）
               html_file="${file%.json}.html"
-              if [ -f "$html_file"]; then
+              echo "Looking for HTML report at: $html_file"
+              if [ -f "$html_file" ]; then
+                echo "Copying HTML report to: $new_html"
                 cp "$html_file" "$new_html"
+              else
+                echo "Warning: HTML report not found at $html_file"
               fi
             fi
           done
 
+          echo "=== File Processing Summary ==="
+          echo "Desktop report found: $found_desktop"
+          echo "Mobile report found: $found_mobile"
+          echo "Contents of reports directory:"
+          ls -la ./reports/
+          
           # 更新历史记录
           if [ ! -f "reports/history.json" ]; then
             echo '{"reports":[]}' > reports/history.json
