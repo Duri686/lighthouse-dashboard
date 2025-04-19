@@ -25,8 +25,11 @@ jobs:
 
       - name: Install dependencies
         run: |
+          npm init -y
           npm install -g @lhci/cli@0.12.x
-          npm install fs path
+          echo "node_modules/" > .gitignore
+          echo ".lighthouseci/" >> .gitignore
+          echo "*.deb" >> .gitignore
 
       - name: Run Lighthouse and Process Reports
         run: |
@@ -51,10 +54,16 @@ jobs:
             fi
           done
 
+      - name: Cleanup and Prepare
+        run: |
+          rm -f google-chrome-stable_current_amd64.deb
+          rm -rf .lighthouseci
+
       - name: Commit and push changes
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add reports/
-          git commit -m "Update Lighthouse report $(date -u)"
+          git add .gitignore || true
+          git add reports/*.json
+          git diff-index --quiet HEAD || git commit -m "Update Lighthouse report $(date -u)"
           git push
