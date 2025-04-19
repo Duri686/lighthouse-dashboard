@@ -96,13 +96,13 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           SITE_URL="${{ matrix.site.url }}"
           SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
-      
+
           # 检查 JSON 文件是否有效
           if ! jq empty "reports/data-$SITE_ID-$DATE.json"; then
             echo "Invalid JSON in reports/data-$SITE_ID-$DATE.json"
             exit 1
           fi
-      
+
           # 如果存在历史数据文件，则更新
           if [ -f "reports/history.json" ]; then
             # 添加新数据到历史记录
@@ -112,7 +112,7 @@ jobs:
             # 创建新的历史记录文件
             echo "{\"reports\": [$(cat "reports/data-$SITE_ID-$DATE.json")]}" > reports/history.json
           fi
-      
+
           echo "Report data saved to reports/data-$SITE_ID-$DATE.json and updated in reports/history.json"
           echo "History content:"
           cat reports/history.json
@@ -121,6 +121,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
+          git pull --rebase # 拉取远程更改
           git add reports/
           git commit -m "Add Lighthouse report data for ${{ matrix.site.name }} ($(date +%Y-%m-%d))" || echo "No changes to commit"
           git push
