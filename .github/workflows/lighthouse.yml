@@ -52,6 +52,9 @@ jobs:
           # echo "Cleaning reports directory..."
           # rm -rf reports/*
           
+          # 创建分开的目录
+          mkdir -p .lighthouseci/desktop .lighthouseci/mobile
+          
           # 运行桌面版测试
           echo "Running Desktop test..."
           lhci collect \
@@ -60,7 +63,7 @@ jobs:
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
-            --outDir=.lighthouseci \
+            --outDir=.lighthouseci/desktop \
             --numberOfRuns=1
 
           # 运行移动版测试
@@ -75,10 +78,31 @@ jobs:
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
-            --outDir=.lighthouseci \
+            --outDir=.lighthouseci/mobile \
             --numberOfRuns=1
 
           echo "Processing Lighthouse results..."
+          
+          # 处理desktop报告
+          desktop_json=$(ls .lighthouseci/desktop/*.json 2>/dev/null | head -n 1)
+          if [ -n "$desktop_json" ]; then
+            echo "Processing desktop report: $desktop_json"
+            cp "$desktop_json" "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
+            cp "${desktop_json%.json}.html" "./reports/data-https___www_fadada_com_desktop-${DATE}.html"
+            DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
+            found_desktop=true
+          fi
+
+          # 处理mobile报告
+          mobile_json=$(ls .lighthouseci/mobile/*.json 2>/dev/null | head -n 1)
+          if [ -n "$mobile_json" ]; then
+            echo "Processing mobile report: $mobile_json"
+            cp "$mobile_json" "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
+            cp "${mobile_json%.json}.html" "./reports/data-https___www_fadada_com_mobile-${DATE}.html"
+            DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
+            found_mobile=true
+          fi
+          
           echo "Files in .lighthouseci:"
           ls -la .lighthouseci/
           
