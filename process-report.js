@@ -78,11 +78,16 @@ function processReport(filePath) {
         const jsonOutput = JSON.stringify(processed);
         
         try {
-            JSON.parse(jsonOutput); // Validate JSON structure
-            fs.writeFileSync(filePath, jsonOutput);
+            // Print the full output for debugging
+            console.log('Full JSON output:');
             console.log(jsonOutput);
+            
+            // Validate and write the output
+            JSON.parse(jsonOutput); // Validate JSON structure
+            console.log(jsonOutput); // Print final output
             return processed;
         } catch (jsonError) {
+            console.error('JSON validation error:', jsonError);
             throw new Error(`Invalid JSON output: ${jsonError.message}`);
         }
 

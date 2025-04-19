@@ -146,22 +146,22 @@ jobs:
           # Initialize history.json with empty array if it doesn't exist
           [ -f reports/history.json ] || echo '{"reports":[]}' > reports/history.json
 
-          # Process reports and capture output
-          DESKTOP_DATA=$(process_report "desktop")
-          MOBILE_DATA=$(process_report "mobile")
+          # Process reports and handle JSON properly
+          echo "Processing desktop report..."
+          DESKTOP_DATA=$(process_report "desktop" | tail -n 1)
+          echo "Desktop data: $DESKTOP_DATA"
+          
+          echo "Processing mobile report..."
+          MOBILE_DATA=$(process_report "mobile" | tail -n 1)
+          echo "Mobile data: $MOBILE_DATA"
 
-          # Update history.json with better error handling
-          if ! echo "$DESKTOP_DATA" | jq empty 2>/dev/null; then
-            echo "Invalid desktop JSON data"
-            DESKTOP_DATA="{\"error\": \"Invalid data\", \"scores\":{}, \"metrics\":{}}"
+          # Validate JSON and update history.json
+          echo "Updating history.json..."
+          if [ ! -f "reports/history.json" ]; then
+            echo '{"reports":[]}' > reports/history.json
           fi
 
-          if ! echo "$MOBILE_DATA" | jq empty 2>/dev/null; then
-            echo "Invalid mobile JSON data"
-            MOBILE_DATA="{\"error\": \"Invalid data\", \"scores\":{}, \"metrics\":{}}"
-          fi
-
-          # Create/update history.json
+          # Create temporary file with proper path
           jq --arg date "$NOW" \
              --arg url "https://www.fadada.com" \
              --argjson desktop "$DESKTOP_DATA" \
@@ -172,12 +172,18 @@ jobs:
                 "desktop": $desktop,
                 "mobile": $mobile
               }]' \
-             reports/history.json > reports/history.json.tmp && mv reports.history.json.tmp reports/history.json
+             reports/history.json > "reports/history.json.tmp"
 
-          # List final results
-          echo "=== Final Results ==="
-          echo "Reports generated:"
-          ls -l reports/
+          if [ -f "reports/history.json.tmp" ]; then
+            mv "reports.history.json.tmp" "reports/history.json"
+          else
+            echo "Error: Failed to create history.json.tmp"
+            exit 1
+          fi
+
+          # Verify the update
+          echo "Updated history.json contents:"
+          cat reports/history.json
 
       - name: List Reports Directory
         run: |
