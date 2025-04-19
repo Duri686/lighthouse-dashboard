@@ -51,7 +51,7 @@ jobs:
           
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
-          # 使用更稳定的配置运行 Lighthouse 并重定向输出
+          # 使用更稳定的配置运行 Lighthouse
           lhci collect \
             --url https://www.fadada.com \
             --settings.preset=desktop \
@@ -60,19 +60,23 @@ jobs:
             --output=json \
             --outDir=./reports
 
-          # 显示生成的文件
-          echo "Generated files in reports directory:"
+          echo "Initial reports directory contents:"
           ls -la ./reports/
           
-          # 处理生成的报告
-          for f in ./reports/lighthouse-*.json; do
+          # 处理所有生成的报告文件
+          for f in ./reports/data-*.json ./reports/lighthouse-*.json; do
             if [ -f "$f" ]; then
-              echo "Processing report: $f"
+              echo "Found report file: $f"
+              chmod 644 "$f"
               DATE_WITH_TIME=$NOW node process-report.js "$f"
-            else
-              echo "No JSON files found in reports directory"
             fi
           done
+          
+          # 确保文件权限正确
+          chmod -R 644 ./reports/*.json
+          
+          echo "Final reports directory contents:"
+          ls -la ./reports/
 
       - name: List Reports Directory
         run: |
@@ -88,9 +92,15 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 添加所有JSON文件
+          find reports -name "*.json" -exec git add {} \;
           git add .gitignore || true
-          git add reports/*.json
-          git diff-index --quiet HEAD || git commit -m "Update Lighthouse report $(date -u)"
+          
+          # 提交前检查文件状态
+          git status
+          
+          git diff --staged --quiet || git commit -m "Update Lighthouse report $(date -u)"
           git push origin HEAD:${{ github.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
