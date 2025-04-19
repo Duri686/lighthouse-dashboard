@@ -70,11 +70,33 @@ jobs:
             echo "}" >> "reports/data-$SITE_ID-$DATE.json"
           else
             # 尝试解析lighthouse输出
-            PERF=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.performance')
-            ACC=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.accessibility')
-            BP=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.bestPractices')
-            SEO=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.seo')
-            REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r '.[0].url')
+            echo "调试输出 LIGHTHOUSE_MANIFEST:"
+            echo "$LIGHTHOUSE_MANIFEST" | jq '.'
+            
+            # 检查JSON格式并安全提取值
+            if echo "$LIGHTHOUSE_MANIFEST" | jq -e 'type == "array"' > /dev/null; then
+              # 如果是数组格式
+              PERF=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.performance // 0')
+              ACC=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.accessibility // 0')
+              BP=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.bestPractices // 0')
+              SEO=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.[0].summary.seo // 0')
+            else
+              # 如果是对象格式
+              PERF=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.performance // 0')
+              ACC=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.accessibility // 0')
+              BP=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.bestPractices // 0')
+              SEO=$(echo "$LIGHTHOUSE_MANIFEST" | jq -r '.summary.seo // 0')
+            fi
+            
+            # 对LIGHTHOUSE_LINKS也做同样的处理
+            echo "调试输出 LIGHTHOUSE_LINKS:"
+            echo "$LIGHTHOUSE_LINKS" | jq '.'
+            
+            if echo "$LIGHTHOUSE_LINKS" | jq -e 'type == "array"' > /dev/null; then
+              REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r '.[0].url // ""')
+            else
+              REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r '.url // ""')
+            fi
             
             # 如果任何值为null，设置为0
             [ "$PERF" = "null" ] && PERF=0
