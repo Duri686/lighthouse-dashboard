@@ -28,9 +28,23 @@ jobs:
         with:
           urls: '${{ matrix.site.url }}'
           configPath: '.lighthouserc.json'
-          uploadArtifacts: true # 启用工件上传，以便我们可以获取完整报告
+          uploadArtifacts: false # 禁用工件上传，避免出现上传错误
           temporaryPublicStorage: true # 使用临时公共存储来保存详细报告
+          chromeFlags: '--no-sandbox --disable-dev-shm-usage --disable-gpu' # 更稳定的Chrome配置
         continue-on-error: true # 即使lighthouse测试失败也继续执行后续步骤
+
+      - name: Debug Lighthouse Output
+        run: |
+          echo "============ Lighthouse Debug Info ============"
+          echo "Lighthouse links content:"
+          echo "$LIGHTHOUSE_LINKS" | jq '.' || echo "无法解析LIGHTHOUSE_LINKS"
+          echo "Lighthouse manifest content:"
+          echo "$LIGHTHOUSE_MANIFEST" | jq '.' || echo "无法解析LIGHTHOUSE_MANIFEST"
+          echo "============ End Debug Info ============"
+        env:
+          LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
+          LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
+        continue-on-error: true # 即使调试命令失败也继续
 
       - name: Format and Save Report Data
         run: |
@@ -94,7 +108,38 @@ jobs:
               DETAILED_DATA="{\"fcp\": $FCP, \"lcp\": $LCP, \"tbt\": $TBT, \"cls\": $CLS, \"tti\": $TTI, \"si\": $SI, \"opportunities\": $OPPORTUNITIES, \"resourceSummary\": $RESOURCE_SUMMARY}"
             else
               echo "未找到完整报告文件"
-              DETAILED_DATA="null"
+              # 尝试从temporaryPublicStorage URL获取数据
+              if [ ! -z "$REPORT_URL" ]; then
+                echo "尝试从公共存储URL获取数据: $REPORT_URL"
+                REPORT_JSON_URL="${REPORT_URL}.json"
+                echo "尝试下载报告JSON: $REPORT_JSON_URL"
+                # 尝试下载报告JSON
+                curl -s -L -o "tmp/report.json" "$REPORT_JSON_URL" || echo "无法下载报告JSON"
+                if [ -f "tmp/report.json" ]; then
+                  echo "成功下载报告JSON，提取数据"
+                  FULL_REPORT="tmp/report.json"
+                  # 再次提取详细性能指标
+                  FCP=$(cat "$FULL_REPORT" | jq -r '.audits["first-contentful-paint"].numericValue // 0')
+                  LCP=$(cat "$FULL_REPORT" | jq -r '.audits["largest-contentful-paint"].numericValue // 0')
+                  TBT=$(cat "$FULL_REPORT" | jq -r '.audits["total-blocking-time"].numericValue // 0')
+                  CLS=$(cat "$FULL_REPORT" | jq -r '.audits["cumulative-layout-shift"].numericValue // 0')
+                  TTI=$(cat "$FULL_REPORT" | jq -r '.audits["interactive"].numericValue // 0')
+                  SI=$(cat "$FULL_REPORT" | jq -r '.audits["speed-index"].numericValue // 0')
+                  
+                  # 提取优化建议
+                  OPPORTUNITIES=$(cat "$FULL_REPORT" | jq -c '[.audits | to_entries[] | select(.value.score != null and .value.score < 0.9 and .value.details.type == "opportunity") | {id: .key, title: .value.title, description: .value.description} | select(.title != null and .description != null)] | [.[0:5][]]' 2>/dev/null || echo "[]")
+                  
+                  # 提取资源类型分布
+                  RESOURCE_SUMMARY=$(cat "$FULL_REPORT" | jq -c '.audits["resource-summary"].details.items // []' 2>/dev/null || echo "[]")
+                  
+                  # 创建详细数据
+                  DETAILED_DATA="{\"fcp\": $FCP, \"lcp\": $LCP, \"tbt\": $TBT, \"cls\": $CLS, \"tti\": $TTI, \"si\": $SI, \"opportunities\": $OPPORTUNITIES, \"resourceSummary\": $RESOURCE_SUMMARY}"
+                else
+                  DETAILED_DATA="null"
+                fi
+              else
+                DETAILED_DATA="null"
+              fi
             fi
             
             # 创建报告JSON
