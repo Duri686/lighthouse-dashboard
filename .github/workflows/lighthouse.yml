@@ -84,33 +84,49 @@ jobs:
           found_desktop=false
           found_mobile=false
           
-          for file in .lighthouseci/*.json; do
-            if [ -f "$file" ]; then
-              echo "Analyzing report: $file"
-              content=$(cat "$file")
-              if echo "$content" | grep -q "\"formFactor\": \"mobile\""; then
-                device_type="mobile"
-                found_mobile=true
-              else
-                device_type="desktop"
-                found_desktop=true
-              fi
-              
-              echo "Processing ${device_type} report..."
-              
-              # 复制并处理报告
-              new_file="./reports/$(basename "${file%.json}")-${device_type}.json"
-              cp "$file" "$new_file"
-              DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_file"
-              
-              # 复制HTML报告
-              html_file="${file%.json}.html"
-              if [ -f "$html_file" ]; then
-                cp "$html_file" "./reports/$(basename "${html_file%.html}")-${device_type}.html"
-              fi
+          # 输出调试信息
+          echo "=== Debug Info ==="
+          echo "Initial .lighthouseci contents:"
+          ls -la .lighthouseci/
+          
+          # 确保文件模式匹配正确
+          shopt -s nullglob
+          
+          # 处理所有JSON报告文件
+          found_desktop=false
+          found_mobile=false
+          
+          # 先识别报告类型
+          for file in .lighthouseci/lhr-*.json; do
+            echo "Analyzing file: $file"
+            if jq -e '.configSettings.formFactor == "mobile"' "$file" >/dev/null; then
+              echo "Identified as mobile report: $file"
+              cp "$file" "./reports/$(basename "${file%.json}")-mobile.json"
+              cp "${file%.json}.html" "./reports/$(basename "${file%.json}")-mobile.html"
+              found_mobile=true
+            else
+              echo "Identified as desktop report: $file"
+              cp "$file" "./reports/$(basename "${file%.json}")-desktop.json"
+              cp "${file%.json}.html" "./reports/$(basename "${file%.json}")-desktop.html"
+              found_desktop=true
             fi
           done
-
+          
+          echo "=== Report Status ==="
+          echo "Desktop report found: $found_desktop"
+          echo "Mobile report found: $found_mobile"
+          echo "Reports directory contents:"
+          ls -la ./reports/
+          
+          # 现在处理复制后的报告
+          for report in ./reports/lhr-*.json; do
+            if [[ $report == *-mobile.json ]]; then
+              DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "$report"
+            else
+              DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "$report"
+            fi
+          done
+          
           if ! $found_desktop; then
             echo "Warning: No desktop report was generated!"
           fi
@@ -138,13 +154,15 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
+          echo "=== Git Status Before Add ==="
+          git status
+          
           # 添加所有报告文件
-          echo "Adding report files..."
-          find reports -type f \( -name "*.json" -o -name "*.html" \) -exec git add {} \;
+          git add reports/lhr-*-{desktop,mobile}.{json,html} || true
           git add .gitignore || true
           
-          echo "Files staged for commit:"
-          git diff --staged --name-status
+          echo "=== Files Staged for Commit ==="
+          git diff --cached --name-status
           
           if git diff --staged --quiet; then
             echo "No changes to commit"
