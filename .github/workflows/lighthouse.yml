@@ -4,10 +4,8 @@ on:
     branches:
       - main
       - master
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - 'index.html'
+    paths-ignore:
+      - 'reports/**'  # 忽略报告目录的更改，防止循环触发
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
