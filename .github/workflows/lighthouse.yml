@@ -24,60 +24,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
-      
-      # 添加缓存步骤
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            node_modules
-            ~/cache/google-chrome-stable_current_amd64.deb
-          key: ${{ runner.os }}-node-chrome-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-chrome-
-            ${{ runner.os }}-node-
-            ${{ runner.os }}-
+          node-version: '18'  # 更新到 Node.js 18
 
       - name: Install Chrome
         run: |
-          CHROME_DEB="google-chrome-stable_current_amd64.deb"
-          CHROME_CACHE=~/cache/$CHROME_DEB
-          
-          if [ ! -f "$CHROME_CACHE" ]; then
-            echo "Chrome not found in cache, downloading..."
-            sudo apt-get update
-            sudo apt-get install -y wget gnupg2
-            wget -q https://dl.google.com/linux/direct/$CHROME_DEB
-            mkdir -p ~/cache
-            cp $CHROME_DEB $CHROME_CACHE
-          else
-            echo "Using cached Chrome package..."
-            cp $CHROME_CACHE $CHROME_DEB
-          fi
-          
-          sudo apt-get install -y ./$CHROME_DEB
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg2
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
           google-chrome --version
 
       - name: Install dependencies
         run: |
-          # 如果没有package.json，使用已创建的版本
-          if [ ! -f "package.json" ]; then
-            cp .github/workflows/package.json ./package.json
-          fi
-          
-          # 安装依赖并生成package-lock.json
-          npm install
-          
-          # 更新gitignore
+          npm init -y
+          npm install -g @lhci/cli@0.12.x
           echo "node_modules/" > .gitignore
           echo ".lighthouseci/" >> .gitignore
           echo "*.deb" >> .gitignore
-          
-          # 显示安装的版本
-          npx lighthouse --version
 
       - name: Run Lighthouse and Process Reports
         run: |
