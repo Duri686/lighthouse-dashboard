@@ -85,7 +85,7 @@ async function loadLighthouseData(url, days) {
     `;
 
     // 加载历史数据文件
-    const response = await fetch('/reports/history.json');
+    const response = await fetch('./reports/history.json');
     if (!response.ok) {
       throw new Error('无法加载报告数据');
     }
