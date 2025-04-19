@@ -148,76 +148,53 @@ jobs:
 
           # Process reports and handle JSON properly
           echo "Processing desktop report..."
-          DESKTOP_DATA=$(process_report "desktop" | tail -n 1)
-          echo "Desktop data: $DESKTOP_DATA"
+          DESKTOP_DATA=$(process_report "desktop" | tail -n 1 | jq -c '{
+            scores: .scores,
+            metrics: .metrics,
+            reportFiles: .reportFiles
+          }')
           
           echo "Processing mobile report..."
-          MOBILE_DATA=$(process_report "mobile" | tail -n 1)
-          echo "Mobile data: $MOBILE_DATA"
+          MOBILE_DATA=$(process_report "mobile" | tail -n 1 | jq -c '{
+            scores: .scores,
+            metrics: .metrics,
+            reportFiles: .reportFiles
+          }')
 
-          # Validate JSON and update history.json
+          # Initialize and update history.json with error handling
           echo "Updating history.json..."
           if [ ! -f "reports/history.json" ]; then
-            echo '{"reports":[]}' > reports/history.json
+            echo '{"reports":[]}' > reports.history.json
           fi
 
-          # Create temporary file with proper path
+          # Clean and validate JSON data
+          DESKTOP_DATA=$(echo "$DESKTOP_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
+          MOBILE_DATA=$(echo "$MOBILE_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
+
+          # Create history update with minimal data
+          echo "Creating history update..."
           jq --arg date "$NOW" \
              --arg url "https://www.fadada.com" \
              --argjson desktop "$DESKTOP_DATA" \
              --argjson mobile "$MOBILE_DATA" \
-             '.reports += [{
-                "date": $date,
-                "url": $url,
-                "desktop": $desktop,
-                "mobile": $mobile
-              }]' \
-             reports/history.json > "reports/history.json.tmp"
+             '.reports = (.reports + [{
+               "date": $date,
+               "url": $url,
+               "desktop": $desktop,
+               "mobile": $mobile
+             }] | .[-100:])' \
+             "reports/history.json" > "reports/history.json.new" \
+          && mv "reports/history.json.new" "reports/history.json"
 
-          if [ -f "reports/history.json.tmp" ]; then
-            mv "reports.history.json.tmp" "reports/history.json"
-          else
-            echo "Error: Failed to create history.json.tmp"
-            exit 1
-          fi
-
-          # Verify the update
-          echo "Updated history.json contents:"
-          cat reports/history.json
-
-          # Initialize and update history.json with better error handling
-          if [ ! -f "reports/history.json" ]; then
-            echo '{"reports":[]}' > reports/history.json
-          fi
-
-          # Ensure the JSON data is complete
-          DESKTOP_DATA=$(echo "$DESKTOP_DATA" | jq -c '.')
-          MOBILE_DATA=$(echo "$MOBILE_DATA" | jq -c '.')
-
-          echo "Creating history update..."
-          UPDATE=$(jq -n \
-            --arg date "$NOW" \
-            --arg url "https://www.fadada.com" \
-            --argjson desktop "$DESKTOP_DATA" \
-            --argjson mobile "$MOBILE_DATA" \
-            '{
-              "date": $date,
-              "url": $url,
-              "desktop": $desktop,
-              "mobile": $mobile
-            }')
-
-          echo "Updating history.json..."
-          jq --argjson update "$UPDATE" '.reports += [$update]' reports/history.json > "reports/history.json.tmp" \
-            && mv "reports/history.json.tmp" "reports/history.json"
-
-          if [ ! -f "reports/history.json" ]; then
-            echo "Error: Failed to update history.json"
-            exit 1
-          fi
-
-          echo "Updated history.json contents:"
-          jq '.' reports/history.json
+          # Copy original reports to reports directory
+          echo "Copying original reports..."
+          for device in desktop mobile; do
+            src_file=$(find ".lighthouseci/$device" -name "lhr-*.json" -type f | sort -r | head -n 1)
+            if [ -f "$src_file" ]; then
+              cp "$src_file" "reports/data-https___www_fadada_com_${device}-${DATE}.json"
+              cp "${src_file%.json}.html" "reports/data-https___www_fadada_com_${device}-${DATE}.html" || true
+            fi
+          done
 
       - name: List Reports Directory
         run: |

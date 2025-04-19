@@ -75,16 +75,10 @@ function processReport(filePath) {
         console.error('Processed data:', JSON.stringify(processed, null, 2));
 
         // Write and validate output
-        const jsonOutput = JSON.stringify(processed);
-        
         try {
-            // Print the full output for debugging
-            console.log('Full JSON output:');
-            console.log(jsonOutput);
-            
-            // Validate and write the output
+            const jsonOutput = JSON.stringify(processed);
             JSON.parse(jsonOutput); // Validate JSON structure
-            console.log(jsonOutput); // Print final output
+            process.stdout.write(jsonOutput); // Use single write for atomic output
             return processed;
         } catch (jsonError) {
             console.error('JSON validation error:', jsonError);
