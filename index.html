@@ -2,10 +2,177 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lighthouse Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- InspireUI 组件 (通过CDN引入) -->
+  <link href="https://cdn.jsdelivr.net/npm/@inspire-ui/css@2.2.0/dist/css/inspire-ui.min.css" rel="stylesheet">
+  <style>
+    /* 定义颜色变量 */
+    :root {
+      --color-good: #0cce6b;
+      --color-average: #ffa400;
+      --color-poor: #ff4e42;
+    }
+    .good { color: var(--color-good); }
+    .average { color: var(--color-average); }
+    .poor { color: var(--color-poor); }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      line-height: 1;
+    }
+  </style>
 </head>
-<body>
-  <h1>Lighthouse Dashboard</h1>
-  <p>This is a placeholder page. You can enhance this to fetch latest reports via Gist, or include links to results from GitHub Actions artifacts or logs.</p>
+<body class="bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <header class="mb-8">
+      <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-900">Lighthouse Dashboard</h1>
+        <div class="text-sm text-gray-500">数据自动更新于每天 03:00</div>
+      </div>
+    </header>
+    
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="urlSelect" class="block text-sm font-medium text-gray-700 mb-1">选择网站</label>
+          <select id="urlSelect" class="w-full inspire-select inspire-select-bordered">
+            <option value="https://www.fadada.com">www.fadada.com</option>
+            <!-- 可以添加更多网站选项 -->
+          </select>
+        </div>
+        <div>
+          <label for="dateRange" class="block text-sm font-medium text-gray-700 mb-1">日期范围</label>
+          <select id="dateRange" class="w-full inspire-select inspire-select-bordered">
+            <option value="7">最近7天</option>
+            <option value="14">最近14天</option>
+            <option value="30">最近30天</option>
+            <option value="90">最近90天</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="text-center">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">性能</h3>
+          <div class="metric-value good" id="performanceScore">-</div>
+          <div class="text-xs text-gray-500 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="text-center">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">可访问性</h3>
+          <div class="metric-value good" id="accessibilityScore">-</div>
+          <div class="text-xs text-gray-500 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="text-center">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">最佳实践</h3>
+          <div class="metric-value good" id="bestPracticesScore">-</div>
+          <div class="text-xs text-gray-500 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="text-center">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">SEO</h3>
+          <div class="metric-value good" id="seoScore">-</div>
+          <div class="text-xs text-gray-500 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">性能趋势</h3>
+      <div class="h-80">
+        <canvas id="performanceChart"></canvas>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">核心网页指标</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">指标</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前值</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">7天趋势</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="font-medium">FCP</div>
+                  <div class="text-xs text-gray-500">首次内容绘制</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500" id="fcp">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="fcpTrend">-</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="font-medium">LCP</div>
+                  <div class="text-xs text-gray-500">最大内容绘制</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500" id="lcp">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="lcpTrend">-</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="font-medium">CLS</div>
+                  <div class="text-xs text-gray-500">累积布局偏移</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500" id="cls">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="clsTrend">-</td>
+              </tr>
+              <tr>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="font-medium">TTI</div>
+                  <div class="text-xs text-gray-500">可交互时间</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500" id="tti">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="ttiTrend">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">最近报告</h3>
+          <button id="refreshBtn" class="inspire-btn inspire-btn-sm inspire-btn-primary">刷新</button>
+        </div>
+        <div id="recentReports" class="space-y-3">
+          <div class="animate-pulse flex space-x-4">
+            <div class="flex-1 space-y-2 py-1">
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="mt-12 text-center text-sm text-gray-500">
+      <p>通过GitHub Actions自动更新的Lighthouse性能报告 | <a href="https://github.com/GoogleChrome/lighthouse" class="text-blue-500 hover:text-blue-700" target="_blank">了解Lighthouse</a></p>
+    </footer>
+  </div>
+
+  <!-- 引入我们的数据加载脚本 -->
+  <script src="js/lighthouse-data.js"></script>
+  <script>
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      const url = document.getElementById('urlSelect').value;
+      const days = parseInt(document.getElementById('dateRange').value);
+      loadLighthouseData(url, days);
+    });
+  </script>
 </body>
 </html>

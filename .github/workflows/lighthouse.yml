@@ -8,12 +8,81 @@ on:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: [
+          {url: "https://www.fadada.com", name: "法大大官网"},
+          # 添加更多网站，格式：{url: "网站URL", name: "网站名称"}
+          # 例如：{url: "https://example.com", name: "示例网站"}
+        ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Run Lighthouse CI on www.fadada.com
+      - name: Run Lighthouse CI on ${{ matrix.site.name }}
+        id: lighthouse
         uses: treosh/lighthouse-ci-action@v9
         with:
-          urls: "https://www.fadada.com"
+          urls: "${{ matrix.site.url }}"
           configPath: ".lighthouserc.json"
+          uploadArtifacts: true
+        continue-on-error: true  # 即使lighthouse测试失败也继续执行后续步骤
+
+      - name: Format and Save Report Data
+        run: |
+          mkdir -p reports
+          DATE=$(date +%Y-%m-%d)
+          SITE_NAME="${{ matrix.site.name }}"
+          SITE_URL="${{ matrix.site.url }}"
+          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
+          
+          # 检查lighthouse输出是否存在
+          if [ -z "${{ steps.lighthouse.outputs.manifest }}" ]; then
+            echo "警告: Lighthouse没有为 $SITE_NAME 产生有效的输出。创建空的报告文件。"
+            echo "{" > "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"performance\": 0," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"accessibility\": 0," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"best-practices\": 0," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"seo\": 0," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"reportUrl\": \"\"" >> "reports/data-$SITE_ID-$DATE.json"
+            echo "}" >> "reports/data-$SITE_ID-$DATE.json"
+          else
+            # 正常情况下从Lighthouse输出中提取关键指标并格式化为JSON
+            echo "{" > "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"performance\": ${{ fromJson(steps.lighthouse.outputs.manifest)[0].summary.performance }}," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"accessibility\": ${{ fromJson(steps.lighthouse.outputs.manifest)[0].summary.accessibility }}," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"best-practices\": ${{ fromJson(steps.lighthouse.outputs.manifest)[0].summary.bestPractices }}," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"seo\": ${{ fromJson(steps.lighthouse.outputs.manifest)[0].summary.seo }}," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"reportUrl\": \"${{ fromJson(steps.lighthouse.outputs.links)[0].url }}\"" >> "reports/data-$SITE_ID-$DATE.json"
+            echo "}" >> "reports/data-$SITE_ID-$DATE.json"
+          fi
+          
+          # 确保jq命令存在
+          which jq || apt-get update && apt-get install -y jq
+          
+          # 如果存在历史数据文件，则更新
+          if [ -f "reports/history.json" ]; then
+            # 添加新数据到历史记录
+            jq --argjson newData "$(cat "reports/data-$SITE_ID-$DATE.json")" '.reports += [$newData]' reports/history.json > reports/history.json.tmp
+            mv reports/history.json.tmp reports/history.json
+          else
+            # 创建新的历史记录文件
+            echo "{\"reports\": [$(cat "reports/data-$SITE_ID-$DATE.json")]}" > reports/history.json
+          fi
+          
+          echo "Report data saved to reports/data-$SITE_ID-$DATE.json and updated in reports/history.json"
+          cat reports/history.json
+
+      - name: Commit and Push Report Data
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add reports/
+          git commit -m "Add Lighthouse report data for ${{ matrix.site.name }} ($(date +%Y-%m-%d))" || echo "No changes to commit"
+          git push
