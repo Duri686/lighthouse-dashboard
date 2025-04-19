@@ -64,6 +64,15 @@ jobs:
             local scale=$6
 
             echo "Running $device test..."
+            
+            # Clear previous results
+            rm -rf ".lighthouseci/$device"
+            mkdir -p ".lighthouseci/$device"
+            
+            # Run Lighthouse with explicit output path
+            local timestamp=$(date +%s)
+            local output_file=".lighthouseci/$device/lhr-$timestamp.json"
+            
             lhci collect \
               --url https://www.fadada.com \
               --settings.formFactor=$formFactor \
@@ -74,17 +83,28 @@ jobs:
               --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
               --settings.maxWaitForLoad=30000 \
               --output=json \
-              --outDir=.lighthouseci/$device \
+              --outputPath="$output_file" \
               --numberOfRuns=1
 
-            # Verify report generation and wait for files
-            sleep 5  # Give time for files to be written
-            local json_file=$(find .lighthouseci/$device -name "lhr-*.json" -type f | head -n 1)
-            if [ ! -f "$json_file" ]; then
-              echo "Error: No Lighthouse report generated for $device"
+            # Debug output
+            echo "Lighthouse run completed. Checking for output..."
+            echo "Contents of .lighthouseci/$device:"
+            ls -la ".lighthouseci/$device"
+
+            # Verify report generation
+            if [ ! -f "$output_file" ]; then
+              echo "Error: Failed to generate report at $output_file"
               return 1
             fi
-            echo "Report generated successfully: $json_file"
+            
+            if [ ! -s "$output_file" ]; then
+              echo "Error: Generated report is empty"
+              return 1
+            fi
+
+            echo "Report generated successfully at: $output_file"
+            echo "File contents preview:"
+            head -n 20 "$output_file"
           }
 
           # Run tests
@@ -94,7 +114,10 @@ jobs:
           # Process reports function with improved error handling
           process_report() {
             local device=$1
-            local json_file=$(find .lighthouseci/$device -name "lhr-*.json" -type f | head -n 1)
+            local json_file=$(find ".lighthouseci/$device" -name "lhr-*.json" -type f | sort -r | head -n 1)
+            
+            echo "Looking for report in .lighthouseci/$device"
+            ls -la ".lighthouseci/$device"
             
             if [ ! -f "$json_file" ]; then
               echo "{\"error\": \"No report found for $device\", \"scores\":{}, \"metrics\":{}}"
