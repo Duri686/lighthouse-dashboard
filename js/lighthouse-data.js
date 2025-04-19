@@ -202,48 +202,75 @@ function updateChart(chartData) {
       return;
     }
 
-    const ctx = chartElement.getContext('2d');
+    // 清空图表容器，重新创建canvas
+    chartElement.innerHTML = '';
+    const canvas = document.createElement('canvas');
+    canvas.id = 'performanceChartCanvas';
+    chartElement.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
 
-    // 销毁现有图表(如果存在)
-    if (window.performanceChart) {
-      window.performanceChart.destroy();
+    if (!ctx) {
+      console.error('无法获取canvas上下文');
+      return;
     }
 
+    // 确保chartData有有效数据
+    if (
+      !chartData ||
+      !chartData.dates ||
+      !chartData.performance ||
+      !Array.isArray(chartData.dates) ||
+      !Array.isArray(chartData.performance) ||
+      chartData.dates.length === 0
+    ) {
+      console.error('图表数据格式无效');
+      chartElement.innerHTML =
+        '<div class="p-4 bg-yellow-50 text-yellow-700 rounded text-center">无有效数据可显示</div>';
+      return;
+    }
+
+    console.log('创建性能图表，数据点数量:', chartData.dates.length);
+
     // 创建新图表
-    window.performanceChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: chartData.dates,
-        datasets: [
-          {
-            label: '性能得分',
-            data: chartData.performance,
-            borderColor: 'rgb(12, 206, 107)',
-            backgroundColor: 'rgba(12, 206, 107, 0.1)',
-            tension: 0.3,
-            fill: true,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            min: 0,
-            max: 100,
-          },
+    try {
+      window.performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.dates,
+          datasets: [
+            {
+              label: '性能得分',
+              data: chartData.performance,
+              borderColor: 'rgb(12, 206, 107)',
+              backgroundColor: 'rgba(12, 206, 107, 0.1)',
+              tension: 0.3,
+              fill: true,
+            },
+          ],
         },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return `得分: ${context.raw}`;
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return `得分: ${context.raw}`;
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+    } catch (chartError) {
+      console.error('创建图表实例时出错:', chartError);
+      chartElement.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">图表初始化失败: ${chartError.message}</div>`;
+    }
   } catch (error) {
     console.error('更新图表时出错:', error);
     const container = document.querySelector('.h-80');
@@ -307,89 +334,118 @@ function updateReportLink(reportData) {
  * 使用实际的Lighthouse数据更新详细信息
  */
 function updateDetailedData(reportData) {
-  const detailedData = reportData.detailedData;
+  try {
+    if (!reportData) {
+      console.error('报告数据不存在');
+      return;
+    }
 
-  if (!detailedData) {
-    // 如果没有详细数据，显示一个提示信息
+    const detailedData = reportData.detailedData;
+    console.log('详细数据:', detailedData); // 调试用
+
+    // 确保详细数据存在
+    if (!detailedData) {
+      // 如果没有详细数据，显示一个提示信息
+      const container = document.getElementById('detailsContent');
+      if (container) {
+        container.innerHTML =
+          '<div class="p-4 bg-yellow-50 text-yellow-700 rounded">没有详细的Lighthouse报告数据可用</div>';
+      }
+      return;
+    }
+
+    // 更新性能指标，确保每个值都存在并有效
+    const metrics = {
+      fcp: formatTime(detailedData.fcp || 0),
+      lcp: formatTime(detailedData.lcp || 0),
+      tbt: formatTime(detailedData.tbt || 0),
+      cls: (detailedData.cls || 0).toFixed(3),
+      tti: formatTime(detailedData.tti || 0),
+      si: formatTime(detailedData.si || 0),
+    };
+
+    // 更新指标显示
+    const updateElement = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    updateElement('fcpDetail', metrics.fcp);
+    updateElement('lcpDetail', metrics.lcp);
+    updateElement('tbtDetail', metrics.tbt);
+    updateElement('clsDetail', metrics.cls);
+    updateElement('ttiDetail', metrics.tti);
+    updateElement('siDetail', metrics.si);
+
+    // 更新核心指标表格
+    updateElement('fcp', metrics.fcp);
+    updateElement('lcp', metrics.lcp);
+    updateElement('cls', metrics.cls);
+    updateElement('tti', metrics.tti);
+
+    // 提取优化建议
+    if (
+      detailedData.opportunities &&
+      Array.isArray(detailedData.opportunities) &&
+      detailedData.opportunities.length > 0
+    ) {
+      const improvements = detailedData.opportunities.map(
+        (opp) => opp.title || '未命名建议',
+      );
+      updateList('improvementsList', improvements, 'red');
+      updateList(
+        'optimizationTips',
+        detailedData.opportunities.map(
+          (opp) => opp.description || '无详细描述',
+        ),
+        'yellow',
+      );
+    } else {
+      updateList('improvementsList', ['没有检测到需要改进的项目'], 'green');
+      updateList('optimizationTips', ['所有检查都通过了'], 'green');
+    }
+
+    // 资源摘要
+    if (
+      detailedData.resourceSummary &&
+      Array.isArray(detailedData.resourceSummary) &&
+      detailedData.resourceSummary.length > 0
+    ) {
+      try {
+        // 更新资源类型图表
+        createResourceTypeChart(detailedData.resourceSummary);
+
+        // 按大小排序资源
+        const sortedResources = [...detailedData.resourceSummary].sort(
+          (a, b) => (b.size || 0) - (a.size || 0),
+        );
+        const largestResources = sortedResources.map(
+          (res) =>
+            `${res.resourceType || '未知类型'} - ${formatBytes(res.size || 0)}`,
+        );
+
+        updateList('largestResources', largestResources);
+
+        // 计算总资源大小
+        const totalSize = detailedData.resourceSummary.reduce(
+          (sum, item) => sum + (item.size || 0),
+          0,
+        );
+        updateElement('totalResourceSize', formatBytes(totalSize));
+      } catch (chartError) {
+        console.error('创建资源图表时出错:', chartError);
+        updateList('largestResources', ['无法加载资源信息']);
+      }
+    } else {
+      updateList('largestResources', ['没有资源信息可用']);
+      updateElement('totalResourceSize', '-');
+    }
+  } catch (error) {
+    console.error('更新详细数据时出错:', error);
     const container = document.getElementById('detailsContent');
     if (container) {
-      container.innerHTML =
-        '<div class="p-4 bg-yellow-50 text-yellow-700 rounded">没有详细的Lighthouse报告数据可用</div>';
+      container.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded">处理详细数据时出错: ${error.message}</div>`;
     }
-    return;
-  }
-
-  // 更新性能指标
-  const metrics = {
-    fcp: formatTime(detailedData.fcp),
-    lcp: formatTime(detailedData.lcp),
-    tbt: formatTime(detailedData.tbt),
-    cls: detailedData.cls.toFixed(3),
-    tti: formatTime(detailedData.tti),
-    si: formatTime(detailedData.si),
-  };
-
-  // 更新指标显示
-  if (document.getElementById('fcpDetail'))
-    document.getElementById('fcpDetail').textContent = metrics.fcp;
-  if (document.getElementById('lcpDetail'))
-    document.getElementById('lcpDetail').textContent = metrics.lcp;
-  if (document.getElementById('tbtDetail'))
-    document.getElementById('tbtDetail').textContent = metrics.tbt;
-  if (document.getElementById('clsDetail'))
-    document.getElementById('clsDetail').textContent = metrics.cls;
-  if (document.getElementById('ttiDetail'))
-    document.getElementById('ttiDetail').textContent = metrics.tti;
-  if (document.getElementById('siDetail'))
-    document.getElementById('siDetail').textContent = metrics.si;
-
-  // 更新核心指标表格
-  if (document.getElementById('fcp'))
-    document.getElementById('fcp').textContent = metrics.fcp;
-  if (document.getElementById('lcp'))
-    document.getElementById('lcp').textContent = metrics.lcp;
-  if (document.getElementById('cls'))
-    document.getElementById('cls').textContent = metrics.cls;
-  if (document.getElementById('tti'))
-    document.getElementById('tti').textContent = metrics.tti;
-
-  // 提取优化建议
-  if (detailedData.opportunities && detailedData.opportunities.length > 0) {
-    const improvements = detailedData.opportunities.map((opp) => opp.title);
-    updateList('improvementsList', improvements, 'red');
-    updateList(
-      'optimizationTips',
-      detailedData.opportunities.map((opp) => opp.description),
-      'yellow',
-    );
-  } else {
-    updateList('improvementsList', ['没有检测到需要改进的项目'], 'green');
-    updateList('optimizationTips', ['所有检查都通过了'], 'green');
-  }
-
-  // 资源摘要
-  if (detailedData.resourceSummary && detailedData.resourceSummary.length > 0) {
-    // 更新资源类型图表
-    createResourceTypeChart(detailedData.resourceSummary);
-
-    // 按大小排序资源
-    const sortedResources = [...detailedData.resourceSummary].sort(
-      (a, b) => b.size - a.size,
-    );
-    const largestResources = sortedResources.map(
-      (res) => `${res.resourceType} - ${formatBytes(res.size)}`,
-    );
-
-    updateList('largestResources', largestResources);
-
-    // 计算总资源大小
-    const totalSize = detailedData.resourceSummary.reduce(
-      (sum, item) => sum + item.size,
-      0,
-    );
-    if (document.getElementById('totalResourceSize'))
-      document.getElementById('totalResourceSize').textContent =
-        formatBytes(totalSize);
   }
 }
 
@@ -452,66 +508,109 @@ function updateList(elementId, items, dotColor) {
  * 创建资源类型饼图
  */
 function createResourceTypeChart(resourceSummary) {
-  const element = document.getElementById('resourceTypesChart');
-  if (!element || !resourceSummary) return;
+  try {
+    const element = document.getElementById('resourceTypesChart');
+    if (
+      !element ||
+      !resourceSummary ||
+      !Array.isArray(resourceSummary) ||
+      resourceSummary.length === 0
+    ) {
+      if (element) {
+        element.innerHTML =
+          '<div class="p-4 bg-yellow-50 text-yellow-700 rounded text-center">没有资源数据可用</div>';
+      }
+      return;
+    }
 
-  // 创建canvas元素并添加到容器
-  element.innerHTML = '<canvas id="resourceTypePie"></canvas>';
-  const ctx = document.getElementById('resourceTypePie').getContext('2d');
+    // 创建canvas元素并添加到容器
+    element.innerHTML = '<canvas id="resourceTypePie"></canvas>';
+    const canvas = document.getElementById('resourceTypePie');
+    if (!canvas) {
+      console.error('无法创建资源图表canvas元素');
+      return;
+    }
 
-  // 准备数据
-  const labels = [];
-  const data = [];
-  const backgroundColor = [
-    '#4285F4', // 蓝色
-    '#34A853', // 绿色
-    '#FBBC05', // 黄色
-    '#EA4335', // 红色
-    '#9AA0A6', // 灰色
-    '#137333', // 深绿
-    '#1A73E8', // 浅蓝
-    '#D93025', // 深红
-  ];
+    const ctx = canvas.getContext('2d');
 
-  // 从实际数据中提取信息
-  resourceSummary.forEach((resource, index) => {
-    labels.push(resource.resourceType);
-    data.push(resource.size);
-  });
+    // 准备数据
+    const labels = [];
+    const data = [];
+    const backgroundColor = [
+      '#4285F4', // 蓝色
+      '#34A853', // 绿色
+      '#FBBC05', // 黄色
+      '#EA4335', // 红色
+      '#9AA0A6', // 灰色
+      '#137333', // 深绿
+      '#1A73E8', // 浅蓝
+      '#D93025', // 深红
+    ];
 
-  // 创建图表
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          data: data,
-          backgroundColor: backgroundColor.slice(0, labels.length),
+    // 从实际数据中提取信息，过滤掉无效条目
+    resourceSummary.forEach((resource, index) => {
+      if (
+        resource &&
+        resource.resourceType &&
+        typeof resource.size === 'number'
+      ) {
+        labels.push(resource.resourceType);
+        data.push(resource.size);
+      }
+    });
+
+    // 如果没有有效数据，显示错误信息
+    if (labels.length === 0) {
+      element.innerHTML =
+        '<div class="p-4 bg-yellow-50 text-yellow-700 rounded text-center">资源数据格式无效</div>';
+      return;
+    }
+
+    // 创建图表，使用try块防止Chart.js错误
+    try {
+      window.resourceChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: backgroundColor.slice(0, labels.length),
+            },
+          ],
         },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 10,
-          },
-        },
-        tooltip: {
-          callbacks: {
-            label: function (context) {
-              const value = context.raw;
-              return `${context.label}: ${formatBytes(value)}`;
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 10,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const value = context.raw;
+                  return `${context.label}: ${formatBytes(value)}`;
+                },
+              },
             },
           },
         },
-      },
-    },
-  });
+      });
+    } catch (chartError) {
+      console.error('创建资源类型图表时出错:', chartError);
+      element.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">创建图表失败: ${chartError.message}</div>`;
+    }
+  } catch (error) {
+    console.error('资源图表函数出错:', error);
+    const element = document.getElementById('resourceTypesChart');
+    if (element) {
+      element.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">处理资源数据时出错: ${error.message}</div>`;
+    }
+  }
 }
 
 // 初始时加载网站列表和默认数据
