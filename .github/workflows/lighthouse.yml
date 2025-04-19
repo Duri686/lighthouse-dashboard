@@ -8,7 +8,7 @@ on:
 # 添加权限设置
 permissions:
   contents: write # 授予写入仓库内容的权限
-
+  
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
           - url: 'https://www.fadada.com'
             name: '法大大官网 (PC)'
             device: 'desktop'
-          # 要添加更多网站，请复制上面两行并修改值
+      fail-fast: false # 确保一个任务失败时不会取消其他任务
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -35,6 +35,8 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
         continue-on-error: true
+        env:
+          DEBUG: "lighthouse:*"
 
       - name: Debug Lighthouse Output
         run: |
@@ -47,7 +49,7 @@ jobs:
         env:
           LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
-        continue-on-error: true # 即使调试命令失败也继续
+        continue-on-error: true
 
       - name: Format and Save Report Data
         run: |
@@ -56,22 +58,19 @@ jobs:
           SITE_NAME="${{ matrix.site.name }}"
           SITE_URL="${{ matrix.site.url }}"
           SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
-      
-          # 设置默认值，避免空值导致 JSON 无效
+
           PERF=${PERF:-0}
           ACC=${ACC:-0}
           BP=${BP:-0}
           SEO=${SEO:-0}
           DETAILED_DATA=${DETAILED_DATA:-{}}
-      
-          # 检查 LIGHTHOUSE_LINKS 并提取 REPORT_URL
+
           if echo "$LIGHTHOUSE_LINKS" | jq -e 'type == "object"' > /dev/null; then
             REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r 'to_entries[0].value // ""')
           else
             REPORT_URL=""
           fi
-      
-          # 创建报告 JSON
+
           echo "{" > "reports/data-$SITE_ID-$DATE.json"
           echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
           echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
@@ -83,45 +82,18 @@ jobs:
           echo "  \"reportUrl\": \"$REPORT_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
           echo "  \"detailedData\": $DETAILED_DATA" >> "reports/data-$SITE_ID-$DATE.json"
           echo "}" >> "reports/data-$SITE_ID-$DATE.json"
-      
-          # 输出生成的 JSON 文件内容以便调试
+
           echo "Generated JSON:"
           cat "reports/data-$SITE_ID-$DATE.json"
         env:
           LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
 
-      - name: Update History
-        run: |
-          DATE=$(date +%Y-%m-%d)
-          SITE_URL="${{ matrix.site.url }}"
-          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
-
-          # 检查 JSON 文件是否有效
-          if ! jq empty "reports/data-$SITE_ID-$DATE.json"; then
-            echo "Invalid JSON in reports/data-$SITE_ID-$DATE.json"
-            exit 1
-          fi
-
-          # 如果存在历史数据文件，则更新
-          if [ -f "reports/history.json" ]; then
-            # 添加新数据到历史记录
-            jq --argjson newData "$(cat "reports/data-$SITE_ID-$DATE.json")" '.reports += [$newData]' reports/history.json > reports/history.json.tmp
-            mv reports/history.json.tmp reports/history.json
-          else
-            # 创建新的历史记录文件
-            echo "{\"reports\": [$(cat "reports/data-$SITE_ID-$DATE.json")]}" > reports/history.json
-          fi
-
-          echo "Report data saved to reports/data-$SITE_ID-$DATE.json and updated in reports/history.json"
-          echo "History content:"
-          cat reports/history.json
-
       - name: Commit and Push Report Data
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
-          git pull --rebase # 拉取远程更改
+          git pull --rebase || echo "No remote changes to pull"
           git add reports/
           git commit -m "Add Lighthouse report data for ${{ matrix.site.name }} ($(date +%Y-%m-%d))" || echo "No changes to commit"
-          git push
+          git push || echo "Push failed, please check for conflicts"
