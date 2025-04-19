@@ -1,110 +1,54 @@
-name: Run Lighthouse CI
-
+name: Lighthouse CI
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 3 * * *' # 每天凌晨 3 点自动运行
+    - cron: '0 */6 * * *'  # 每6小时运行一次
+  workflow_dispatch:
 
-# 添加权限设置
-permissions:
-  contents: write # 授予写入仓库内容的权限
-  actions: read  # 添加读取actions的权限
-  
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        site:
-          - url: 'https://www.fadada.com'
-            name: '法大大官网'
-            device: 'mobile'
-            config: '.lighthouserc.mobile.json'
-          - url: 'https://www.fadada.com'
-            name: '法大大官网 (PC)'
-            device: 'desktop'
-            config: '.lighthouserc.json'
-      fail-fast: false # 确保一个任务失败时不会取消其他任务
     steps:
       - uses: actions/checkout@v3
-
-      - name: Run Lighthouse CI on ${{ matrix.site.name }}
-        id: lighthouse
-        uses: treosh/lighthouse-ci-action@v9
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          urls: '${{ matrix.site.url }}'
-          configPath: '${{ matrix.site.config }}'
-          uploadArtifacts: false  # Disable default artifact upload
-          temporaryPublicStorage: true
-        continue-on-error: true
-        env:
-          DEBUG: "lighthouse:*"
+          node-version: '16'
 
-      - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: lighthouse-report-${{ matrix.site.device }}-${{ github.run_id }}
-          path: .lighthouseci/
-          retention-days: 7
-        continue-on-error: true
-
-      - name: Debug Lighthouse Output
+      - name: Install dependencies
         run: |
-          echo "============ Lighthouse Debug Info ============"
-          echo "Lighthouse links content:"
-          echo "$LIGHTHOUSE_LINKS" | jq '.' || echo "无法解析LIGHTHOUSE_LINKS"
-          echo "Lighthouse manifest content:"
-          echo "$LIGHTHOUSE_MANIFEST" | jq '.' || echo "无法解析LIGHTHOUSE_MANIFEST"
-          echo "============ End Debug Info ============"
-        env:
-          LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
-          LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
-        continue-on-error: true
+          npm install -g @lhci/cli
+          npm install fs path
 
-      - name: Format and Save Report Data
+      - name: Run Lighthouse and Process Reports
         run: |
-          mkdir -p reports
-          DATE=$(date +%Y-%m-%d)
-          SITE_NAME="${{ matrix.site.name }}"
-          SITE_URL="${{ matrix.site.url }}"
-          SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')_${{ matrix.site.device }}
+          # 设置脚本权限
+          chmod +x process-report.js
+          
+          # 获取当前时间
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
+          
+          # 运行 Lighthouse 并收集报告
+          lhci collect \
+            --url https://www.fadada.com \
+            --settings.preset=desktop \
+            --settings.throttling.cpuSlowdownMultiplier=1 \
+            --settings.chromeFlags="--no-sandbox --headless" \
+            --output=json \
+            --outDir=./reports
+          
+          # 处理生成的报告
+          for f in ./reports/lighthouse-*.json; do
+            if [ -f "$f" ]; then
+              echo "Processing report: $f"
+              DATE_WITH_TIME=$NOW node process-report.js "$f"
+            fi
+          done
 
-          PERF=${PERF:-0}
-          ACC=${ACC:-0}
-          BP=${BP:-0}
-          SEO=${SEO:-0}
-          DETAILED_DATA=${DETAILED_DATA:-{}}
-
-          if echo "$LIGHTHOUSE_LINKS" | jq -e 'type == "object"' > /dev/null; then
-            REPORT_URL=$(echo "$LIGHTHOUSE_LINKS" | jq -r 'to_entries[0].value // ""')
-          else
-            REPORT_URL=""
-          fi
-
-          echo "{" > "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"name\": \"$SITE_NAME\"," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"url\": \"$SITE_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"performance\": $PERF," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"accessibility\": $ACC," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"best-practices\": $BP," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"seo\": $SEO," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"reportUrl\": \"$REPORT_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
-          echo "  \"detailedData\": $DETAILED_DATA" >> "reports/data-$SITE_ID-$DATE.json"
-          echo "}" >> "reports/data-$SITE_ID-$DATE.json"
-
-          echo "Generated JSON:"
-          cat "reports/data-$SITE_ID-$DATE.json"
-        env:
-          LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
-          LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
-
-      - name: Commit and Push Report Data
+      - name: Commit and push changes
         run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
-          git pull --rebase || echo "No remote changes to pull"
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
           git add reports/
-          git commit -m "Add Lighthouse report data for ${{ matrix.site.name }} ($(date +%Y-%m-%d))" || echo "No changes to commit"
-          git push || echo "Push failed, please check for conflicts"
+          git commit -m "Update Lighthouse report $(date -u)"
+          git push
