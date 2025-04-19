@@ -121,6 +121,17 @@
           }
         ]
       }
+    },
+    {
+      "date": "2025-04-19",
+      "name": "法大大官网 (PC)",
+      "url": "https://www.fadada.com",
+      "performance": 0,
+      "accessibility": 0,
+      "best-practices": 0,
+      "seo": 0,
+      "reportUrl": "",
+      "detailedData": {}
     }
   ]
 }
