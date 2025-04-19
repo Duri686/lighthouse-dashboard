@@ -7,7 +7,7 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <!-- InspireUI 组件 (通过CDN引入) -->
   <link href="https://cdn.jsdelivr.net/npm/@inspire-ui/css@2.2.0/dist/css/inspire-ui.min.css" rel="stylesheet">
   <style>
@@ -277,10 +277,29 @@
   <!-- 引入我们的数据加载脚本 -->
   <script src="js/lighthouse-data.js"></script>
   <script>
-    document.getElementById('refreshBtn').addEventListener('click', function() {
-      const url = document.getElementById('urlSelect').value;
-      const days = parseInt(document.getElementById('dateRange').value);
-      loadLighthouseData(url, days);
+    // 页面初始化和错误处理
+    document.addEventListener('DOMContentLoaded', function() {
+      // 确保Chart.js正确加载
+      if (typeof Chart === 'undefined') {
+        console.error('Chart.js库未正确加载');
+        alert('图表库加载失败，部分功能可能无法正常工作。请刷新页面或检查网络连接。');
+      }
+      
+      // 绑定刷新按钮事件
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+          const url = document.getElementById('urlSelect').value;
+          const days = parseInt(document.getElementById('dateRange').value);
+          loadLighthouseData(url, days);
+        });
+      }
+      
+      // 处理未捕获的错误
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.error('页面出现未捕获错误:', message, 'at', source, lineno, colno, error);
+        return false;
+      };
     });
   </script>
 </body>
