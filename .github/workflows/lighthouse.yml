@@ -88,42 +88,49 @@ jobs:
             if [ -n "$json_file" ]; then
               echo "Processing $device report: $json_file"
               
-              # Debug: Show file contents
-              echo "File contents:"
-              cat "$json_file" | head -n 20
-              
               # Copy reports
               cp "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json" || true
               cp "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html" || true
               
-              # Process report
-              DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
-              node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json" || echo "{}"
+              # Process report and ensure valid JSON output
+              RESULT=$(DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
+                node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json")
+              
+              # Validate JSON
+              if echo "$RESULT" | jq empty 2>/dev/null; then
+                echo "$RESULT"
+              else
+                echo "{}"
+              fi
             else
-              echo "No JSON file found for $device"
               echo "{}"
             fi
           }
 
-          # Initialize or reset history.json
-          echo '{"reports":[]}' > reports/history.json
+          # Initialize history.json with empty array if it doesn't exist
+          [ -f reports/history.json ] || echo '{"reports":[]}' > reports/history.json
 
-          # Get processed data
-          desktop_data=$(process_report "desktop")
-          mobile_data=$(process_report "mobile")
+          # Process reports and capture output
+          DESKTOP_DATA=$(process_report "desktop")
+          MOBILE_DATA=$(process_report "mobile")
 
-          # Update history.json with new entry
-          jq --arg date "$NOW" \
-             --arg url "https://www.fadada.com" \
-             --argjson desktop "$desktop_data" \
-             --argjson mobile "$mobile_data" \
-             '.reports += [{
-                "date": $date,
-                "url": $url,
-                "desktop": $desktop,
-                "mobile": $mobile
-              }]' \
-             reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
+          # Update history.json with validated JSON
+          if echo "$DESKTOP_DATA" | jq empty 2>/dev/null && echo "$MOBILE_DATA" | jq empty 2>/dev/null; then
+            jq --arg date "$NOW" \
+               --arg url "https://www.fadada.com" \
+               --argjson desktop "$DESKTOP_DATA" \
+               --argjson mobile "$MOBILE_DATA" \
+               '.reports += [{
+                  "date": $date,
+                  "url": $url,
+                  "desktop": $desktop,
+                  "mobile": $mobile
+                }]' \
+               reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
+          else
+            echo "Error: Invalid JSON data generated"
+            exit 1
+          fi
 
           # List final results
           echo "=== Final Results ==="

@@ -24,18 +24,18 @@ function processReport(filePath) {
         // Extract core metrics and scores
         const processed = {
             scores: {
-                performance: Math.round(report.categories.performance.score * 100) / 100,
-                accessibility: Math.round(report.categories.accessibility.score * 100) / 100,
-                bestPractices: Math.round(report.categories['best-practices'].score * 100) / 100,
-                seo: Math.round(report.categories.seo.score * 100) / 100
+                performance: Math.round((report.categories?.performance?.score || 0) * 100) / 100,
+                accessibility: Math.round((report.categories?.accessibility?.score || 0) * 100) / 100,
+                bestPractices: Math.round((report.categories?.['best-practices']?.score || 0) * 100) / 100,
+                seo: Math.round((report.categories?.seo?.score || 0) * 100) / 100
             },
             metrics: {
-                fcp: Math.round(report.audits['first-contentful-paint'].numericValue),
-                lcp: Math.round(report.audits['largest-contentful-paint'].numericValue),
-                tbt: Math.round(report.audits['total-blocking-time'].numericValue),
-                cls: Math.round(report.audits['cumulative-layout-shift'].numericValue * 1000) / 1000,
-                tti: Math.round(report.audits['interactive'].numericValue),
-                si: Math.round(report.audits['speed-index'].numericValue)
+                fcp: Math.round(report.audits?.['first-contentful-paint']?.numericValue || 0),
+                lcp: Math.round(report.audits?.['largest-contentful-paint']?.numericValue || 0),
+                tbt: Math.round(report.audits?.['total-blocking-time']?.numericValue || 0),
+                cls: Math.round((report.audits?.['cumulative-layout-shift']?.numericValue || 0) * 1000) / 1000,
+                tti: Math.round(report.audits?.['interactive']?.numericValue || 0),
+                si: Math.round(report.audits?.['speed-index']?.numericValue || 0)
             },
             opportunities: report.categories.performance.auditRefs
                 .filter(ref => report.audits[ref.id].score < 1)
@@ -55,15 +55,15 @@ function processReport(filePath) {
             }
         };
 
-        // Overwrite the original file with processed data
-        fs.writeFileSync(filePath, JSON.stringify(processed, null, 2));
-        
-        // Output processed data for shell script
-        console.log(JSON.stringify(processed));
-        
-        // Add debug logging
-        console.error('Processed data:', JSON.stringify(processed, null, 2));
-        
+        // Ensure valid JSON string output
+        const jsonOutput = JSON.stringify(processed);
+        if (!jsonOutput) {
+            throw new Error('Failed to stringify processed data');
+        }
+
+        // Write to file and output
+        fs.writeFileSync(filePath, jsonOutput);
+        console.log(jsonOutput);
         return processed;
 
     } catch (error) {
