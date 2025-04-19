@@ -2,12 +2,12 @@
   "ci": {
     "collect": {
       "settings": {
-        "preset": "desktop",
+        "preset": "mobile",
         "screenEmulation": {
-          "mobile": false,
-          "width": 1350,
-          "height": 940,
-          "deviceScaleFactor": 1,
+          "mobile": true,
+          "width": 360,
+          "height": 640,
+          "deviceScaleFactor": 2,
           "disabled": false
         },
         "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-gpu"

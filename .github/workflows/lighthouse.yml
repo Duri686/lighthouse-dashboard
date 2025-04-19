@@ -18,9 +18,11 @@ jobs:
           - url: 'https://www.fadada.com'
             name: '法大大官网'
             device: 'mobile'
+            config: '.lighthouserc.mobile.json'
           - url: 'https://www.fadada.com'
             name: '法大大官网 (PC)'
             device: 'desktop'
+            config: '.lighthouserc.json'
       fail-fast: false # 确保一个任务失败时不会取消其他任务
     steps:
       - name: Checkout repo
@@ -31,7 +33,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@v9
         with:
           urls: '${{ matrix.site.url }}'
-          configPath: '.lighthouserc.json'
+          configPath: '${{ matrix.site.config }}'
           uploadArtifacts: true
           temporaryPublicStorage: true
         continue-on-error: true

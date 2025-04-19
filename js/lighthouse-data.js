@@ -15,19 +15,23 @@ async function loadSiteList() {
 
     const data = await response.json();
 
-    // 提取所有不同的网站
+    // 提取所有不同的网站和设备类型组合
     const sitesMap = {};
     data.reports.forEach((report) => {
       if (report.url && report.name) {
-        sitesMap[report.url] = report.name;
+        // 从报告文件名中提取设备类型
+        const deviceType = report.device || 'mobile'; // 默认为移动端
+        const key = `${report.url}_${deviceType}`;
+        sitesMap[key] = {
+          url: report.url,
+          name: `${report.name} (${deviceType === 'desktop' ? 'PC端' : '移动端'})`,
+          device: deviceType
+        };
       }
     });
 
     // 转换为数组
-    const sites = Object.entries(sitesMap).map(([url, name]) => ({
-      url,
-      name,
-    }));
+    const sites = Object.values(sitesMap);
 
     // 更新下拉菜单
     updateSiteSelect(sites);

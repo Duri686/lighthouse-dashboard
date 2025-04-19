@@ -295,6 +295,21 @@
         });
       }
       
+      // 绑定详情切换按钮事件
+      const toggleBtn = document.getElementById('toggleDetails');
+      const detailsContent = document.getElementById('detailsContent');
+      if (toggleBtn && detailsContent) {
+        toggleBtn.addEventListener('click', function() {
+          if (detailsContent.classList.contains('hidden')) {
+            detailsContent.classList.remove('hidden');
+            toggleBtn.innerHTML = '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+          } else {
+            detailsContent.classList.add('hidden');
+            toggleBtn.innerHTML = '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+          }
+        });
+      }
+      
       // 处理未捕获的错误
       window.onerror = function(message, source, lineno, colno, error) {
         console.error('页面出现未捕获错误:', message, 'at', source, lineno, colno, error);
