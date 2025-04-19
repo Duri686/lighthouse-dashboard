@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 3 * * *' # 每天凌晨 3 点自动运行
-
+    
+# 添加权限设置
+permissions:
+  contents: write  # 授予写入仓库内容的权限
+  
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
