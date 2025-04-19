@@ -9,27 +9,27 @@ function processReport(inputFile) {
     const dateWithTime = process.env.DATE_WITH_TIME;
     const dateStr = dateWithTime.split('T')[0];
 
-    // 验证和提取数据
-    if (!report.lhr || !report.lhr.categories) {
+    // 新版本 Lighthouse 直接访问数据，不需要 lhr 前缀
+    if (!report.categories) {
+      console.log('Report structure:', Object.keys(report));
       throw new Error('Invalid Lighthouse report format');
     }
 
-    const categories = report.lhr.categories;
     const formattedReport = {
       date: dateWithTime,
       name: "法大大官网 (PC)",
-      url: "https://www.fadada.com",
-      performance: Math.round(categories.performance.score * 100),
-      accessibility: Math.round(categories.accessibility.score * 100),
-      "best-practices": Math.round(categories['best-practices'].score * 100),
-      seo: Math.round(categories.seo.score * 100),
-      reportUrl: report.lhr.finalUrl,
+      url: report.finalUrl || report.requestedUrl,
+      performance: Math.round(report.categories.performance.score * 100),
+      accessibility: Math.round(report.categories.accessibility.score * 100),
+      "best-practices": Math.round(report.categories['best-practices'].score * 100),
+      seo: Math.round(report.categories.seo.score * 100),
+      reportUrl: report.finalUrl,
       detailedData: {
-        firstContentfulPaint: report.lhr.audits['first-contentful-paint'].numericValue / 1000,
-        largestContentfulPaint: report.lhr.audits['largest-contentful-paint'].numericValue / 1000,
-        totalBlockingTime: report.lhr.audits['total-blocking-time'].numericValue,
-        cumulativeLayoutShift: report.lhr.audits['cumulative-layout-shift'].numericValue,
-        speedIndex: report.lhr.audits['speed-index'].numericValue / 1000
+        firstContentfulPaint: report.audits['first-contentful-paint'].numericValue / 1000,
+        largestContentfulPaint: report.audits['largest-contentful-paint'].numericValue / 1000,
+        totalBlockingTime: report.audits['total-blocking-time'].numericValue,
+        cumulativeLayoutShift: report.audits['cumulative-layout-shift'].numericValue,
+        speedIndex: report.audits['speed-index'].numericValue / 1000
       }
     };
 
@@ -43,7 +43,8 @@ function processReport(inputFile) {
     console.log(`Successfully wrote report to: ${outputPath}`);
     return outputPath;
   } catch (error) {
-    console.error('Error processing report:', error);
+    console.error('Error processing report:', error.message);
+    console.error('Stack:', error.stack);
     throw error;
   }
 }
