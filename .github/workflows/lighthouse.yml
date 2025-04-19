@@ -48,8 +48,9 @@ jobs:
           mkdir -p reports
           
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
+          DATE_STR=$(date -u +"%Y-%m-%d")
           
-          # 使用更稳定的配置运行 Lighthouse
+          # 使用更稳定的配置运行 Lighthouse 并直接输出到目标文件
           lhci collect \
             --url https://www.fadada.com \
             --settings.preset=desktop \
@@ -58,16 +59,16 @@ jobs:
             --output=json \
             --outDir=./reports
 
-          echo "Initial reports directory contents:"
-          ls -la ./reports/
+          echo "Lighthouse run completed. Processing reports..."
           
-          # 只处理 lighthouse- 开头的报告文件
-          for f in ./reports/lighthouse-*.json; do
-            if [ -f "$f" ]; then
-              echo "Processing Lighthouse report: $f"
-              DATE_WITH_TIME=$NOW node process-report.js "$f" || true
-            fi
-          done
+          # 使用正确的文件名模式处理报告
+          LATEST_REPORT=$(ls -t ./reports/lighthouse-*.json | head -n1)
+          if [ -f "$LATEST_REPORT" ]; then
+            echo "Processing latest report: $LATEST_REPORT"
+            DATE_WITH_TIME=$NOW node process-report.js "$LATEST_REPORT"
+          else
+            echo "No Lighthouse report found!"
+          fi
           
           # 确保文件权限正确
           chmod -R 644 ./reports/*.json
