@@ -1,0 +1,42 @@
+name: Lighthouse CI for www.fadada.com
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨 2 点运行
+  workflow_dispatch:     # 支持手动触发
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Lighthouse remotely
+        uses: treosh/lighthouse-ci-action@v9
+        with:
+          urls: 'https://www.fadada.com'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Upload to Gist
+        run: |
+          FILE_PATH=$(find . -name "*.report.html" | head -n 1)
+          if [ -f "$FILE_PATH" ]; then
+            CONTENT=$(cat "$FILE_PATH" | base64 -w 0)
+            TODAY=$(date +'%Y-%m-%d')
+            FILENAME="fadada-lighthouse-$TODAY.html"
+
+            curl -X POST "https://api.github.com/gists" \
+              -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d @- <<EOF
+            {
+              "description": "Lighthouse report for fadada.com ($TODAY)",
+              "public": false,
+              "files": {
+                "$FILENAME": {
+                  "content": "$CONTENT"
+                }
+              }
+            }
+EOF
+          fi
