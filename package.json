@@ -1,0 +1,12 @@
+{
+  "name": "lighthouse-dashboard",
+  "version": "1.0.0",
+  "description": "这是一个用于可视化展示Lighthouse性能报告数据的仪表盘应用。它通过GitHub Actions自动运行Lighthouse测试，并将结果展示在一个美观的仪表盘界面上。",
+  "main": "process-report.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
