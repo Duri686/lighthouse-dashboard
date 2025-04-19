@@ -1,39 +1,42 @@
 {
   "ci": {
     "collect": {
-      "numberOfRuns": 1
-    },
-    "assert": {
-      "assertions": {
-        "apple-touch-icon": "off",
-        "color-contrast": "off",
-        "crawlable-anchors": "off",
-        "csp-xss": "off",
-        "deprecations": "off",
-        "duplicate-id-aria": "off",
-        "errors-in-console": "off",
-        "font-display": "off",
-        "heading-order": "off",
-        "html-has-lang": "off",
-        "image-alt": "off",
-        "image-size-responsive": "off",
-        "installable-manifest": "off",
-        "link-name": "off",
-        "maskable-icon": "off",
-        "meta-viewport": "off",
-        "no-unload-listeners": "off",
-        "non-composited-animations": "off",
-        "offscreen-images": "off",
-        "service-worker": "off",
-        "splash-screen": "off",
-        "tap-targets": "off",
-        "themed-omnibox": "off",
-        "total-byte-weight": "off",
-        "unsized-images": "off"
+      "settings": {
+        "emulatedFormFactor": "mobile",
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-gpu"
       }
-    },
-    "upload": {
-      "target": "temporary-public-storage"
     }
+  },
+  "assert": {
+    "assertions": {
+      "apple-touch-icon": "off",
+      "color-contrast": "off",
+      "crawlable-anchors": "off",
+      "csp-xss": "off",
+      "deprecations": "off",
+      "duplicate-id-aria": "off",
+      "errors-in-console": "off",
+      "font-display": "off",
+      "heading-order": "off",
+      "html-has-lang": "off",
+      "image-alt": "off",
+      "image-size-responsive": "off",
+      "installable-manifest": "off",
+      "link-name": "off",
+      "maskable-icon": "off",
+      "meta-viewport": "off",
+      "no-unload-listeners": "off",
+      "non-composited-animations": "off",
+      "offscreen-images": "off",
+      "service-worker": "off",
+      "splash-screen": "off",
+      "tap-targets": "off",
+      "themed-omnibox": "off",
+      "total-byte-weight": "off",
+      "unsized-images": "off"
+    }
+  },
+  "upload": {
+    "target": "temporary-public-storage"
   }
 }
