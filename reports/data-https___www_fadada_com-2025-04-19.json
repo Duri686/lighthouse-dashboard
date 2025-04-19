@@ -2,9 +2,10 @@
   "date": "2025-04-19",
   "name": "法大大官网",
   "url": "https://www.fadada.com",
-  "performance": 0.22,
-  "accessibility": 0.76,
+  "performance": 0,
+  "accessibility": 0,
   "best-practices": 0,
-  "seo": 0.83,
-  "reportUrl": ""
+  "seo": 0,
+  "reportUrl": "",
+  "detailedData": null
 }
