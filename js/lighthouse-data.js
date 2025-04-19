@@ -74,18 +74,49 @@ function updateSiteSelect(sites) {
  */
 async function loadLighthouseData(url, days) {
     try {
-        // 获取最新的报告
-        const response = await fetch('/reports/data-https___www_fadada_com_desktop-2025-04-19.json');
-        const data = await response.json();
+        const response = await fetch('reports/history.json');
+        const history = await response.json();
+        
+        // 过滤指定时间范围的数据
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+        
+        const filteredReports = history.reports.filter(report => {
+            return new Date(report.date) >= cutoffDate && report.url === url;
+        });
+
+        if (filteredReports.length === 0) {
+            throw new Error('所选时间范围内没有数据');
+        }
+
+        // 获取最新报告
+        const latestReport = filteredReports[0];
+        const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+        const currentData = latestReport[deviceType];
 
         // 更新基础指标
-        updateMetrics(data);
+        updateMetrics(currentData.scores);
         
-        // 更新详细信息链接
-        updateReportLinks(data);
+        // 更新详细指标
+        updateDetailedData({
+            detailedData: currentData.metrics
+        });
+
+        // 准备图表数据
+        const chartData = {
+            dates: filteredReports.map(r => new Date(r.date).toLocaleDateString()),
+            performance: filteredReports.map(r => r[deviceType].scores.performance * 100)
+        };
         
-        // 更新图表和趋势
-        updateCharts(data);
+        // 更新图表
+        updateChart(chartData);
+        
+        // 更新报告链接
+        updateReportLinks({
+            htmlReport: `/reports/${currentData.reportFiles.html}`,
+            jsonReport: `/reports/${currentData.reportFiles.json}`
+        });
+
     } catch (error) {
         console.error('加载数据失败:', error);
         showError('数据加载失败，请稍后重试');

@@ -48,14 +48,10 @@ jobs:
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           DATE=$(date -u +"%Y-%m-%d")
           
-          # 不再清理reports目录
-          # echo "Cleaning reports directory..."
-          # rm -rf reports/*
-          
-          # 创建分开的目录
+          # Create separate directories for desktop and mobile tests
           mkdir -p .lighthouseci/desktop .lighthouseci/mobile
           
-          # 运行桌面版测试
+          # Run Desktop test
           echo "Running Desktop test..."
           lhci collect \
             --url https://www.fadada.com \
@@ -65,21 +61,45 @@ jobs:
             --output=json \
             --outDir=.lighthouseci/desktop \
             --numberOfRuns=1
+            
+          # Ensure desktop test generated files
+          if [ ! -f ".lighthouseci/desktop/lhr-"*".json" ]; then
+            echo "Desktop test failed to generate report"
+            exit 1
+          fi
 
-          # 运行移动版测试
+          # Run Mobile test
           echo "Running Mobile test..."
           lhci collect \
             --url https://www.fadada.com \
-            --settings.formFactor=mobile \
-            --settings.screenEmulation.mobile=true \
-            --settings.screenEmulation.width=360 \
-            --settings.screenEmulation.height=640 \
-            --settings.screenEmulation.deviceScaleFactor=2 \
+            --preset=mobile \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
             --outDir=.lighthouseci/mobile \
             --numberOfRuns=1
+            
+          # Ensure mobile test generated files  
+          if [ ! -f ".lighthouseci/mobile/lhr-"*".json" ]; then
+            echo "Mobile test failed to generate report"
+            exit 1
+          fi
+
+          # Process desktop report
+          desktop_json=$(ls .lighthouseci/desktop/lhr-*.json | head -n 1)
+          if [ -n "$desktop_json" ]; then
+            cp "$desktop_json" "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
+            cp "${desktop_json%.json}.html" "./reports/data-https___www_fadada_com_desktop-${DATE}.html"
+            DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
+          fi
+
+          # Process mobile report
+          mobile_json=$(ls .lighthouseci/mobile/lhr-*.json | head -n 1)
+          if [ -n "$mobile_json" ]; then
+            cp "$mobile_json" "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
+            cp "${mobile_json%.json}.html" "./reports/data-https___www_fadada_com_mobile-${DATE}.html"
+            DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
+          fi
 
           echo "Processing Lighthouse results..."
           
@@ -193,7 +213,24 @@ jobs:
              '.reports += [{"date": $date, "desktop": $desktop_report, "mobile": $mobile_report}]' \
              reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
 
-          # 验证报告是否生成
+          # 处理报告并更新history.json
+          if [ ! -f "reports/history.json" ]; then
+            echo '{"reports":[]}' > reports/history.json
+          fi
+
+          # 处理desktop和mobile报告并创建新的条目
+          jq --arg date "$NOW" \
+             --arg url "https://www.fadada.com" \
+             --argjson desktop "$(DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json")" \
+             --argjson mobile "$(DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json")" \
+             '.reports += [{
+                "date": $date,
+                "url": $url,
+                "desktop": $desktop,
+                "mobile": $mobile
+              }]' \
+             reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
+
           echo "=== Report Status ==="
           echo "Desktop report found: $found_desktop"
           echo "Mobile report found: $found_mobile"

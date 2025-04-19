@@ -2,28 +2,47 @@
   "reports": [
     {
       "date": "2025-04-19T13:52:01",
-      "desktop": "data-https___www_fadada_com_desktop-2025-04-19.json",
-      "mobile": "data-https___www_fadada_com_mobile-2025-04-19.json"
-    },
-    {
-      "date": "2025-04-19T14:05:33",
-      "desktop": "data-https___www_fadada_com_desktop-2025-04-19.json",
-      "mobile": "data-https___www_fadada_com_mobile-2025-04-19.json"
-    },
-    {
-      "date": "2025-04-19T14:14:57",
-      "desktop": "data-https___www_fadada_com_desktop-2025-04-19.json",
-      "mobile": "data-https___www_fadada_com_mobile-2025-04-19.json"
-    },
-    {
-      "date": "2025-04-19T14:19:33",
-      "desktop": "data-https___www_fadada_com_desktop-2025-04-19.json",
-      "mobile": "data-https___www_fadada_com_mobile-2025-04-19.json"
-    },
-    {
-      "date": "2025-04-19T14:25:37",
-      "desktop": "data-https___www_fadada_com_desktop-2025-04-19.json",
-      "mobile": "data-https___www_fadada_com_mobile-2025-04-19.json"
+      "url": "https://www.fadada.com",
+      "desktop": {
+        "scores": {
+          "performance": 0.85,
+          "accessibility": 0.92,
+          "bestPractices": 0.93,
+          "seo": 0.98
+        },
+        "metrics": {
+          "fcp": 1.8,
+          "lcp": 2.5,
+          "tbt": 150,
+          "cls": 0.12,
+          "tti": 3.2,
+          "si": 2.8
+        },
+        "reportFiles": {
+          "html": "data-https___www_fadada_com_desktop-2025-04-19.html",
+          "json": "data-https___www_fadada_com_desktop-2025-04-19.json"
+        }
+      },
+      "mobile": {
+        "scores": {
+          "performance": 0.82,
+          "accessibility": 0.90,
+          "bestPractices": 0.93,
+          "seo": 0.97
+        },
+        "metrics": {
+          "fcp": 2.1,
+          "lcp": 2.8,
+          "tbt": 180,
+          "cls": 0.15,
+          "tti": 3.5,
+          "si": 3.0
+        },
+        "reportFiles": {
+          "html": "data-https___www_fadada_com_mobile-2025-04-19.html",
+          "json": "data-https___www_fadada_com_mobile-2025-04-19.json"
+        }
+      }
     }
   ]
 }
