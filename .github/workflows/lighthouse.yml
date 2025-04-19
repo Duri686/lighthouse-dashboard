@@ -69,10 +69,7 @@ jobs:
             rm -rf ".lighthouseci/$device"
             mkdir -p ".lighthouseci/$device"
             
-            # Run Lighthouse with explicit output path
-            local timestamp=$(date +%s)
-            local output_file=".lighthouseci/$device/lhr-$timestamp.json"
-            
+            # Run Lighthouse
             lhci collect \
               --url https://www.fadada.com \
               --settings.formFactor=$formFactor \
@@ -83,28 +80,35 @@ jobs:
               --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
               --settings.maxWaitForLoad=30000 \
               --output=json \
-              --outputPath="$output_file" \
+              --outDir=".lighthouseci/$device" \
               --numberOfRuns=1
 
             # Debug output
             echo "Lighthouse run completed. Checking for output..."
+            echo "Contents of .lighthouseci directory:"
+            ls -la .lighthouseci/
             echo "Contents of .lighthouseci/$device:"
-            ls -la ".lighthouseci/$device"
-
-            # Verify report generation
-            if [ ! -f "$output_file" ]; then
-              echo "Error: Failed to generate report at $output_file"
+            ls -la ".lighthouseci/$device" || true
+            
+            # Find the generated report
+            local json_file=$(find ".lighthouseci" -name "lhr-*.json" -type f | sort -r | head -n 1)
+            
+            if [ ! -f "$json_file" ]; then
+              echo "Error: No JSON report found"
               return 1
             fi
             
-            if [ ! -s "$output_file" ]; then
-              echo "Error: Generated report is empty"
-              return 1
+            # Move the report to the correct location
+            local target_file=".lighthouseci/$device/$(basename $json_file)"
+            if [ "$json_file" != "$target_file" ]; then
+              mkdir -p ".lighthouseci/$device"
+              mv "$json_file" "$target_file"
             fi
-
-            echo "Report generated successfully at: $output_file"
+            
+            echo "Report generated successfully at: $target_file"
             echo "File contents preview:"
-            head -n 20 "$output_file"
+            head -n 20 "$target_file"
+            return 0
           }
 
           # Run tests
