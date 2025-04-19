@@ -1,0 +1,17 @@
+{
+  "date": "2025-04-19T12:39:27",
+  "name": "法大大官网 (移动端)",
+  "url": "https://www.fadada.com/",
+  "performance": 83,
+  "accessibility": 76,
+  "best-practices": 67,
+  "seo": 85,
+  "deviceType": "mobile",
+  "reportUrl": "./lhr-1745066431678-mobile.json",
+  "detailedData": {
+    "firstContentfulPaint": 3.5010655639648447,
+    "largestContentfulPaint": 3.5010655639648447,
+    "timeToInteractive": 4.133730000000001,
+    "speedIndex": 3.580815953217878
+  }
+}
