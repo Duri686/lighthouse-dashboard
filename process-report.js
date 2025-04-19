@@ -1,13 +1,12 @@
 const fs = require('fs');
 
 function processReport(filePath) {
-    console.log(`Processing report: ${filePath}`);
-    
     try {
+        console.log(`Processing report: ${filePath}`);
         const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         const deviceType = process.env.DEVICE_TYPE;
+        const date = process.env.DATE;
         
-        // 提取关键指标
         const processed = {
             scores: {
                 performance: report.categories.performance.score,
@@ -24,26 +23,23 @@ function processReport(filePath) {
                 si: report.audits['speed-index'].numericValue
             },
             reportFiles: {
-                html: `data-https___www_fadada_com_${deviceType}-${process.env.DATE}.html`,
-                json: `data-https___www_fadada_com_${deviceType}-${process.env.DATE}.json`
+                html: `data-https___www_fadada_com_${deviceType}-${date}.html`,
+                json: `data-https___www_fadada_com_${deviceType}-${date}.json`
             }
         };
         
-        // 输出处理后的数据供jq使用
+        // Output the processed data
         console.log(JSON.stringify(processed));
         return processed;
         
     } catch (error) {
         console.error(`Error processing report ${filePath}:`, error);
-        process.exit(1);
+        return null;
     }
 }
 
-// 获取报告文件路径
+// Process the report if file path is provided
 const reportPath = process.argv[2];
-if (!reportPath) {
-    console.error('No report file path provided');
-    process.exit(1);
+if (reportPath) {
+    processReport(reportPath);
 }
-
-processReport(reportPath);

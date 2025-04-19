@@ -48,181 +48,72 @@ jobs:
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           DATE=$(date -u +"%Y-%m-%d")
           
-          # Create separate directories for desktop and mobile tests
-          mkdir -p .lighthouseci/desktop .lighthouseci/mobile
+          # Create directories
+          mkdir -p .lighthouseci/{desktop,mobile}
           
-          # Run Desktop test
+          # Run Desktop test with modified settings
           echo "Running Desktop test..."
           lhci collect \
             --url https://www.fadada.com \
-            --settings.preset=desktop \
+            --settings.formFactor=desktop \
+            --settings.screenEmulation.mobile=false \
+            --settings.screenEmulation.width=1350 \
+            --settings.screenEmulation.height=940 \
+            --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
             --outDir=.lighthouseci/desktop \
             --numberOfRuns=1
-            
-          # Ensure desktop test generated files
-          if [ ! -f ".lighthouseci/desktop/lhr-"*".json" ]; then
-            echo "Desktop test failed to generate report"
-            exit 1
-          fi
 
           # Run Mobile test
           echo "Running Mobile test..."
           lhci collect \
             --url https://www.fadada.com \
-            --preset=mobile \
+            --settings.formFactor=mobile \
+            --settings.screenEmulation.mobile=true \
+            --settings.screenEmulation.width=360 \
+            --settings.screenEmulation.height=640 \
+            --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
             --outDir=.lighthouseci/mobile \
             --numberOfRuns=1
+
+          # Process reports and update history
+          process_report() {
+            local device=$1
+            local json_file=$(ls .lighthouseci/$device/lhr-*.json 2>/dev/null | head -n 1)
             
-          # Ensure mobile test generated files  
-          if [ ! -f ".lighthouseci/mobile/lhr-"*".json" ]; then
-            echo "Mobile test failed to generate report"
-            exit 1
-          fi
-
-          # Process desktop report
-          desktop_json=$(ls .lighthouseci/desktop/lhr-*.json | head -n 1)
-          if [ -n "$desktop_json" ]; then
-            cp "$desktop_json" "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
-            cp "${desktop_json%.json}.html" "./reports/data-https___www_fadada_com_desktop-${DATE}.html"
-            DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
-          fi
-
-          # Process mobile report
-          mobile_json=$(ls .lighthouseci/mobile/lhr-*.json | head -n 1)
-          if [ -n "$mobile_json" ]; then
-            cp "$mobile_json" "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
-            cp "${mobile_json%.json}.html" "./reports/data-https___www_fadada_com_mobile-${DATE}.html"
-            DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
-          fi
-
-          echo "Processing Lighthouse results..."
-          
-          # 处理desktop报告
-          desktop_json=$(ls .lighthouseci/desktop/*.json 2>/dev/null | head -n 1)
-          if [ -n "$desktop_json" ]; then
-            echo "Processing desktop report: $desktop_json"
-            cp "$desktop_json" "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
-            cp "${desktop_json%.json}.html" "./reports/data-https___www_fadada_com_desktop-${DATE}.html"
-            DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json"
-            found_desktop=true
-          fi
-
-          # 处理mobile报告
-          mobile_json=$(ls .lighthouseci/mobile/*.json 2>/dev/null | head -n 1)
-          if [ -n "$mobile_json" ]; then
-            echo "Processing mobile report: $mobile_json"
-            cp "$mobile_json" "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
-            cp "${mobile_json%.json}.html" "./reports/data-https___www_fadada_com_mobile-${DATE}.html"
-            DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json"
-            found_mobile=true
-          fi
-          
-          echo "Files in .lighthouseci:"
-          ls -la .lighthouseci/
-          
-          # 处理所有JSON报告文件之前先记录生成的文件
-          echo "=== Generated Files Summary ==="
-          echo "Lighthouse test results in .lighthouseci/:"
-          file_count=$(ls -1 .lighthouseci/*.json 2>/dev/null | wc -l)
-          echo "Found $file_count JSON reports:"
-          ls -1 .lighthouseci/*.json | while read -r file; do
-            echo "- $(basename "$file")"
-          done
-          
-          echo "Found $(ls -1 .lighthouseci/*.html 2>/dev/null | wc -l) HTML reports:"
-          ls -1 .lighthouseci/*.html | while read -r file; do
-            echo "- $(basename "$file")"
-          done
-
-          # 分别保存desktop和mobile的文件路径
-          desktop_json=""
-          desktop_html=""
-          mobile_json=""
-          mobile_html=""
-          
-          for file in .lighthouseci/*.json; do
-            if [ -f "$file" ]; then
-              echo "Processing file: $file"
-              # 使用jq检查更多字段来确定设备类型
-              if jq -e '.configSettings.screenEmulation.mobile == true' "$file" > /dev/null 2>&1; then
-                device_type="mobile"
-                found_mobile=true
-                mobile_json="$file"
-                mobile_html="${file%.json}.html"
-                echo "Identified as mobile report: $file"
-              else
-                device_type="desktop"
-                found_desktop=true
-                desktop_json="$file"
-                desktop_html="${file%.json}.html"
-                echo "Identified as desktop report: $file"
-              fi
+            if [ -n "$json_file" ]; then
+              echo "Processing $device report: $json_file"
               
-              # 显示报告的配置信息以便调试
-              echo "Report configuration:"
-              jq '.configSettings' "$file"
+              # Copy reports
+              cp "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
+              cp "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html"
               
-              # 生成带时间戳的文件名
-              new_json="./reports/data-https___www_fadada_com_${device_type}-${DATE}.json"
-              new_html="./reports/data-https___www_fadada_com_${device_type}-${DATE}.html"
+              # Process report and return the JSON data
+              DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
+              node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
               
-              echo "Copying JSON report to: $new_json"
-              cp "$file" "$new_json"
-              DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_json"
-              
-              # 复制HTML报告
-              html_file="${file%.json}.html"
-              if [ -f "$html_file" ]; then
-                echo "Copying HTML report to: $new_html"
-                cp "$html_file" "$new_html"
-              else
-                echo "Warning: HTML report not found at $html_file"
-              fi
-              processed_files=$((processed_files + 1))
+              return 0
             fi
-          done
+            return 1
+          }
 
-          # 验证两种报告是否都已处理
-          echo "=== Device Type Verification ==="
-          [ -n "$desktop_json" ] && echo "Desktop JSON found at: $desktop_json" || echo "Desktop JSON missing"
-          [ -n "$desktop_html" ] && echo "Desktop HTML found at: $desktop_html" || echo "Desktop HTML missing"
-          [ -n "$mobile_json" ] && echo "Mobile JSON found at: $mobile_json" || echo "Mobile JSON missing"
-          [ -n "$mobile_html" ] && echo "Mobile HTML found at: $mobile_html" || echo "Mobile HTML missing"
+          # Initialize or reset history.json
+          echo '{"reports":[]}' > reports/history.json
 
-          echo "=== File Processing Summary ==="
-          echo "Desktop report found: $found_desktop"
-          echo "Mobile report found: $found_mobile"
-          echo "Contents of reports directory:"
-          ls -la ./reports/
-          
-          # 更新历史记录
-          if [ ! -f "reports/history.json" ]; then
-            echo '{"reports":[]}' > reports/history.json
-          fi
-          
-          # 使用临时文件来更新history.json
-          jq --arg date "$NOW" \
-             --arg desktop_report "data-https___www_fadada_com_desktop-${DATE}.json" \
-             --arg mobile_report "data-https___www_fadada_com_mobile-${DATE}.json" \
-             '.reports += [{"date": $date, "desktop": $desktop_report, "mobile": $mobile_report}]' \
-             reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
+          # Get processed data
+          desktop_data=$(process_report "desktop")
+          mobile_data=$(process_report "mobile")
 
-          # 处理报告并更新history.json
-          if [ ! -f "reports/history.json" ]; then
-            echo '{"reports":[]}' > reports/history.json
-          fi
-
-          # 处理desktop和mobile报告并创建新的条目
+          # Update history.json with new entry
           jq --arg date "$NOW" \
              --arg url "https://www.fadada.com" \
-             --argjson desktop "$(DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_desktop-${DATE}.json")" \
-             --argjson mobile "$(DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "./reports/data-https___www_fadada_com_mobile-${DATE}.json")" \
+             --argjson desktop "$desktop_data" \
+             --argjson mobile "$mobile_data" \
              '.reports += [{
                 "date": $date,
                 "url": $url,
@@ -231,30 +122,10 @@ jobs:
               }]' \
              reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
 
-          echo "=== Report Status ==="
-          echo "Desktop report found: $found_desktop"
-          echo "Mobile report found: $found_mobile"
-          echo "Reports directory contents:"
-          ls -la ./reports/
-
-          echo "=== Processing Results Summary ==="
-          echo "Total files found in .lighthouseci: $file_count"
-          echo "Files processed: $processed_files"
+          # List final results
+          echo "=== Final Results ==="
           echo "Reports generated:"
-          echo "- Desktop report: $found_desktop"
-          echo "- Mobile report: $found_mobile"
-          
-          echo "=== Final Reports Status ==="
-          echo "Files in reports directory:"
-          json_reports=$(find reports -name "*.json" ! -name "history.json" | wc -l)
-          html_reports=$(find reports -name "*.html" | wc -l)
-          echo "JSON reports (excluding history.json): $json_reports"
-          echo "HTML reports: $html_reports"
-          echo ""
-          echo "Report files list:"
-          find reports -type f -name "*.json" ! -name "history.json" -o -name "*.html" | while read -r file; do
-            echo "- $(basename "$file")"
-          done
+          ls -l reports/
 
       - name: List Reports Directory
         run: |
