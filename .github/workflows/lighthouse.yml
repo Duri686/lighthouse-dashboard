@@ -24,20 +24,51 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # 更新到 Node.js 18
+          node-version: '18'
+          cache: 'npm'
+      
+      # 添加缓存步骤
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            ~/cache/google-chrome-stable_current_amd64.deb
+          key: ${{ runner.os }}-node-chrome-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-chrome-
+            ${{ runner.os }}-node-
+            ${{ runner.os }}-
 
       - name: Install Chrome
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg2
-          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          CHROME_DEB="google-chrome-stable_current_amd64.deb"
+          CHROME_CACHE=~/cache/$CHROME_DEB
+          
+          if [ ! -f "$CHROME_CACHE" ]; then
+            echo "Chrome not found in cache, downloading..."
+            sudo apt-get update
+            sudo apt-get install -y wget gnupg2
+            wget -q https://dl.google.com/linux/direct/$CHROME_DEB
+            mkdir -p ~/cache
+            cp $CHROME_DEB $CHROME_CACHE
+          else
+            echo "Using cached Chrome package..."
+            cp $CHROME_CACHE $CHROME_DEB
+          fi
+          
+          sudo apt-get install -y ./$CHROME_DEB
           google-chrome --version
 
       - name: Install dependencies
         run: |
-          npm init -y
-          npm install -g @lhci/cli@0.12.x
+          if [ ! -f "package.json" ]; then
+            npm init -y
+          fi
+          if [ ! -d "node_modules" ]; then
+            npm install -g @lhci/cli@0.12.x
+          fi
           echo "node_modules/" > .gitignore
           echo ".lighthouseci/" >> .gitignore
           echo "*.deb" >> .gitignore
