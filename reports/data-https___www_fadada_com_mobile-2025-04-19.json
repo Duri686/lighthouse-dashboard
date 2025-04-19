@@ -1,17 +1,17 @@
 {
-  "date": "2025-04-19T13:52:01",
+  "date": "2025-04-19T14:05:33",
   "name": "法大大官网 (移动端)",
   "url": "https://www.fadada.com/",
-  "performance": 84,
+  "performance": 80,
   "accessibility": 76,
   "best-practices": 67,
-  "seo": 86,
+  "seo": 84,
   "deviceType": "mobile",
   "reportUrl": "./data-https___www_fadada_com_mobile-2025-04-19.json",
   "detailedData": {
-    "firstContentfulPaint": 3.2944655639648444,
-    "largestContentfulPaint": 3.5335790000000005,
-    "timeToInteractive": 4.0082725,
-    "speedIndex": 3.479632918738788
+    "firstContentfulPaint": 3.4791239999999997,
+    "largestContentfulPaint": 3.988608000000001,
+    "timeToInteractive": 4.067607999999999,
+    "speedIndex": 3.4791239999999997
   }
 }
