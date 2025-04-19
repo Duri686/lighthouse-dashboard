@@ -82,20 +82,37 @@ jobs:
           echo "Files in .lighthouseci:"
           ls -la .lighthouseci/
           
+          # 处理所有JSON报告文件之前先记录生成的文件
+          echo "=== Generated Files Summary ==="
+          echo "Lighthouse test results in .lighthouseci/:"
+          file_count=$(ls -1 .lighthouseci/*.json 2>/dev/null | wc -l)
+          echo "Found $file_count JSON reports:"
+          ls -1 .lighthouseci/*.json | while read -r file; do
+            echo "- $(basename "$file")"
+          done
+          
+          echo "Found $(ls -1 .lighthouseci/*.html 2>/dev/null | wc -l) HTML reports:"
+          ls -1 .lighthouseci/*.html | while read -r file; do
+            echo "- $(basename "$file")"
+          done
+
           # 处理所有JSON报告文件
           found_desktop=false
           found_mobile=false
+          processed_files=0
           
           for file in .lighthouseci/*.json; do
             if [ -f "$file" ]; then
               echo "Processing file: $file"
-              content=$(cat "$file")
-              if echo "$content" | grep -q "\"formFactor\": \"mobile\""; then
+              # 使用jq来解析JSON并检查设备类型
+              if jq -e '.configSettings.formFactor == "mobile"' "$file" > /dev/null; then
                 device_type="mobile"
                 found_mobile=true
+                echo "Identified as mobile report"
               else
                 device_type="desktop"
                 found_desktop=true
+                echo "Identified as desktop report"
               fi
               
               # 生成带时间戳的文件名
@@ -115,6 +132,7 @@ jobs:
               else
                 echo "Warning: HTML report not found at $html_file"
               fi
+              processed_files=$((processed_files + 1))
             fi
           done
 
@@ -142,6 +160,25 @@ jobs:
           echo "Mobile report found: $found_mobile"
           echo "Reports directory contents:"
           ls -la ./reports/
+
+          echo "=== Processing Results Summary ==="
+          echo "Total files found in .lighthouseci: $file_count"
+          echo "Files processed: $processed_files"
+          echo "Reports generated:"
+          echo "- Desktop report: $found_desktop"
+          echo "- Mobile report: $found_mobile"
+          
+          echo "=== Final Reports Status ==="
+          echo "Files in reports directory:"
+          json_reports=$(find reports -name "*.json" ! -name "history.json" | wc -l)
+          html_reports=$(find reports -name "*.html" | wc -l)
+          echo "JSON reports (excluding history.json): $json_reports"
+          echo "HTML reports: $html_reports"
+          echo ""
+          echo "Report files list:"
+          find reports -type f -name "*.json" ! -name "history.json" -o -name "*.html" | while read -r file; do
+            echo "- $(basename "$file")"
+          done
 
       - name: List Reports Directory
         run: |
