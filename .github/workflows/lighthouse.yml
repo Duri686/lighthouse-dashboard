@@ -80,6 +80,12 @@ jobs:
           LATEST_DESKTOP=$(find ./reports -name "lhr-*desktop*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
           LATEST_MOBILE=$(find ./reports -name "lhr-*mobile*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
 
+          # 确保至少有一个报告被生成
+          if [ ! -f "$LATEST_DESKTOP" ] && [ ! -f "$LATEST_MOBILE" ]; then
+            echo "Error: No reports were generated!"
+            exit 1
+          fi
+
           if [ -n "$LATEST_DESKTOP" ]; then
             echo "Processing desktop report: $LATEST_DESKTOP"
             DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "$LATEST_DESKTOP"
@@ -90,8 +96,13 @@ jobs:
             DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "$LATEST_MOBILE"
           fi
 
-          # 清理多余的原始报告
-          find ./reports -name "lhr-*.json" ! -name "$(basename $LATEST_DESKTOP)" ! -name "$(basename $LATEST_MOBILE)" -delete
+          # 只保留最近30天的报告
+          find ./reports -name "lhr-*.json" -type f -mtime +30 -delete
+
+          # 对于相同设备类型的报告，只保留最新的5个
+          for type in desktop mobile; do
+            ls -t ./reports/lhr-*${type}*.json 2>/dev/null | tail -n +6 | xargs rm -f 2>/dev/null || true
+          done
 
       - name: List Reports Directory
         run: |
