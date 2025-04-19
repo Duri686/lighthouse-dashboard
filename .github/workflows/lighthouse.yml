@@ -139,7 +139,8 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           # 添加所有报告文件
-          git add reports/*.json reports/*.html || true
+          echo "Adding report files..."
+          find reports -type f \( -name "*.json" -o -name "*.html" \) -exec git add {} \;
           git add .gitignore || true
           
           echo "Files staged for commit:"
@@ -150,5 +151,6 @@ jobs:
           else
             git commit -m "Update Lighthouse reports $(date -u)"
             git push origin HEAD:${{ github.ref }}
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
