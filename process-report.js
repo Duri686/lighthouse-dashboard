@@ -3,6 +3,7 @@ const path = require('path');
 
 function processReport(inputFile) {
   try {
+    const deviceType = process.env.DEVICE_TYPE || 'desktop';
     console.log(`Reading report from: ${inputFile}`);
     const rawData = fs.readFileSync(inputFile, 'utf8');
     const report = JSON.parse(rawData);
@@ -31,10 +32,10 @@ function processReport(inputFile) {
       }
     };
 
-    // 保存格式化的报告
+    // 修改输出文件名以区分设备类型
     const outputPath = path.join(
       path.dirname(inputFile), 
-      `data-https___www_fadada_com_desktop-${dateStr}.json`
+      `data-https___www_fadada_com_${deviceType}-${dateStr}.json`
     );
     
     fs.writeFileSync(outputPath, JSON.stringify(formattedReport, null, 2));

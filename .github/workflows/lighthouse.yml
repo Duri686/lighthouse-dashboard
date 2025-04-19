@@ -44,42 +44,50 @@ jobs:
 
       - name: Run Lighthouse and Process Reports
         run: |
-          # 确保目录存在
           mkdir -p reports
-          
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
-          # 运行 Lighthouse 并保存原始输出
+          # 运行桌面版测试
+          echo "Running Desktop test..."
           lhci collect \
             --url https://www.fadada.com \
             --settings.preset=desktop \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
-            --outDir=./reports
+            --outDir=./reports \
+            --numberOfRuns=1
 
-          echo "Listing .lighthouseci directory:"
-          ls -la .lighthouseci/
-          
+          # 运行移动版测试
+          echo "Running Mobile test..."
+          lhci collect \
+            --url https://www.fadada.com \
+            --settings.preset=mobile \
+            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.maxWaitForLoad=30000 \
+            --output=json \
+            --outDir=./reports \
+            --numberOfRuns=1
+
           echo "Moving Lighthouse results to reports directory:"
           mv .lighthouseci/*.json ./reports/ || true
           
-          echo "Debug: Showing all JSON files in reports:"
-          find ./reports -name "*.json" -ls
-          
-          # 处理最新的报告
-          LATEST_REPORT=$(find ./reports -name "*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
-          if [ -n "$LATEST_REPORT" ]; then
-            echo "Processing latest report: $LATEST_REPORT"
-            echo "Report contents:"
-            cat "$LATEST_REPORT"
-            DATE_WITH_TIME=$NOW node process-report.js "$LATEST_REPORT"
-          else
-            echo "No report files found!"
+          # 处理最新的桌面版和移动版报告
+          LATEST_DESKTOP=$(find ./reports -name "lhr-*desktop*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
+          LATEST_MOBILE=$(find ./reports -name "lhr-*mobile*.json" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
+
+          if [ -n "$LATEST_DESKTOP" ]; then
+            echo "Processing desktop report: $LATEST_DESKTOP"
+            DEVICE_TYPE=desktop DATE_WITH_TIME=$NOW node process-report.js "$LATEST_DESKTOP"
           fi
 
-          echo "Final reports directory contents:"
-          ls -la ./reports/
+          if [ -n "$LATEST_MOBILE" ]; then
+            echo "Processing mobile report: $LATEST_MOBILE"
+            DEVICE_TYPE=mobile DATE_WITH_TIME=$NOW node process-report.js "$LATEST_MOBILE"
+          fi
+
+          # 清理多余的原始报告
+          find ./reports -name "lhr-*.json" ! -name "$(basename $LATEST_DESKTOP)" ! -name "$(basename $LATEST_MOBILE)" -delete
 
       - name: List Reports Directory
         run: |
