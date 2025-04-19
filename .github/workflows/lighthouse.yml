@@ -63,15 +63,21 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # 如果没有package.json，使用已创建的版本
           if [ ! -f "package.json" ]; then
-            npm init -y
+            cp .github/workflows/package.json ./package.json
           fi
-          if [ ! -d "node_modules" ]; then
-            npm install -g @lhci/cli@0.12.x
-          fi
+          
+          # 安装依赖并生成package-lock.json
+          npm install
+          
+          # 更新gitignore
           echo "node_modules/" > .gitignore
           echo ".lighthouseci/" >> .gitignore
           echo "*.deb" >> .gitignore
+          
+          # 显示安装的版本
+          npx lighthouse --version
 
       - name: Run Lighthouse and Process Reports
         run: |
