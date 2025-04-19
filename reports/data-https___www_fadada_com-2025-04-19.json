@@ -2,10 +2,10 @@
   "date": "2025-04-19",
   "name": "法大大官网",
   "url": "https://www.fadada.com",
-  "performance": 0,
-  "accessibility": 0,
+  "performance": 0.34,
+  "accessibility": 0.76,
   "best-practices": 0,
-  "seo": 0,
+  "seo": 0.83,
   "reportUrl": "",
-  "detailedData": null
+  "detailedData": {"fcp": 7269.423, "lcp": 8699.463000000002, "tbt": 549.5, "cls": 0.00013289133707682291, "tti": 10433.748, "si": 11510.485303440262, "opportunities": [{"id":"render-blocking-resources","title":"Eliminate render-blocking resources","description":"Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline and deferring all non-critical JS/styles. [Learn more](https://web.dev/render-blocking-resources/)."},{"id":"unused-css-rules","title":"Reduce unused CSS","description":"Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. [Learn more](https://web.dev/unused-css-rules/)."},{"id":"unused-javascript","title":"Reduce unused JavaScript","description":"Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn more](https://web.dev/unused-javascript/)."},{"id":"modern-image-formats","title":"Serve images in next-gen formats","description":"Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more](https://web.dev/uses-webp-images/)."},{"id":"uses-optimized-images","title":"Efficiently encode images","description":"Optimized images load faster and consume less cellular data. [Learn more](https://web.dev/uses-optimized-images/)."}], "resourceSummary": [{"resourceType":"total","label":"Total","requestCount":176,"transferSize":6069249},{"resourceType":"media","label":"Media","requestCount":3,"transferSize":2556337},{"resourceType":"image","label":"Image","requestCount":28,"transferSize":2387509},{"resourceType":"document","label":"Document","requestCount":1,"transferSize":482293},{"resourceType":"script","label":"Script","requestCount":64,"transferSize":373678},{"resourceType":"font","label":"Font","requestCount":3,"transferSize":117219},{"resourceType":"other","label":"Other","requestCount":40,"transferSize":76615},{"resourceType":"stylesheet","label":"Stylesheet","requestCount":37,"transferSize":75598},{"resourceType":"third-party","label":"Third-party","requestCount":12,"transferSize":71370}]}
 }
