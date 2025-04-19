@@ -85,8 +85,7 @@ jobs:
           SITE_URL="${{ matrix.site.url }}"
           SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
           
-          # 确保jq命令存在
-          which jq || apt-get update && apt-get install -y jq
+          # jq已在GitHub Actions环境中预装
           
           # 如果存在历史数据文件，则更新
           if [ -f "reports/history.json" ]; then
