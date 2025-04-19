@@ -34,11 +34,20 @@ jobs:
         with:
           urls: '${{ matrix.site.url }}'
           configPath: '${{ matrix.site.config }}'
-          uploadArtifacts: true
+          uploadArtifacts: false  # Disable default artifact upload
           temporaryPublicStorage: true
         continue-on-error: true
         env:
           DEBUG: "lighthouse:*"
+
+      - name: Upload Lighthouse results
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-report-${{ matrix.site.device }}-${{ github.run_id }}
+          path: .lighthouseci/
+          retention-days: 7
+        continue-on-error: true
 
       - name: Debug Lighthouse Output
         run: |

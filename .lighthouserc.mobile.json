@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "settings": {
-        "preset": "mobile",
+        "preset": "perf",
         "screenEmulation": {
           "mobile": true,
           "width": 360,
@@ -10,7 +10,16 @@
           "deviceScaleFactor": 2,
           "disabled": false
         },
-        "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-gpu"
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-gpu",
+        "formFactor": "mobile",
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638.4,
+          "cpuSlowdownMultiplier": 4,
+          "requestLatencyMs": 150,
+          "downloadThroughputKbps": 1474.5600000000002,
+          "uploadThroughputKbps": 675.2
+        }
       }
     }
   },
