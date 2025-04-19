@@ -1,11 +1,17 @@
 {
-  "date": "2025-04-19",
+  "date": "2025-04-19T11:59:10",
   "name": "法大大官网 (PC)",
-  "url": "https://www.fadada.com",
-  "performance": 0,
-  "accessibility": 0,
-  "best-practices": 0,
-  "seo": 0,
-  "reportUrl": "https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1745057755781-30864.report.html",
-  "detailedData": {}
+  "url": "https://www.fadada.com/",
+  "performance": 61,
+  "accessibility": 76,
+  "best-practices": 75,
+  "seo": 83,
+  "reportUrl": "https://www.fadada.com/",
+  "detailedData": {
+    "firstContentfulPaint": 3.7565355639648437,
+    "largestContentfulPaint": 4.011069,
+    "totalBlockingTime": 13.5,
+    "cumulativeLayoutShift": 0.00003569546702767847,
+    "speedIndex": 3.7565355639648437
+  }
 }
