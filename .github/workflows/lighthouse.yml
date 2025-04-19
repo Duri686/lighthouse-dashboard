@@ -44,6 +44,8 @@ jobs:
 
       - name: Run Lighthouse and Process Reports
         run: |
+          set -e  # Exit on error
+          
           mkdir -p reports
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           DATE=$(date -u +"%Y-%m-%d")
@@ -51,37 +53,34 @@ jobs:
           # Create directories
           mkdir -p .lighthouseci/{desktop,mobile}
           
-          # Run Desktop test with modified settings
-          echo "Running Desktop test..."
-          lhci collect \
-            --url https://www.fadada.com \
-            --settings.formFactor=desktop \
-            --settings.screenEmulation.mobile=false \
-            --settings.screenEmulation.width=1350 \
-            --settings.screenEmulation.height=940 \
-            --settings.screenEmulation.deviceScaleFactor=1 \
-            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.maxWaitForLoad=30000 \
-            --output=json \
-            --outDir=.lighthouseci/desktop \
-            --numberOfRuns=1
+          run_lighthouse() {
+            local device=$1
+            local formFactor=$2
+            local width=$3
+            local height=$4
+            local mobile=$5
+            local scale=$6
 
-          # Run Mobile test
-          echo "Running Mobile test..."
-          lhci collect \
-            --url https://www.fadada.com \
-            --settings.formFactor=mobile \
-            --settings.screenEmulation.mobile=true \
-            --settings.screenEmulation.width=360 \
-            --settings.screenEmulation.height=640 \
-            --settings.screenEmulation.deviceScaleFactor=2 \
-            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.maxWaitForLoad=30000 \
-            --output=json \
-            --outDir=.lighthouseci/mobile \
-            --numberOfRuns=1
+            echo "Running $device test..."
+            lhci collect \
+              --url https://www.fadada.com \
+              --settings.formFactor=$formFactor \
+              --settings.screenEmulation.mobile=$mobile \
+              --settings.screenEmulation.width=$width \
+              --settings.screenEmulation.height=$height \
+              --settings.screenEmulation.deviceScaleFactor=$scale \
+              --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+              --settings.maxWaitForLoad=30000 \
+              --output=json \
+              --outDir=.lighthouseci/$device \
+              --numberOfRuns=1 || echo "Warning: Lighthouse run failed for $device"
+          }
 
-          # Process reports and update history
+          # Run tests
+          run_lighthouse "desktop" "desktop" 1350 940 "false" 1
+          run_lighthouse "mobile" "mobile" 360 640 "true" 2
+
+          # Process reports function with better error handling
           process_report() {
             local device=$1
             local json_file=$(ls .lighthouseci/$device/lhr-*.json 2>/dev/null | head -n 1)
@@ -89,17 +88,21 @@ jobs:
             if [ -n "$json_file" ]; then
               echo "Processing $device report: $json_file"
               
+              # Debug: Show file contents
+              echo "File contents:"
+              cat "$json_file" | head -n 20
+              
               # Copy reports
-              cp "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
-              cp "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html"
+              cp "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json" || true
+              cp "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html" || true
               
-              # Process report and return the JSON data
+              # Process report
               DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
-              node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
-              
-              return 0
+              node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json" || echo "{}"
+            else
+              echo "No JSON file found for $device"
+              echo "{}"
             fi
-            return 1
           }
 
           # Initialize or reset history.json

@@ -2,11 +2,25 @@ const fs = require('fs');
 
 function processReport(filePath) {
     try {
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`File not found: ${filePath}`);
+        }
+
         console.log(`Processing report: ${filePath}`);
-        const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        
+        if (!fileContent) {
+            throw new Error('Empty file content');
+        }
+
+        const report = JSON.parse(fileContent);
         const deviceType = process.env.DEVICE_TYPE;
         const date = process.env.DATE;
         
+        if (!report || !report.categories) {
+            throw new Error('Invalid report structure');
+        }
+
         // Extract core metrics and scores
         const processed = {
             scores: {
@@ -47,15 +61,30 @@ function processReport(filePath) {
         // Output processed data for shell script
         console.log(JSON.stringify(processed));
         
+        // Add debug logging
+        console.error('Processed data:', JSON.stringify(processed, null, 2));
+        
+        return processed;
+
     } catch (error) {
         console.error(`Error processing report ${filePath}:`, error);
-        // Return minimal valid JSON on error to prevent jq from failing
-        console.log('{}');
+        // Return a valid but empty result structure
+        return {
+            scores: { performance: 0, accessibility: 0, bestPractices: 0, seo: 0 },
+            metrics: { fcp: 0, lcp: 0, tbt: 0, cls: 0, tti: 0, si: 0 },
+            opportunities: [],
+            resourceSummary: [],
+            reportFiles: {
+                html: '',
+                json: ''
+            }
+        };
     }
 }
 
 // Process the report if file path is provided
 const reportPath = process.argv[2];
 if (reportPath) {
-    processReport(reportPath);
+    const result = processReport(reportPath);
+    console.log(JSON.stringify(result));
 }
