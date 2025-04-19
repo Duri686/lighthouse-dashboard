@@ -96,24 +96,33 @@ jobs:
             echo "- $(basename "$file")"
           done
 
-          # 处理所有JSON报告文件
-          found_desktop=false
-          found_mobile=false
-          processed_files=0
+          # 分别保存desktop和mobile的文件路径
+          desktop_json=""
+          desktop_html=""
+          mobile_json=""
+          mobile_html=""
           
           for file in .lighthouseci/*.json; do
             if [ -f "$file" ]; then
               echo "Processing file: $file"
-              # 使用jq来解析JSON并检查设备类型
-              if jq -e '.configSettings.formFactor == "mobile"' "$file" > /dev/null; then
+              # 使用jq检查更多字段来确定设备类型
+              if jq -e '.configSettings.screenEmulation.mobile == true' "$file" > /dev/null 2>&1; then
                 device_type="mobile"
                 found_mobile=true
-                echo "Identified as mobile report"
+                mobile_json="$file"
+                mobile_html="${file%.json}.html"
+                echo "Identified as mobile report: $file"
               else
                 device_type="desktop"
                 found_desktop=true
-                echo "Identified as desktop report"
+                desktop_json="$file"
+                desktop_html="${file%.json}.html"
+                echo "Identified as desktop report: $file"
               fi
+              
+              # 显示报告的配置信息以便调试
+              echo "Report configuration:"
+              jq '.configSettings' "$file"
               
               # 生成带时间戳的文件名
               new_json="./reports/data-https___www_fadada_com_${device_type}-${DATE}.json"
@@ -123,9 +132,8 @@ jobs:
               cp "$file" "$new_json"
               DEVICE_TYPE=$device_type DATE_WITH_TIME=$NOW node process-report.js "$new_json"
               
-              # 复制HTML报告（修复语法错误）
+              # 复制HTML报告
               html_file="${file%.json}.html"
-              echo "Looking for HTML report at: $html_file"
               if [ -f "$html_file" ]; then
                 echo "Copying HTML report to: $new_html"
                 cp "$html_file" "$new_html"
@@ -135,6 +143,13 @@ jobs:
               processed_files=$((processed_files + 1))
             fi
           done
+
+          # 验证两种报告是否都已处理
+          echo "=== Device Type Verification ==="
+          [ -n "$desktop_json" ] && echo "Desktop JSON found at: $desktop_json" || echo "Desktop JSON missing"
+          [ -n "$desktop_html" ] && echo "Desktop HTML found at: $desktop_html" || echo "Desktop HTML missing"
+          [ -n "$mobile_json" ] && echo "Mobile JSON found at: $mobile_json" || echo "Mobile JSON missing"
+          [ -n "$mobile_html" ] && echo "Mobile HTML found at: $mobile_html" || echo "Mobile HTML missing"
 
           echo "=== File Processing Summary ==="
           echo "Desktop report found: $found_desktop"
