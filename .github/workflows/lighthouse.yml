@@ -62,7 +62,11 @@ jobs:
           echo "Running Mobile test..."
           lhci collect \
             --url https://www.fadada.com \
-            --settings.preset=mobile \
+            --settings.formFactor=mobile \
+            --settings.screenEmulation.mobile=true \
+            --settings.screenEmulation.width=360 \
+            --settings.screenEmulation.height=640 \
+            --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.maxWaitForLoad=30000 \
             --output=json \
