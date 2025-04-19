@@ -150,17 +150,31 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 添加所有报告文件
-          git add reports/data-https___www_fadada_com_*.json
-          git add reports/data-https___www_fadada_com_*.html
-          git add reports/history.json
-          git add .gitignore || true
-          
-          echo "=== Git Status After Add ==="
+          echo "=== Git Status Before Add ==="
           git status
           
-          # 提交更改
-          git commit -m "Update Lighthouse reports $(date -u)" || echo "No changes to commit"
-          git push origin HEAD:${{ github.ref }} || echo "No changes to push"
+          # 使用find命令添加文件
+          echo "Adding report files..."
+          find reports -type f -name "data-https___www_fadada_com_*.json" -exec git add {} \; || true
+          find reports -type f -name "data-https___www_fadada_com_*.html" -exec git add {} \; || true
+          
+          # 添加history.json如果存在
+          if [ -f "reports/history.json" ]; then
+            git add reports/history.json
+          fi
+          
+          git add .gitignore || true
+          
+          echo "=== Files staged for commit ==="
+          git status --short
+          
+          # 检查是否有文件要提交
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          else
+            git commit -m "Update Lighthouse reports $(date -u)"
+            git push origin "HEAD:$GITHUB_REF" || git push origin "HEAD:${GITHUB_REF#refs/heads/}"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
