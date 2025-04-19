@@ -21,6 +21,13 @@ function processReport(filePath) {
             throw new Error('Invalid report structure');
         }
 
+        // Add debug logging
+        console.error('Report structure:', {
+            hasCategories: !!report.categories,
+            categoryKeys: Object.keys(report.categories || {}),
+            auditKeys: Object.keys(report.audits || {})
+        });
+
         // Extract core metrics and scores
         const processed = {
             scores: {
@@ -55,16 +62,21 @@ function processReport(filePath) {
             }
         };
 
-        // Ensure valid JSON string output
-        const jsonOutput = JSON.stringify(processed);
-        if (!jsonOutput) {
-            throw new Error('Failed to stringify processed data');
-        }
+        // Debug log before writing
+        console.error('Writing processed data to:', filePath);
+        console.error('Processed data:', JSON.stringify(processed, null, 2));
 
-        // Write to file and output
-        fs.writeFileSync(filePath, jsonOutput);
-        console.log(jsonOutput);
-        return processed;
+        // Write and validate output
+        const jsonOutput = JSON.stringify(processed);
+        
+        try {
+            JSON.parse(jsonOutput); // Validate JSON structure
+            fs.writeFileSync(filePath, jsonOutput);
+            console.log(jsonOutput);
+            return processed;
+        } catch (jsonError) {
+            throw new Error(`Invalid JSON output: ${jsonError.message}`);
+        }
 
     } catch (error) {
         console.error(`Error processing report ${filePath}:`, error);

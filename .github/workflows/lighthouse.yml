@@ -38,13 +38,15 @@ jobs:
         run: |
           npm init -y
           npm install -g @lhci/cli@0.12.x
+          # Add package.json to git tracking
+          git add package.json
           echo "node_modules/" > .gitignore
           echo ".lighthouseci/" >> .gitignore
           echo "*.deb" >> .gitignore
 
       - name: Run Lighthouse and Process Reports
         run: |
-          set -e  # Exit on error
+          set -ex  # Exit on error and print commands
           
           mkdir -p reports
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
@@ -73,7 +75,10 @@ jobs:
               --settings.maxWaitForLoad=30000 \
               --output=json \
               --outDir=.lighthouseci/$device \
-              --numberOfRuns=1 || echo "Warning: Lighthouse run failed for $device"
+              --numberOfRuns=1
+            
+            # Check if files were generated
+            ls -la .lighthouseci/$device/
           }
 
           # Run tests
@@ -87,22 +92,25 @@ jobs:
             
             if [ -n "$json_file" ]; then
               echo "Processing $device report: $json_file"
+              echo "JSON file contents:"
+              cat "$json_file" | head -n 20
               
-              # Copy reports
-              cp "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json" || true
-              cp "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html" || true
+              # Create target directory if it doesn't exist
+              mkdir -p "./reports"
               
-              # Process report and ensure valid JSON output
+              # Copy reports with error checking
+              cp -v "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
+              cp -v "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html"
+              
+              # Process report and validate JSON
               RESULT=$(DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
                 node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json")
               
-              # Validate JSON
-              if echo "$RESULT" | jq empty 2>/dev/null; then
-                echo "$RESULT"
-              else
-                echo "{}"
-              fi
+              echo "Processed result:"
+              echo "$RESULT" | jq '.'
+              echo "$RESULT"
             else
+              echo "No JSON file found for $device in $(pwd)/.lighthouseci/$device/"
               echo "{}"
             fi
           }
