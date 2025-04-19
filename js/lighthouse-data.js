@@ -73,75 +73,59 @@ function updateSiteSelect(sites) {
  * 加载特定网站的Lighthouse数据
  */
 async function loadLighthouseData(url, days) {
-  try {
-    // 显示加载状态
-    document.querySelectorAll('.metric-value').forEach((el) => {
-      el.textContent = '-';
-      el.className = 'metric-value';
-    });
-    document.getElementById('recentReports').innerHTML = `
-      <div class="animate-pulse flex space-x-4">
-        <div class="flex-1 space-y-2 py-1">
-          <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
-      </div>
-    `;
+    try {
+        // 获取最新的报告
+        const response = await fetch('/reports/data-https___www_fadada_com_desktop-2025-04-19.json');
+        const data = await response.json();
 
-    // 加载历史数据文件
-    const response = await fetch('reports/history.json');
-    if (!response.ok) {
-      throw new Error('无法加载报告数据');
+        // 更新基础指标
+        updateMetrics(data);
+        
+        // 更新详细信息链接
+        updateReportLinks(data);
+        
+        // 更新图表和趋势
+        updateCharts(data);
+    } catch (error) {
+        console.error('加载数据失败:', error);
+        showError('数据加载失败，请稍后重试');
     }
+}
 
-    const data = await response.json();
+function updateMetrics(data) {
+    // 更新主要指标
+    document.getElementById('performanceScore').textContent = data.performance;
+    document.getElementById('accessibilityScore').textContent = data.accessibility;
+    document.getElementById('bestPracticesScore').textContent = data['best-practices'];
+    document.getElementById('seoScore').textContent = data.seo;
 
-    // 过滤数据 - 按URL和天数
-    let filteredReports = data.reports.filter((report) => report.url === url);
-
-    // 按日期排序（最新的在前）
-    filteredReports.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // 限制天数
-    if (days > 0) {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - days);
-      filteredReports = filteredReports.filter(
-        (report) => new Date(report.date) >= cutoffDate,
-      );
+    // 更新详细性能指标
+    if (data.detailedData) {
+        document.getElementById('fcpDetail').textContent = `${data.detailedData.firstContentfulPaint.toFixed(1)}s`;
+        document.getElementById('lcpDetail').textContent = `${data.detailedData.largestContentfulPaint.toFixed(1)}s`;
+        // ... 其他性能指标更新
     }
+}
 
-    // 转换数据以用于图表
-    const chartData = {
-      dates: [],
-      performance: [],
-      accessibility: [],
-      bestPractices: [],
-      seo: [],
-    };
+function updateReportLinks(data) {
+    // 更新报告链接
+    const htmlReportLink = document.getElementById('fullReportLink');
+    const jsonReportLink = document.getElementById('jsonReportLink');
+    
+    // 获取对应的原始报告文件名
+    const dateStr = data.date.split('T')[0];
+    const baseReportName = `lhr-${Date.now()}`;
+    
+    htmlReportLink.href = `./reports/${baseReportName}.html`;
+    jsonReportLink.href = `./reports/${baseReportName}.json`;
+}
 
-    // 为了在图表中正确显示，我们需要按时间顺序排列（从旧到新）
-    const chronologicalReports = [...filteredReports].reverse();
-
-    chronologicalReports.forEach((report) => {
-      chartData.dates.push(report.date);
-      chartData.performance.push(Math.round(report.performance * 100));
-      chartData.accessibility.push(Math.round(report.accessibility * 100));
-      chartData.bestPractices.push(Math.round(report['best-practices'] * 100));
-      chartData.seo.push(Math.round(report.seo * 100));
-    });
-
-    // 更新UI
-    updateDashboard(chartData, filteredReports);
-
-    return chartData;
-  } catch (error) {
-    console.error('加载Lighthouse数据时出错:', error);
-    document.getElementById(
-      'recentReports',
-    ).innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded">加载数据失败: ${error.message}</div>`;
-    return null;
-  }
+function showError(message) {
+    // 显示错误消息
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative';
+    errorDiv.textContent = message;
+    document.querySelector('.max-w-7xl').prepend(errorDiv);
 }
 
 function updateDashboard(chartData, reports) {

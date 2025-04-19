@@ -9,27 +9,25 @@ function processReport(inputFile) {
     const dateWithTime = process.env.DATE_WITH_TIME;
     const dateStr = dateWithTime.split('T')[0];
 
-    // 新版本 Lighthouse 直接访问数据，不需要 lhr 前缀
-    if (!report.categories) {
-      console.log('Report structure:', Object.keys(report));
-      throw new Error('Invalid Lighthouse report format');
-    }
+    // 从文件名获取HTML报告路径
+    const htmlReportPath = inputFile.replace('.json', '.html');
+    const reportId = path.basename(htmlReportPath);
 
+    // 构建简化的报告
     const formattedReport = {
       date: dateWithTime,
       name: "法大大官网 (PC)",
-      url: report.finalUrl || report.requestedUrl,
+      url: report.requestedUrl || "https://www.fadada.com",
       performance: Math.round(report.categories.performance.score * 100),
       accessibility: Math.round(report.categories.accessibility.score * 100),
       "best-practices": Math.round(report.categories['best-practices'].score * 100),
       seo: Math.round(report.categories.seo.score * 100),
-      reportUrl: report.finalUrl,
+      // 使用本地HTML报告文件路径
+      reportUrl: `./${reportId}`,
+      // 只保留关键性能指标
       detailedData: {
         firstContentfulPaint: report.audits['first-contentful-paint'].numericValue / 1000,
-        largestContentfulPaint: report.audits['largest-contentful-paint'].numericValue / 1000,
-        totalBlockingTime: report.audits['total-blocking-time'].numericValue,
-        cumulativeLayoutShift: report.audits['cumulative-layout-shift'].numericValue,
-        speedIndex: report.audits['speed-index'].numericValue / 1000
+        largestContentfulPaint: report.audits['largest-contentful-paint'].numericValue / 1000
       }
     };
 
