@@ -185,6 +185,40 @@ jobs:
           echo "Updated history.json contents:"
           cat reports/history.json
 
+          # Initialize and update history.json with better error handling
+          if [ ! -f "reports/history.json" ]; then
+            echo '{"reports":[]}' > reports/history.json
+          fi
+
+          # Ensure the JSON data is complete
+          DESKTOP_DATA=$(echo "$DESKTOP_DATA" | jq -c '.')
+          MOBILE_DATA=$(echo "$MOBILE_DATA" | jq -c '.')
+
+          echo "Creating history update..."
+          UPDATE=$(jq -n \
+            --arg date "$NOW" \
+            --arg url "https://www.fadada.com" \
+            --argjson desktop "$DESKTOP_DATA" \
+            --argjson mobile "$MOBILE_DATA" \
+            '{
+              "date": $date,
+              "url": $url,
+              "desktop": $desktop,
+              "mobile": $mobile
+            }')
+
+          echo "Updating history.json..."
+          jq --argjson update "$UPDATE" '.reports += [$update]' reports/history.json > "reports/history.json.tmp" \
+            && mv "reports/history.json.tmp" "reports/history.json"
+
+          if [ ! -f "reports/history.json" ]; then
+            echo "Error: Failed to update history.json"
+            exit 1
+          fi
+
+          echo "Updated history.json contents:"
+          jq '.' reports/history.json
+
       - name: List Reports Directory
         run: |
           echo "Contents of reports directory:"
