@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 3 * * *' # 每天凌晨 3 点自动运行
-    
+
 # 添加权限设置
 permissions:
-  contents: write  # 授予写入仓库内容的权限
-  
+  contents: write # 授予写入仓库内容的权限
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         site:
-          - url: "https://www.fadada.com"
-            name: "法大大官网"
+          - url: 'https://www.fadada.com'
+            name: '法大大官网'
           # 要添加更多网站，请复制上面两行并修改值
     steps:
       - name: Checkout repo
@@ -26,10 +26,11 @@ jobs:
         id: lighthouse
         uses: treosh/lighthouse-ci-action@v9
         with:
-          urls: "${{ matrix.site.url }}"
-          configPath: ".lighthouserc.json"
-          uploadArtifacts: false  # 禁用默认的工件上传，我们将手动保存结果
-        continue-on-error: true  # 即使lighthouse测试失败也继续执行后续步骤
+          urls: '${{ matrix.site.url }}'
+          configPath: '.lighthouserc.json'
+          uploadArtifacts: true # 启用工件上传，以便我们可以获取完整报告
+          temporaryPublicStorage: true # 使用临时公共存储来保存详细报告
+        continue-on-error: true # 即使lighthouse测试失败也继续执行后续步骤
 
       - name: Format and Save Report Data
         run: |
@@ -38,7 +39,7 @@ jobs:
           SITE_NAME="${{ matrix.site.name }}"
           SITE_URL="${{ matrix.site.url }}"
           SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
-          
+
           # 检查lighthouse输出是否存在
           if [ -z "$LIGHTHOUSE_MANIFEST" ]; then
             echo "警告: Lighthouse没有为 $SITE_NAME 产生有效的输出。创建空的报告文件。"
@@ -50,7 +51,8 @@ jobs:
             echo "  \"accessibility\": 0," >> "reports/data-$SITE_ID-$DATE.json"
             echo "  \"best-practices\": 0," >> "reports/data-$SITE_ID-$DATE.json"
             echo "  \"seo\": 0," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"reportUrl\": \"\"" >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"reportUrl\": \"\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"detailedData\": null" >> "reports/data-$SITE_ID-$DATE.json"
             echo "}" >> "reports/data-$SITE_ID-$DATE.json"
           else
             # 尝试解析lighthouse输出
@@ -67,6 +69,34 @@ jobs:
             [ "$SEO" = "null" ] && SEO=0
             [ "$REPORT_URL" = "null" ] && REPORT_URL=""
             
+            # 获取完整的Lighthouse JSON报告
+            mkdir -p tmp
+            FULL_REPORT=$(find . -name "*.report.json" | head -n 1)
+            
+            if [ ! -z "$FULL_REPORT" ] && [ -f "$FULL_REPORT" ]; then
+              echo "找到完整报告: $FULL_REPORT"
+              
+              # 提取详细性能指标
+              FCP=$(cat "$FULL_REPORT" | jq -r '.audits["first-contentful-paint"].numericValue // 0')
+              LCP=$(cat "$FULL_REPORT" | jq -r '.audits["largest-contentful-paint"].numericValue // 0')
+              TBT=$(cat "$FULL_REPORT" | jq -r '.audits["total-blocking-time"].numericValue // 0')
+              CLS=$(cat "$FULL_REPORT" | jq -r '.audits["cumulative-layout-shift"].numericValue // 0')
+              TTI=$(cat "$FULL_REPORT" | jq -r '.audits["interactive"].numericValue // 0')
+              SI=$(cat "$FULL_REPORT" | jq -r '.audits["speed-index"].numericValue // 0')
+              
+              # 提取优化建议（最多5项）
+              OPPORTUNITIES=$(cat "$FULL_REPORT" | jq -c '[.audits | to_entries[] | select(.value.score != null and .value.score < 0.9 and .value.details.type == "opportunity") | {id: .key, title: .value.title, description: .value.description} | select(.title != null and .description != null)] | [.[0:5][]]' 2>/dev/null || echo "[]")
+              
+              # 提取资源类型分布
+              RESOURCE_SUMMARY=$(cat "$FULL_REPORT" | jq -c '.audits["resource-summary"].details.items // []' 2>/dev/null || echo "[]")
+              
+              # 直接创建详细数据JSON字符串，避免使用heredoc
+              DETAILED_DATA="{\"fcp\": $FCP, \"lcp\": $LCP, \"tbt\": $TBT, \"cls\": $CLS, \"tti\": $TTI, \"si\": $SI, \"opportunities\": $OPPORTUNITIES, \"resourceSummary\": $RESOURCE_SUMMARY}"
+            else
+              echo "未找到完整报告文件"
+              DETAILED_DATA="null"
+            fi
+            
             # 创建报告JSON
             echo "{" > "reports/data-$SITE_ID-$DATE.json"
             echo "  \"date\": \"$DATE\"," >> "reports/data-$SITE_ID-$DATE.json"
@@ -76,21 +106,22 @@ jobs:
             echo "  \"accessibility\": $ACC," >> "reports/data-$SITE_ID-$DATE.json"
             echo "  \"best-practices\": $BP," >> "reports/data-$SITE_ID-$DATE.json"
             echo "  \"seo\": $SEO," >> "reports/data-$SITE_ID-$DATE.json"
-            echo "  \"reportUrl\": \"$REPORT_URL\"" >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"reportUrl\": \"$REPORT_URL\"," >> "reports/data-$SITE_ID-$DATE.json"
+            echo "  \"detailedData\": $DETAILED_DATA" >> "reports/data-$SITE_ID-$DATE.json"
             echo "}" >> "reports/data-$SITE_ID-$DATE.json"
           fi
         env:
           LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
-          
+
       - name: Update History
         run: |
           DATE=$(date +%Y-%m-%d)
           SITE_URL="${{ matrix.site.url }}"
           SITE_ID=$(echo "$SITE_URL" | sed 's/[^a-zA-Z0-9]/_/g')
-          
+
           # jq已在GitHub Actions环境中预装
-          
+
           # 如果存在历史数据文件，则更新
           if [ -f "reports/history.json" ]; then
             # 添加新数据到历史记录
@@ -100,7 +131,7 @@ jobs:
             # 创建新的历史记录文件
             echo "{\"reports\": [$(cat "reports/data-$SITE_ID-$DATE.json")]}" > reports/history.json
           fi
-          
+
           echo "Report data saved to reports/data-$SITE_ID-$DATE.json and updated in reports/history.json"
           echo "History content:"
           cat reports/history.json

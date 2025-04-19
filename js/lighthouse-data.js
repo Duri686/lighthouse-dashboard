@@ -162,6 +162,18 @@ function updateDashboard(chartData, reports) {
 
   // 更新最近报告列表
   updateRecentReports(reports.slice(0, 5));
+
+  // 更新报告链接
+  updateReportLink(latestData);
+
+  // 如果存在详细数据且详情面板是可见的，则更新详细数据
+  if (
+    latestData.detailedData &&
+    document.getElementById('detailsContent') &&
+    !document.getElementById('detailsContent').classList.contains('hidden')
+  ) {
+    updateDetailedData(latestData);
+  }
 }
 
 function updateMetric(elementId, value) {
@@ -183,14 +195,20 @@ function updateMetric(elementId, value) {
 }
 
 function updateChart(chartData) {
-  const ctx = document.getElementById('performanceChart').getContext('2d');
+  try {
+    const chartElement = document.getElementById('performanceChart');
+    if (!chartElement) {
+      console.error('找不到performanceChart元素');
+      return;
+    }
 
-  // 检查图表是否已存在
-  if (window.performanceChart) {
-    window.performanceChart.data.labels = chartData.dates;
-    window.performanceChart.data.datasets[0].data = chartData.performance;
-    window.performanceChart.update();
-  } else {
+    const ctx = chartElement.getContext('2d');
+
+    // 销毁现有图表(如果存在)
+    if (window.performanceChart) {
+      window.performanceChart.destroy();
+    }
+
     // 创建新图表
     window.performanceChart = new Chart(ctx, {
       type: 'line',
@@ -226,6 +244,12 @@ function updateChart(chartData) {
         },
       },
     });
+  } catch (error) {
+    console.error('更新图表时出错:', error);
+    const container = document.querySelector('.h-80');
+    if (container) {
+      container.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">无法加载图表: ${error.message}</div>`;
+    }
   }
 }
 
@@ -265,6 +289,231 @@ function updateRecentReports(reports) {
   document.getElementById('recentReports').innerHTML = reportsHtml;
 }
 
+/**
+ * 更新报告链接
+ */
+function updateReportLink(reportData) {
+  const linkElement = document.getElementById('fullReportLink');
+  if (linkElement && reportData.reportUrl) {
+    linkElement.href = reportData.reportUrl;
+    linkElement.classList.remove('inspire-btn-disabled');
+  } else if (linkElement) {
+    linkElement.href = '#';
+    linkElement.classList.add('inspire-btn-disabled');
+  }
+}
+
+/**
+ * 使用实际的Lighthouse数据更新详细信息
+ */
+function updateDetailedData(reportData) {
+  const detailedData = reportData.detailedData;
+
+  if (!detailedData) {
+    // 如果没有详细数据，显示一个提示信息
+    const container = document.getElementById('detailsContent');
+    if (container) {
+      container.innerHTML =
+        '<div class="p-4 bg-yellow-50 text-yellow-700 rounded">没有详细的Lighthouse报告数据可用</div>';
+    }
+    return;
+  }
+
+  // 更新性能指标
+  const metrics = {
+    fcp: formatTime(detailedData.fcp),
+    lcp: formatTime(detailedData.lcp),
+    tbt: formatTime(detailedData.tbt),
+    cls: detailedData.cls.toFixed(3),
+    tti: formatTime(detailedData.tti),
+    si: formatTime(detailedData.si),
+  };
+
+  // 更新指标显示
+  if (document.getElementById('fcpDetail'))
+    document.getElementById('fcpDetail').textContent = metrics.fcp;
+  if (document.getElementById('lcpDetail'))
+    document.getElementById('lcpDetail').textContent = metrics.lcp;
+  if (document.getElementById('tbtDetail'))
+    document.getElementById('tbtDetail').textContent = metrics.tbt;
+  if (document.getElementById('clsDetail'))
+    document.getElementById('clsDetail').textContent = metrics.cls;
+  if (document.getElementById('ttiDetail'))
+    document.getElementById('ttiDetail').textContent = metrics.tti;
+  if (document.getElementById('siDetail'))
+    document.getElementById('siDetail').textContent = metrics.si;
+
+  // 更新核心指标表格
+  if (document.getElementById('fcp'))
+    document.getElementById('fcp').textContent = metrics.fcp;
+  if (document.getElementById('lcp'))
+    document.getElementById('lcp').textContent = metrics.lcp;
+  if (document.getElementById('cls'))
+    document.getElementById('cls').textContent = metrics.cls;
+  if (document.getElementById('tti'))
+    document.getElementById('tti').textContent = metrics.tti;
+
+  // 提取优化建议
+  if (detailedData.opportunities && detailedData.opportunities.length > 0) {
+    const improvements = detailedData.opportunities.map((opp) => opp.title);
+    updateList('improvementsList', improvements, 'red');
+    updateList(
+      'optimizationTips',
+      detailedData.opportunities.map((opp) => opp.description),
+      'yellow',
+    );
+  } else {
+    updateList('improvementsList', ['没有检测到需要改进的项目'], 'green');
+    updateList('optimizationTips', ['所有检查都通过了'], 'green');
+  }
+
+  // 资源摘要
+  if (detailedData.resourceSummary && detailedData.resourceSummary.length > 0) {
+    // 更新资源类型图表
+    createResourceTypeChart(detailedData.resourceSummary);
+
+    // 按大小排序资源
+    const sortedResources = [...detailedData.resourceSummary].sort(
+      (a, b) => b.size - a.size,
+    );
+    const largestResources = sortedResources.map(
+      (res) => `${res.resourceType} - ${formatBytes(res.size)}`,
+    );
+
+    updateList('largestResources', largestResources);
+
+    // 计算总资源大小
+    const totalSize = detailedData.resourceSummary.reduce(
+      (sum, item) => sum + item.size,
+      0,
+    );
+    if (document.getElementById('totalResourceSize'))
+      document.getElementById('totalResourceSize').textContent =
+        formatBytes(totalSize);
+  }
+}
+
+/**
+ * 格式化时间（毫秒转为可读形式）
+ */
+function formatTime(ms) {
+  if (ms === undefined || ms === null) return '-';
+
+  if (ms < 1000) {
+    return Math.round(ms) + ' ms';
+  } else {
+    return (ms / 1000).toFixed(1) + ' s';
+  }
+}
+
+/**
+ * 格式化字节大小
+ */
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+/**
+ * 更新列表内容
+ */
+function updateList(elementId, items, dotColor) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  if (dotColor) {
+    element.innerHTML = items
+      .map(
+        (item) => `
+      <li class="flex items-start">
+        <span class="text-${dotColor}-500 mr-2">●</span>
+        <span>${item}</span>
+      </li>
+    `,
+      )
+      .join('');
+  } else {
+    element.innerHTML = items
+      .map(
+        (item) => `
+      <li>${item}</li>
+    `,
+      )
+      .join('');
+  }
+}
+
+/**
+ * 创建资源类型饼图
+ */
+function createResourceTypeChart(resourceSummary) {
+  const element = document.getElementById('resourceTypesChart');
+  if (!element || !resourceSummary) return;
+
+  // 创建canvas元素并添加到容器
+  element.innerHTML = '<canvas id="resourceTypePie"></canvas>';
+  const ctx = document.getElementById('resourceTypePie').getContext('2d');
+
+  // 准备数据
+  const labels = [];
+  const data = [];
+  const backgroundColor = [
+    '#4285F4', // 蓝色
+    '#34A853', // 绿色
+    '#FBBC05', // 黄色
+    '#EA4335', // 红色
+    '#9AA0A6', // 灰色
+    '#137333', // 深绿
+    '#1A73E8', // 浅蓝
+    '#D93025', // 深红
+  ];
+
+  // 从实际数据中提取信息
+  resourceSummary.forEach((resource, index) => {
+    labels.push(resource.resourceType);
+    data.push(resource.size);
+  });
+
+  // 创建图表
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          data: data,
+          backgroundColor: backgroundColor.slice(0, labels.length),
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 10,
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const value = context.raw;
+              return `${context.label}: ${formatBytes(value)}`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 // 初始时加载网站列表和默认数据
 document.addEventListener('DOMContentLoaded', async function () {
   // 首先加载网站列表
@@ -296,4 +545,31 @@ document.addEventListener('DOMContentLoaded', async function () {
     const days = parseInt(document.getElementById('dateRange').value);
     loadLighthouseData(url, days);
   });
+
+  // 详情切换按钮
+  const toggleBtn = document.getElementById('toggleDetails');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function () {
+      const detailsContent = document.getElementById('detailsContent');
+
+      if (detailsContent.classList.contains('hidden')) {
+        // 展开详情
+        detailsContent.classList.remove('hidden');
+        toggleBtn.innerHTML =
+          '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+
+        // 获取当前所选网站的最新报告数据
+        const url = document.getElementById('urlSelect').value;
+        const days = parseInt(document.getElementById('dateRange').value);
+        loadLighthouseData(url, days).then((chartData) => {
+          // 最新的报告数据已经由loadLighthouseData函数中的updateDashboard处理了
+        });
+      } else {
+        // 收起详情
+        detailsContent.classList.add('hidden');
+        toggleBtn.innerHTML =
+          '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+      }
+    });
+  }
 });

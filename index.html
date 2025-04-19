@@ -95,6 +95,115 @@
       </div>
     </div>
 
+    <!-- 新增：详细问题分析部分 -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">详细问题分析</h3>
+        <button id="toggleDetails" class="inspire-btn inspire-btn-sm inspire-btn-ghost flex items-center">
+          展开详情 
+          <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div id="detailsContent" class="hidden">
+        <!-- 详细内容区域 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="border rounded-md p-4">
+            <h4 class="font-medium text-gray-700 mb-2">需要改进项</h4>
+            <ul id="improvementsList" class="text-sm space-y-2">
+              <li class="flex items-start">
+                <span class="text-red-500 mr-2">●</span>
+                <span>加载中...</span>
+              </li>
+            </ul>
+          </div>
+          <div class="border rounded-md p-4">
+            <h4 class="font-medium text-gray-700 mb-2">表现良好项</h4>
+            <ul id="passedAuditsList" class="text-sm space-y-2">
+              <li class="flex items-start">
+                <span class="text-green-500 mr-2">●</span>
+                <span>加载中...</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- 性能指标详情 -->
+        <div class="border rounded-md p-4 mb-6">
+          <h4 class="font-medium text-gray-700 mb-4">性能指标详情</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">首次内容绘制 (FCP)</div>
+              <div id="fcpDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">最大内容绘制 (LCP)</div>
+              <div id="lcpDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">总阻塞时间 (TBT)</div>
+              <div id="tbtDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">累积布局偏移 (CLS)</div>
+              <div id="clsDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">交互到可用时间 (TTI)</div>
+              <div id="ttiDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">速度指数 (SI)</div>
+              <div id="siDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">服务器响应时间</div>
+              <div id="serverResponseDetail" class="text-lg font-semibold">-</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+              <div class="text-sm text-gray-500">资源总大小</div>
+              <div id="totalResourceSize" class="text-lg font-semibold">-</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 资源统计 -->
+        <div class="border rounded-md p-4">
+          <h4 class="font-medium text-gray-700 mb-2">资源统计</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <h5 class="text-sm font-medium text-gray-600 mb-2">按类型统计</h5>
+              <div id="resourceTypesChart" class="h-48"></div>
+            </div>
+            <div>
+              <h5 class="text-sm font-medium text-gray-600 mb-2">资源大小排行</h5>
+              <ul id="largestResources" class="text-sm space-y-2">
+                <li>加载中...</li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="text-sm font-medium text-gray-600 mb-2">优化建议</h5>
+              <ul id="optimizationTips" class="text-sm space-y-2">
+                <li class="flex items-start">
+                  <span class="text-yellow-500 mr-2">▲</span>
+                  <span>加载中...</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 查看原始报告链接 -->
+        <div class="mt-4 text-center">
+          <a id="fullReportLink" href="#" target="_blank" class="inspire-btn inspire-btn-outline">
+            查看原始Lighthouse报告
+          </a>
+        </div>
+      </div>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">核心网页指标</h3>
