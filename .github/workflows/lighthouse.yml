@@ -1,7 +1,7 @@
 name: Lighthouse CI
 on:
   schedule:
-    - cron: '0 */6 * * *'  # 每6小时运行一次
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,27 +13,32 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'  # 更新到 Node.js 18
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/sources.list.d/google.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Install dependencies
         run: |
-          npm install -g @lhci/cli
+          npm install -g @lhci/cli@0.12.x
           npm install fs path
 
       - name: Run Lighthouse and Process Reports
         run: |
-          # 设置脚本权限
           chmod +x process-report.js
           
-          # 获取当前时间
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
           
-          # 运行 Lighthouse 并收集报告
+          # 使用更稳定的配置运行 Lighthouse
           lhci collect \
             --url https://www.fadada.com \
             --settings.preset=desktop \
-            --settings.throttling.cpuSlowdownMultiplier=1 \
-            --settings.chromeFlags="--no-sandbox --headless" \
+            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.maxWaitForLoad=30000 \
             --output=json \
             --outDir=./reports
           
