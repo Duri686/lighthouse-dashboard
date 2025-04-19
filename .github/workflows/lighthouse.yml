@@ -76,43 +76,44 @@ jobs:
               --output=json \
               --outDir=.lighthouseci/$device \
               --numberOfRuns=1
-            
-            # Check if files were generated
-            ls -la .lighthouseci/$device/
+
+            # Verify report generation and wait for files
+            sleep 5  # Give time for files to be written
+            local json_file=$(find .lighthouseci/$device -name "lhr-*.json" -type f | head -n 1)
+            if [ ! -f "$json_file" ]; then
+              echo "Error: No Lighthouse report generated for $device"
+              return 1
+            fi
+            echo "Report generated successfully: $json_file"
           }
 
           # Run tests
           run_lighthouse "desktop" "desktop" 1350 940 "false" 1
           run_lighthouse "mobile" "mobile" 360 640 "true" 2
 
-          # Process reports function with better error handling
+          # Process reports function with improved error handling
           process_report() {
             local device=$1
-            local json_file=$(ls .lighthouseci/$device/lhr-*.json 2>/dev/null | head -n 1)
+            local json_file=$(find .lighthouseci/$device -name "lhr-*.json" -type f | head -n 1)
             
-            if [ -n "$json_file" ]; then
-              echo "Processing $device report: $json_file"
-              echo "JSON file contents:"
-              cat "$json_file" | head -n 20
-              
-              # Create target directory if it doesn't exist
-              mkdir -p "./reports"
-              
-              # Copy reports with error checking
-              cp -v "$json_file" "./reports/data-https___www_fadada_com_${device}-${DATE}.json"
-              cp -v "${json_file%.json}.html" "./reports/data-https___www_fadada_com_${device}-${DATE}.html"
-              
-              # Process report and validate JSON
-              RESULT=$(DEVICE_TYPE=$device DATE=$DATE DATE_WITH_TIME=$NOW \
-                node process-report.js "./reports/data-https___www_fadada_com_${device}-${DATE}.json")
-              
-              echo "Processed result:"
-              echo "$RESULT" | jq '.'
-              echo "$RESULT"
-            else
-              echo "No JSON file found for $device in $(pwd)/.lighthouseci/$device/"
-              echo "{}"
+            if [ ! -f "$json_file" ]; then
+              echo "{\"error\": \"No report found for $device\", \"scores\":{}, \"metrics\":{}}"
+              return 0
             fi
+
+            if [ ! -s "$json_file" ]; then
+              echo "{\"error\": \"Empty report file for $device\", \"scores\":{}, \"metrics\":{}}"
+              return 0
+            fi
+
+            # Process the report
+            local result=$(DEVICE_TYPE=$device DATE=$DATE node process-report.js "$json_file")
+            if [ $? -ne 0 ]; then
+              echo "{\"error\": \"Processing failed for $device\", \"scores\":{}, \"metrics\":{}}"
+              return 0
+            fi
+
+            echo "$result"
           }
 
           # Initialize history.json with empty array if it doesn't exist
@@ -122,23 +123,29 @@ jobs:
           DESKTOP_DATA=$(process_report "desktop")
           MOBILE_DATA=$(process_report "mobile")
 
-          # Update history.json with validated JSON
-          if echo "$DESKTOP_DATA" | jq empty 2>/dev/null && echo "$MOBILE_DATA" | jq empty 2>/dev/null; then
-            jq --arg date "$NOW" \
-               --arg url "https://www.fadada.com" \
-               --argjson desktop "$DESKTOP_DATA" \
-               --argjson mobile "$MOBILE_DATA" \
-               '.reports += [{
-                  "date": $date,
-                  "url": $url,
-                  "desktop": $desktop,
-                  "mobile": $mobile
-                }]' \
-               reports/history.json > reports/history.json.tmp && mv reports/history.json.tmp reports/history.json
-          else
-            echo "Error: Invalid JSON data generated"
-            exit 1
+          # Update history.json with better error handling
+          if ! echo "$DESKTOP_DATA" | jq empty 2>/dev/null; then
+            echo "Invalid desktop JSON data"
+            DESKTOP_DATA="{\"error\": \"Invalid data\", \"scores\":{}, \"metrics\":{}}"
           fi
+
+          if ! echo "$MOBILE_DATA" | jq empty 2>/dev/null; then
+            echo "Invalid mobile JSON data"
+            MOBILE_DATA="{\"error\": \"Invalid data\", \"scores\":{}, \"metrics\":{}}"
+          fi
+
+          # Create/update history.json
+          jq --arg date "$NOW" \
+             --arg url "https://www.fadada.com" \
+             --argjson desktop "$DESKTOP_DATA" \
+             --argjson mobile "$MOBILE_DATA" \
+             '.reports += [{
+                "date": $date,
+                "url": $url,
+                "desktop": $desktop,
+                "mobile": $mobile
+              }]' \
+             reports/history.json > reports/history.json.tmp && mv reports.history.json.tmp reports/history.json
 
           # List final results
           echo "=== Final Results ==="

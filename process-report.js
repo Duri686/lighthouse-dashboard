@@ -18,14 +18,17 @@ function processReport(filePath) {
         const date = process.env.DATE;
         
         if (!report || !report.categories) {
+            console.error('Invalid report structure:', report);
             throw new Error('Invalid report structure');
         }
 
-        // Add debug logging
-        console.error('Report structure:', {
+        // Add more detailed debug logging
+        console.error('Report validation:', {
             hasCategories: !!report.categories,
             categoryKeys: Object.keys(report.categories || {}),
-            auditKeys: Object.keys(report.audits || {})
+            auditKeys: Object.keys(report.audits || {}),
+            performanceScore: report.categories?.performance?.score,
+            fcpValue: report.audits?.['first-contentful-paint']?.numericValue
         });
 
         // Extract core metrics and scores
@@ -61,6 +64,11 @@ function processReport(filePath) {
                 json: `data-https___www_fadada_com_${deviceType}-${date}.json`
             }
         };
+
+        // Validate processed data
+        if (Object.values(processed.scores).some(score => score === undefined || isNaN(score))) {
+            throw new Error('Invalid scores in processed data');
+        }
 
         // Debug log before writing
         console.error('Writing processed data to:', filePath);
