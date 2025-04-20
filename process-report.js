@@ -78,8 +78,4 @@ if (require.main === module) {
     }
     processReport(reportFilePath, historyPath, url, date, deviceType);
 }
-const reportPath = process.argv[2];
-if (reportPath) {
-    const result = processReport(reportPath);
-    console.log(JSON.stringify(result));
-}
+
