@@ -94,15 +94,24 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 首先获取最新更改
+          echo "Fetching latest changes..."
+          git fetch origin
+          git pull origin $BRANCH_NAME --rebase
+          
+          # 添加更改
           git add reports
           git add reports/$BRANCH_NAME-history.json || true
           git add .gitignore || true
+          
+          # 检查是否有更改需要提交
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           else
             git commit -m "Update Lighthouse reports ${{ env.REPORT_DATE }} ($BRANCH_NAME ${{ matrix.site.name }})"
-            git push
+            git push origin $BRANCH_NAME
           fi
 
       - name: Install dependencies
@@ -282,6 +291,11 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
+          # 首先获取最新更改
+          echo "Fetching latest changes..."
+          git fetch origin
+          git pull origin ${GITHUB_REF#refs/heads/} --rebase
+          
           echo "=== Git Status Before Add ==="
           git status
           
@@ -306,7 +320,9 @@ jobs:
             exit 0
           else
             git commit -m "Update Lighthouse reports $(date -u)"
-            git push origin "HEAD:$GITHUB_REF" || git push origin "HEAD:${GITHUB_REF#refs/heads/}"
+            # 使用当前分支名称
+            CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+            git push origin "HEAD:$CURRENT_BRANCH"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
