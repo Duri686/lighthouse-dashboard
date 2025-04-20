@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - 'reports/**'  # 忽略报告目录的更改，防止循环触发
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 0,3,5,7,12 * * *'
   workflow_dispatch:
 
 permissions:

@@ -473,8 +473,9 @@ function updateReportLink(reportData) {
   if (reportData && reportData.detailedData && reportData.detailedData.reportFiles) {
     // 从 reportData 中获取报告文件名
     const reportFiles = reportData.detailedData.reportFiles;
-    const htmlFileName = reportFiles.html;
-    const jsonFileName = reportFiles.json;
+    // 如果报告文件已包含设备类型，直接使用，否则生成带设备类型的文件名
+    const htmlFileName = reportFiles.html || `lhr-${siteName}-${deviceType}.report.html`;
+    const jsonFileName = reportFiles.json || `lhr-${siteName}-${deviceType}.report.json`;
     
     // 获取当前选中的分支
     const branch = getSelectedBranch();
@@ -482,17 +483,46 @@ function updateReportLink(reportData) {
     // 从 URL 或名称中提取网站名称
     const siteName = reportData.name ? reportData.name.split(' ')[0] : 'fadada';
     
+    // 获取设备类型（移动端或桌面端）
+    const deviceType = reportData.device || (window.selectedDevice || 'desktop');
+    
     // 构建文件路径
-    // 使用当前日期作为目录名
-    const today = new Date();
-    const dateStr = today.getFullYear() + 
-                   ('0' + (today.getMonth() + 1)).slice(-2) + 
-                   ('0' + today.getDate()).slice(-2);
+    // 使用报告数据中的日期
+    let dateStr;
+    
+    // 从报告数据中提取日期
+    if (reportData.date) {
+      if (/^\d{8}$/.test(reportData.date)) {
+        // 如果是20250420格式
+        dateStr = reportData.date;
+      } else if (reportData.date.includes('-')) {
+        // 如果是2025-04-20格式，转换为20250420
+        dateStr = reportData.date.split('T')[0].replace(/-/g, '');
+      } else {
+        // 其他格式默认当前日期
+        const today = new Date();
+        dateStr = today.getFullYear() + 
+                 ('0' + (today.getMonth() + 1)).slice(-2) + 
+                 ('0' + today.getDate()).slice(-2);
+      }
+    } else {
+      // 如果没有日期信息，使用当前日期
+      const today = new Date();
+      dateStr = today.getFullYear() + 
+               ('0' + (today.getMonth() + 1)).slice(-2) + 
+               ('0' + today.getDate()).slice(-2);
+    }
+    
+    console.log('[updateReportLink] 使用的报告日期:', dateStr);
     
     // 构建最终路径
     const basePath = `reports/${dateStr}/${branch}/${siteName}`;
+    
+    // 如果报告文件名中已经包含了设备类型，则直接使用，否则添加设备类型
     const htmlPath = `${basePath}/${htmlFileName}`;
     const jsonPath = `${basePath}/${jsonFileName}`;
+    
+    console.log('[updateReportLink] 浏览器类型:', deviceType);
     
     console.log('[updateReportLink] 使用reportFiles构建的文件路径:', htmlPath, jsonPath);
     
@@ -552,6 +582,7 @@ function updateDetailedData(reportData) {
       cls: (detailedData.cls || 0).toFixed(3),
       tti: formatTime(detailedData.tti || 0),
       si: formatTime(detailedData.si || 0),
+      serverResponse: formatTime(detailedData.serverResponse || 0)
     };
     console.log('[updateDetailedData] metrics:', metrics);
 
@@ -569,6 +600,7 @@ function updateDetailedData(reportData) {
     updateElement('clsDetail', metrics.cls);
     updateElement('ttiDetail', metrics.tti);
     updateElement('siDetail', metrics.si);
+    updateElement('serverResponseDetail', metrics.serverResponse);
 
     // 指标分级颜色函数
     function getMetricClass(metric, value) {
@@ -999,32 +1031,39 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 初始化同步一次
     updateToggleBtnText();
 
-    // 切换详情内容的显示/隐藏状态
+    // 切换详情内容的显示/隐藏状态 - 完全重写
     function toggleDetailsVisibility() {
       const detailsContent = document.getElementById('detailsContent');
       if (!detailsContent) return;
       
-      // 直接检查当前的显示状态
-      const isCurrentlyVisible = window.getComputedStyle(detailsContent).display !== 'none';
-      console.log('[toggleDetails] 当前显示状态:', isCurrentlyVisible ? '显示中' : '隐藏中');
-      
-      if (isCurrentlyVisible) {
-        // 当前可见，需要隐藏
-        console.log('[toggleDetails] 执行隐藏操作');
-        detailsContent.style.display = 'none';
-        toggleBtn.innerHTML = '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
-      } else {
-        // 当前隐藏，需要显示
-        console.log('[toggleDetails] 执行显示操作');
-        detailsContent.style.display = 'block';
-        toggleBtn.innerHTML = '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+      // 缓存当前状态到全局变量，更可靠(而不是每次都检测计算样式)
+      if (typeof window.detailsVisible === 'undefined') {
+        // 初始值：默认为隐藏，符合页面的默认行为
+        window.detailsVisible = false;
       }
       
-      // 检查操作后的状态
+      // 切换状态
+      window.detailsVisible = !window.detailsVisible;
+      console.log('[toggleDetails] 切换后的状态设置为:', window.detailsVisible ? '显示' : '隐藏');
+      
+      // 根据状态变量设置显示属性
+      if (window.detailsVisible) {
+        // 显示详情
+        console.log('[toggleDetails] 将详情内容设置为显示');
+        detailsContent.style.display = 'block';
+        toggleBtn.innerHTML = '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+      } else {
+        // 隐藏详情
+        console.log('[toggleDetails] 将详情内容设置为隐藏');
+        detailsContent.style.display = 'none';
+        toggleBtn.innerHTML = '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+      }
+      
+      // 检查操作后的实际DOM状态
       setTimeout(() => {
-        const newDisplay = window.getComputedStyle(detailsContent).display;
-        console.log('[toggleDetails] 操作后 display:', newDisplay);
-      }, 10);
+        const realDisplay = window.getComputedStyle(detailsContent).display;
+        console.log('[toggleDetails] 操作后实际display状态:', realDisplay);
+      }, 50);
     }
     
     // 点击事件直接调用切换函数

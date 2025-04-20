@@ -34,6 +34,10 @@
       font-size: 1.5rem;
       font-weight: bold;
     }
+    /* 隐藏元素 */
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -41,7 +45,7 @@
     <header class="mb-8">
       <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-900">Lighthouse Dashboard</h1>
-        <div class="text-sm text-gray-500">数据自动更新于每天 03:00</div>
+        <div class="text-sm text-gray-500">数据每日更新于北京时间8点、11点、13点、15点和20点</div>
       </div>
     </header>
     
@@ -121,7 +125,7 @@
         </button>
       </div>
       
-      <div id="detailsContent">
+      <div id="detailsContent" style="display: none;">
         <!-- 详细内容区域 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="border rounded-md p-4">
@@ -319,11 +323,12 @@
       const detailsContent = document.getElementById('detailsContent');
       if (toggleBtn && detailsContent) {
         toggleBtn.addEventListener('click', function() {
-          if (detailsContent.classList.contains('hidden')) {
-            detailsContent.classList.remove('hidden');
+          const isHidden = window.getComputedStyle(detailsContent).display === 'none';
+          if (isHidden) {
+            detailsContent.style.display = 'block';
             toggleBtn.innerHTML = '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
           } else {
-            detailsContent.classList.add('hidden');
+            detailsContent.style.display = 'none';
             toggleBtn.innerHTML = '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
           }
         });
