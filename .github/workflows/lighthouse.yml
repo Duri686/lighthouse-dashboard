@@ -232,8 +232,8 @@ jobs:
             echo "$result"
           }
 
-          # Initialize history.json with empty array if it doesn't exist
-          [ -f reports/history.json ] || echo '{"reports":[]}' > reports/history.json
+          # 不再创建history.json文件
+          # [ -f reports/history.json ] || echo '{"reports":[]}' > reports/history.json
 
           # Process reports and handle JSON properly
           echo "Processing desktop report..."
@@ -260,30 +260,8 @@ jobs:
           DESKTOP_DATA=$(echo "$DESKTOP_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
           MOBILE_DATA=$(echo "$MOBILE_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
 
-          # Create history update with minimal data
-          echo "Creating history update..."
-          jq --arg date "$NOW" \
-             --arg url "https://www.fadada.com" \
-             --argjson desktop "$DESKTOP_DATA" \
-             --argjson mobile "$MOBILE_DATA" \
-             '.reports = (.reports + [{
-               "date": $date,
-               "url": $url,
-               "desktop": $desktop,
-               "mobile": $mobile
-             }] | .[-100:])' \
-             "reports/history.json" > "reports/history.json.new" \
-          && mv "reports/history.json.new" "reports/history.json"
-
-          # Copy original reports to reports directory
-          echo "Copying original reports..."
-          for device in desktop mobile; do
-            src_file=$(find ".lighthouseci/$device" -name "lhr-*.json" -type f | sort -r | head -n 1)
-            if [ -f "$src_file" ]; then
-              cp "$src_file" "reports/data-https___www_fadada_com_${device}-${DATE}.json"
-              cp "${src_file%.json}.html" "reports/data-https___www_fadada_com_${device}-${DATE}.html" || true
-            fi
-          done
+          # 不再创建和更新额外的报告文件
+          echo "Skipping creating additional report files..."
 
       - name: List Reports Directory
         run: |
@@ -318,15 +296,8 @@ jobs:
           echo "=== Git Status Before Add ==="
           git status
           
-          # 使用find命令添加文件
-          echo "Adding report files..."
-          find reports -type f -name "data-https___www_fadada_com_*.json" -exec git add {} \; || true
-          find reports -type f -name "data-https___www_fadada_com_*.html" -exec git add {} \; || true
-          
-          # 添加history.json如果存在
-          if [ -f "reports/history.json" ]; then
-            git add reports/history.json
-          fi
+          # 不再添加额外的报告文件到git
+          echo "Skipping adding additional report files to git..."
           
           git add .gitignore || true
           
