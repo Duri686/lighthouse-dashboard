@@ -78,30 +78,6 @@ if (require.main === module) {
     }
     processReport(reportFilePath, historyPath, url, date, deviceType);
 }
-
-            return processed;
-        } catch (jsonError) {
-            console.error('JSON validation error:', jsonError);
-            throw new Error(`Invalid JSON output: ${jsonError.message}`);
-        }
-
-    } catch (error) {
-        console.error(`Error processing report ${filePath}:`, error);
-        // Return a valid but empty result structure
-        return {
-            scores: { performance: 0, accessibility: 0, bestPractices: 0, seo: 0 },
-            metrics: { fcp: 0, lcp: 0, tbt: 0, cls: 0, tti: 0, si: 0 },
-            opportunities: [],
-            resourceSummary: [],
-            reportFiles: {
-                html: '',
-                json: ''
-            }
-        };
-    }
-}
-
-// Process the report if file path is provided
 const reportPath = process.argv[2];
 if (reportPath) {
     const result = processReport(reportPath);
