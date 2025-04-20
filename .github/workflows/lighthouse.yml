@@ -3,14 +3,14 @@ on:
   push:
     branches:
       - main
-      - master
+      - staging
+      - release/*
     paths-ignore:
       - 'reports/**'  # 忽略报告目录的更改，防止循环触发
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
-# 添加权限配置
 permissions:
   contents: write
   pages: write
@@ -18,13 +18,18 @@ permissions:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site:
+          - url: "https://www.fadada.com"
+            name: "fadada"
     steps:
       - uses: actions/checkout@v3
       
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # 更新到 Node.js 18
+          node-version: '18'
 
       - name: Install Chrome
         run: |
@@ -32,7 +37,62 @@ jobs:
           sudo apt-get install -y wget gnupg2
           wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-          google-chrome --version
+
+      - name: Set date and branch env
+        id: set_env
+        run: |
+          echo "REPORT_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Create reports directory
+        run: mkdir -p reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}
+
+      - name: Run Lighthouse (Desktop)
+        run: |
+          lighthouse ${{ matrix.site.url }} \
+            --output=json \
+            --output=html \
+            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop
+
+      - name: Run Lighthouse (Mobile)
+        run: |
+          lighthouse ${{ matrix.site.url }} \
+            --output=json \
+            --output=html \
+            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile \
+            --preset=mobile
+
+      - name: Process desktop report
+        run: |
+          node process-report.js reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json reports/$BRANCH_NAME-history.json "${{ matrix.site.url }}" ${{ env.REPORT_DATE }} desktop
+
+      - name: Process mobile report
+        run: |
+          node process-report.js reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json reports/$BRANCH_NAME-history.json "${{ matrix.site.url }}" ${{ env.REPORT_DATE }} mobile
+
+      - name: List Reports Directory
+        run: |
+          echo "Contents of reports directory:"
+          ls -la ./reports/
+
+      - name: Cleanup and Prepare
+        run: |
+          rm -f google-chrome-stable_current_amd64.deb
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add reports
+          git add reports/$BRANCH_NAME-history.json || true
+          git add .gitignore || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          else
+            git commit -m "Update Lighthouse reports ${{ env.REPORT_DATE }} ($BRANCH_NAME ${{ matrix.site.name }})"
+            git push
+          fi
 
       - name: Install dependencies
         run: |

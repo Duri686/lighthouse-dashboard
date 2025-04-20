@@ -6,9 +6,21 @@
  * 获取网站列表
  * 从历史数据中提取所有唯一的网站URL
  */
+// 获取所有可用分支
+const branches = ['main', 'staging', 'release']; // 可根据实际情况扩展
+
+function getSelectedBranch() {
+  return localStorage.getItem('selectedBranch') || 'main';
+}
+
+function setSelectedBranch(branch) {
+  localStorage.setItem('selectedBranch', branch);
+}
+
 async function loadSiteList() {
   try {
-    const response = await fetch('reports/history.json');
+    const branch = getSelectedBranch();
+    const response = await fetch(`reports/${branch}-history.json`);
     if (!response.ok) {
       throw new Error('无法加载报告数据');
     }
@@ -18,13 +30,15 @@ async function loadSiteList() {
     // 提取所有不同的网站和设备类型组合
     const sitesMap = {};
     data.reports.forEach((report) => {
-      if (report.url && report.name) {
-        // 从报告文件名中提取设备类型
-        const deviceType = report.device || 'mobile'; // 默认为移动端
+      if (report.url) {
+        // 兼容没有 name 字段的情况
+        const siteName = report.name || report.url;
+        // 兼容没有 device 字段的情况
+        const deviceType = report.device || 'mobile';
         const key = `${report.url}_${deviceType}`;
         sitesMap[key] = {
           url: report.url,
-          name: `${report.name} (${deviceType === 'desktop' ? 'PC端' : '移动端'})`,
+          name: `${siteName} (${deviceType === 'desktop' ? 'PC端' : '移动端'})`,
           device: deviceType
         };
       }
@@ -93,6 +107,11 @@ async function loadLighthouseData(url, days) {
         const latestReport = filteredReports[0];
         const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
         const currentData = latestReport[deviceType];
+
+        // 容错处理，防止无效数据导致崩溃
+        if (!currentData || !currentData.scores) {
+            throw new Error('所选报告缺少有效的 Lighthouse 指标数据');
+        }
 
         // 更新基础指标
         updateMetrics(currentData.scores);
@@ -634,6 +653,16 @@ function createResourceTypeChart(resourceSummary) {
 
 // 初始时加载网站列表和默认数据
 document.addEventListener('DOMContentLoaded', async function () {
+  // 设置分支下拉框选中状态
+  const branchSelect = document.getElementById('branchSelect');
+  if (branchSelect) {
+    branchSelect.value = getSelectedBranch();
+    branchSelect.addEventListener('change', function () {
+      setSelectedBranch(this.value);
+      location.reload(); // 切换分支后刷新页面/数据
+    });
+  }
+
   // 首先加载网站列表
   const sites = await loadSiteList();
 
