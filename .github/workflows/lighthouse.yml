@@ -31,6 +31,11 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies
+        run: |
+          npm init -y
+          npm install -g lighthouse
+
       - name: Install Chrome
         run: |
           sudo apt-get update
@@ -49,14 +54,14 @@ jobs:
 
       - name: Run Lighthouse (Desktop)
         run: |
-          lighthouse ${{ matrix.site.url }} \
+          npx lighthouse ${{ matrix.site.url }} \
             --output=json \
             --output=html \
             --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop
 
       - name: Run Lighthouse (Mobile)
         run: |
-          lighthouse ${{ matrix.site.url }} \
+          npx lighthouse ${{ matrix.site.url }} \
             --output=json \
             --output=html \
             --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile \
