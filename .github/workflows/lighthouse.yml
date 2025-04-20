@@ -98,7 +98,16 @@ jobs:
           # 首先获取最新更改
           echo "Fetching latest changes..."
           git fetch origin
-          git pull origin $BRANCH_NAME --rebase
+          
+          # 处理未暂存文件，先将所有更改暂存再拉取
+          echo "Stashing any changes before pull..."
+          git stash -u || true
+          
+          # 拉取最新代码
+          git pull origin $BRANCH_NAME --ff-only || git pull origin $BRANCH_NAME
+          
+          # 如果有暂存的更改，恢复他们
+          git stash pop || true
           
           # 添加更改
           git add reports
@@ -294,7 +303,17 @@ jobs:
           # 首先获取最新更改
           echo "Fetching latest changes..."
           git fetch origin
-          git pull origin ${GITHUB_REF#refs/heads/} --rebase
+          
+          # 处理未暂存文件，先将所有更改暂存再拉取
+          echo "Stashing any changes before pull..."
+          git stash -u || true
+          
+          # 拉取最新代码
+          CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          git pull origin $CURRENT_BRANCH --ff-only || git pull origin $CURRENT_BRANCH
+          
+          # 如果有暂存的更改，恢复他们
+          git stash pop || true
           
           echo "=== Git Status Before Add ==="
           git status
