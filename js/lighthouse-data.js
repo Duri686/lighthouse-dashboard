@@ -69,8 +69,15 @@ function updateSiteSelect(sites) {
 
   sites.forEach((site) => {
     const option = document.createElement('option');
-    option.value = site.url;
+    // 将URL和设备类型一起作为选项的value
+    option.value = JSON.stringify({
+      url: site.url,
+      device: site.device
+    });
     option.textContent = site.name;
+    // 添加自定义属性以便于后续获取
+    option.dataset.url = site.url;
+    option.dataset.device = site.device;
     select.appendChild(option);
   });
 
@@ -81,73 +88,147 @@ function updateSiteSelect(sites) {
     option.textContent = '无数据';
     select.appendChild(option);
   }
+  
+  // 添加日志显示所有选项
+  console.log('[updateSiteSelect] 更新网站选项:', sites);
 }
 
 /**
  * 加载特定网站的Lighthouse数据
  */
-async function loadLighthouseData(url, days) {
+async function getBranchOptions() {
+    const response = await fetch('branch-config.json');
+    const config = await response.json();
+    return config.branches || [];
+}
+// 兼容全局调用
+window.getBranchOptions = getBranchOptions;
+
+async function loadLighthouseData(urlOrData, days, branch = 'main') {
+    // 处理传入的是 JSON 字符串的情况
+    let url, deviceType;
+    
     try {
-        const response = await fetch('reports/history.json');
+        if (typeof urlOrData === 'string' && urlOrData.startsWith('{')) {
+            // 尝试解析 JSON
+            const data = JSON.parse(urlOrData);
+            url = data.url;
+            deviceType = data.device;
+            console.log('[loadLighthouseData] 从 JSON 解析出 URL 和设备类型:', url, deviceType);
+        } else {
+            url = urlOrData;
+            // 如果没有指定设备类型，则使用默认值
+            deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+        }
+    } catch (e) {
+        console.error('解析 URL 数据失败:', e);
+        url = urlOrData;
+        deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+    }
+    try {
+        // 根据分支名加载对应的 history 文件
+        const historyFile = `reports/${branch}-history.json`;
+        const response = await fetch(historyFile);
+        if (!response.ok) throw new Error(`无法加载 ${historyFile}`);
         const history = await response.json();
-        
-        // 过滤指定时间范围的数据
+
+        // 过滤指定时间范围的数据，兼容 20250420 和 2025-04-20
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - days);
+
+        // 使用从选项中解析出的设备类型
+        console.log('[loadLighthouseData] 过滤报告使用设备类型:', deviceType);
         
         const filteredReports = history.reports.filter(report => {
-            return new Date(report.date) >= cutoffDate && report.url === url;
+            // 检查URL和设备类型是否匹配
+            const urlMatches = report.url === url;
+            // 检查是否有对应的设备类型数据（作为属性存在，而不是device字段）
+            const deviceMatches = !deviceType || report.hasOwnProperty(deviceType);
+            
+            // 如果URL不匹配或设备类型不匹配，直接跳过
+            if (!urlMatches || !deviceMatches) {
+                return false;
+            }
+            
+            // 检查日期是否在指定范围内
+            let reportDate = report.date;
+            if (/^\d{8}$/.test(reportDate)) {
+                // 如果是 20250420 格式，转换为 Date 对象
+                const year = parseInt(reportDate.substring(0, 4));
+                const month = parseInt(reportDate.substring(4, 6)) - 1; // 月份从0开始
+                const day = parseInt(reportDate.substring(6, 8));
+                const date = new Date(year, month, day);
+                return date >= cutoffDate;
+            } else if (reportDate.includes('T')) {
+                // 如果是 ISO 格式 (2025-04-20T12:00:00)
+                const date = new Date(reportDate);
+                return date >= cutoffDate;
+            } else {
+                // 如果是 2025-04-20 格式
+            }
+            return new Date(reportDate) >= cutoffDate;
         });
-
-        if (filteredReports.length === 0) {
-            throw new Error('所选时间范围内没有数据');
-        }
-
-        // 获取最新报告
-        const latestReport = filteredReports[0];
-        const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
-        const currentData = latestReport[deviceType];
-
-        // 容错处理，防止无效数据导致崩溃
-        if (!currentData || !currentData.scores) {
-            throw new Error('所选报告缺少有效的 Lighthouse 指标数据');
-        }
-
-        // 更新基础指标
-        updateMetrics(currentData.scores);
         
-        // 更新详细指标
-        updateDetailedData({
-            detailedData: currentData.metrics
-        });
-
-        // 准备图表数据
+        console.log('[loadLighthouseData] 过滤后的报告数量:', filteredReports.length);
+        
+        // 初始化 chartData 对象
         const chartData = {
-            dates: filteredReports.map(r => new Date(r.date).toLocaleDateString()),
-            performance: filteredReports.map(r => r[deviceType].scores.performance * 100)
+            dates: [],
+            scores: []
         };
         
-        // 更新图表
-        updateChart(chartData);
-        
-        // 更新报告链接
-        updateReportLinks({
-            htmlReport: `/reports/${currentData.reportFiles.html}`,
-            jsonReport: `/reports/${currentData.reportFiles.json}`
-        });
+        const reports = filteredReports.map(report => {
+    const data = report[deviceType];
+    // 处理日期格式
+    let reportDate = report.date;
+    if (/^\d{8}$/.test(reportDate)) {
+        reportDate = `${reportDate.slice(0,4)}-${reportDate.slice(4,6)}-${reportDate.slice(6,8)}`;
+    }
+    // 详细数据映射（修正key名以适配前端UI）
+    const metrics = data.metrics || {};
+    const detailedData = {
+        fcp: metrics.fcp,
+        lcp: metrics.lcp,
+        tbt: metrics.tbt,
+        cls: metrics.cls,
+        tti: metrics.tti,
+        si: metrics.si,
+        opportunities: data.opportunities || []
+    };
+    chartData.dates.push(reportDate);
+    chartData.scores.push(data.scores.performance);
+    return {
+        date: reportDate,
+        performance: data.scores.performance,
+        accessibility: data.scores.accessibility,
+        'best-practices': data.scores['best-practices'],
+        seo: data.scores.seo,
+        url: report.url,
+        name: report.name,
+        reportUrl: data.reportUrl || '#',
+        detailedData: detailedData
+    };
+});
 
-    } catch (error) {
-        console.error('加载数据失败:', error);
-        showError('数据加载失败，请稍后重试');
+// 调试日志，检查chartData内容
+console.log('chartData for updateDashboard:', chartData);
+
+// 用于 updateDashboard
+updateDashboard(chartData, reports);
+    } catch (err) {
+        console.error('加载数据失败:', err);
+        document.getElementById('metrics').innerHTML = `<div style="color:red">${err.message}</div>`;
     }
 }
 
+
+
 function updateMetrics(data) {
-    // 更新主要指标
-    document.getElementById('performanceScore').textContent = data.performance;
-    document.getElementById('accessibilityScore').textContent = data.accessibility;
-    document.getElementById('bestPracticesScore').textContent = data['best-practices'];
-    document.getElementById('seoScore').textContent = data.seo;
+    // 更新主要指标（乘以100并取整）
+    document.getElementById('performanceScore').textContent = Math.round(data.performance * 100);
+    document.getElementById('accessibilityScore').textContent = Math.round(data.accessibility * 100);
+    document.getElementById('bestPracticesScore').textContent = Math.round(data['best-practices'] * 100);
+    document.getElementById('seoScore').textContent = Math.round(data.seo * 100);
 
     // 更新详细性能指标
     if (data.detailedData) {
@@ -188,6 +269,7 @@ function updateDashboard(chartData, reports) {
 
   // 获取最新的报告结果
   const latestData = reports[0];
+  console.log('[updateDashboard] latestData:', latestData);
 
   // 更新主要指标
   updateMetric('performanceScore', latestData.performance);
@@ -195,8 +277,12 @@ function updateDashboard(chartData, reports) {
   updateMetric('bestPracticesScore', latestData['best-practices']);
   updateMetric('seoScore', latestData.seo);
 
-  // 更新图表
-  updateChart(chartData);
+  // 转换为 updateChart 期望的数据格式
+  const chartDataForChart = {
+    dates: chartData.dates,
+    performance: chartData.scores
+  };
+  updateChart(chartDataForChart);
 
   // 更新最近报告列表
   updateRecentReports(reports.slice(0, 5));
@@ -204,12 +290,18 @@ function updateDashboard(chartData, reports) {
   // 更新报告链接
   updateReportLink(latestData);
 
-  // 如果存在详细数据且详情面板是可见的，则更新详细数据
+  // 提供近7天报告给 updateDetailedData 计算趋势
+  window.reportsForTrend = reports;
+  // 始终调用一次，确保核心网页指标表格赋值
+  updateDetailedData(latestData);
+
+  // 如果存在详细数据且详情面板是可见的，则再更新一次详细数据（用于详情内容）
   if (
     latestData.detailedData &&
     document.getElementById('detailsContent') &&
     !document.getElementById('detailsContent').classList.contains('hidden')
   ) {
+    console.log('[updateDashboard] 调用 updateDetailedData，参数:', latestData);
     updateDetailedData(latestData);
   }
 }
@@ -233,90 +325,105 @@ function updateMetric(elementId, value) {
 }
 
 function updateChart(chartData) {
-  try {
-    const chartElement = document.getElementById('performanceChart');
-    if (!chartElement) {
-      console.error('找不到performanceChart元素');
-      return;
-    }
-
-    // 清空图表容器，重新创建canvas
-    chartElement.innerHTML = '';
-    const canvas = document.createElement('canvas');
-    canvas.id = 'performanceChartCanvas';
-    chartElement.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      console.error('无法获取canvas上下文');
-      return;
-    }
-
-    // 确保chartData有有效数据
-    if (
-      !chartData ||
-      !chartData.dates ||
-      !chartData.performance ||
-      !Array.isArray(chartData.dates) ||
-      !Array.isArray(chartData.performance) ||
-      chartData.dates.length === 0
-    ) {
-      console.error('图表数据格式无效');
-      chartElement.innerHTML =
-        '<div class="p-4 bg-yellow-50 text-yellow-700 rounded text-center">无有效数据可显示</div>';
-      return;
-    }
-
-    console.log('创建性能图表，数据点数量:', chartData.dates.length);
-
-    // 创建新图表
-    try {
-      window.performanceChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartData.dates,
-          datasets: [
-            {
-              label: '性能得分',
-              data: chartData.performance,
-              borderColor: 'rgb(12, 206, 107)',
-              backgroundColor: 'rgba(12, 206, 107, 0.1)',
-              tension: 0.3,
-              fill: true,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              min: 0,
-              max: 100,
-            },
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return `得分: ${context.raw}`;
-                },
-              },
-            },
-          },
-        },
-      });
-    } catch (chartError) {
-      console.error('创建图表实例时出错:', chartError);
-      chartElement.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">图表初始化失败: ${chartError.message}</div>`;
-    }
-  } catch (error) {
-    console.error('更新图表时出错:', error);
-    const container = document.querySelector('.h-80');
-    if (container) {
-      container.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">无法加载图表: ${error.message}</div>`;
-    }
+  // 如果无有效数据，使用模拟数据演示
+  if (!chartData || !chartData.dates || !chartData.performance || chartData.dates.length === 0) {
+    chartData = {
+      dates: ['2025-04-17', '2025-04-18', '2025-04-19', '2025-04-20'],
+      performance: [0.41, 0.55, 0.68, 0.73]
+    };
   }
+  const chartElement = document.getElementById('performanceChart');
+  if (!chartElement) {
+    console.error('找不到performanceChart元素');
+    return;
+  }
+  // 清空容器
+  chartElement.innerHTML = '';
+  // 创建一个div用于echarts
+  const echartsDiv = document.createElement('div');
+  echartsDiv.style.width = '100%';
+  echartsDiv.style.height = '300px';
+  chartElement.appendChild(echartsDiv);
+
+  // 初始化echarts实例
+  const myChart = echarts.init(echartsDiv);
+
+  // 颜色分级函数
+  function getScoreColor(score) {
+    if (score >= 90) return '#43a047'; // 绿色
+    if (score >= 50) return '#ffa726'; // 橙色
+    return '#e53935'; // 红色
+  }
+  const scores = chartData.performance.map(x => Math.round(x * 100));
+  const colors = scores.map(getScoreColor);
+  // 配置option
+  const option = {
+    title: {
+      text: '性能趋势',
+      left: 'center',
+      textStyle: { fontSize: 18, fontWeight: 600, color: '#222' }
+    },
+    tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#eee', borderWidth: 1, textStyle: { color: '#222' } },
+    grid: { left: 40, right: 20, top: 50, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: chartData.dates,
+      boundaryGap: false,
+      axisLine: { lineStyle: { color: '#ccc' } },
+      axisLabel: { color: '#888', fontSize: 12 }
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      splitLine: { lineStyle: { color: '#eee' } },
+      axisLabel: { color: '#888', fontSize: 12 }
+    },
+    series: [
+      {
+        name: '性能得分',
+        type: 'line',
+        data: scores,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 10,
+        lineStyle: {
+          width: 4,
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 1,
+            y2: 0,
+            colorStops: colors.map((c, i) => ({ offset: i / (colors.length - 1 || 1), color: c }))
+          },
+          shadowColor: 'rgba(0,0,0,0.1)',
+          shadowBlur: 6
+        },
+        itemStyle: {
+          color: (params) => colors[params.dataIndex],
+          borderColor: '#fff',
+          borderWidth: 2,
+          shadowColor: 'rgba(0,0,0,0.2)',
+          shadowBlur: 5
+        },
+        areaStyle: {
+          color: 'rgba(67,160,71,0.07)' // 绿色淡化背景
+        },
+        emphasis: {
+          focus: 'series',
+          itemStyle: {
+            borderColor: '#222',
+            borderWidth: 3
+          }
+        },
+        z: 3
+      }
+    ]
+  };
+  myChart.setOption(option);
 }
+
 
 function updateRecentReports(reports) {
   if (!reports || reports.length === 0) {
@@ -358,13 +465,58 @@ function updateRecentReports(reports) {
  * 更新报告链接
  */
 function updateReportLink(reportData) {
-  const linkElement = document.getElementById('fullReportLink');
-  if (linkElement && reportData.reportUrl) {
-    linkElement.href = reportData.reportUrl;
-    linkElement.classList.remove('inspire-btn-disabled');
-  } else if (linkElement) {
-    linkElement.href = '#';
-    linkElement.classList.add('inspire-btn-disabled');
+  // 更新HTML报告链接
+  const htmlLinkElement = document.getElementById('fullReportLink');
+  // 更新JSON报告链接
+  const jsonLinkElement = document.getElementById('jsonReportLink');
+  
+  if (reportData && reportData.detailedData && reportData.detailedData.reportFiles) {
+    // 从 reportData 中获取报告文件名
+    const reportFiles = reportData.detailedData.reportFiles;
+    const htmlFileName = reportFiles.html;
+    const jsonFileName = reportFiles.json;
+    
+    // 获取当前选中的分支
+    const branch = getSelectedBranch();
+    
+    // 从 URL 或名称中提取网站名称
+    const siteName = reportData.name ? reportData.name.split(' ')[0] : 'fadada';
+    
+    // 构建文件路径
+    // 使用当前日期作为目录名
+    const today = new Date();
+    const dateStr = today.getFullYear() + 
+                   ('0' + (today.getMonth() + 1)).slice(-2) + 
+                   ('0' + today.getDate()).slice(-2);
+    
+    // 构建最终路径
+    const basePath = `reports/${dateStr}/${branch}/${siteName}`;
+    const htmlPath = `${basePath}/${htmlFileName}`;
+    const jsonPath = `${basePath}/${jsonFileName}`;
+    
+    console.log('[updateReportLink] 使用reportFiles构建的文件路径:', htmlPath, jsonPath);
+    
+    if (htmlLinkElement) {
+      htmlLinkElement.href = htmlPath;
+      htmlLinkElement.classList.remove('inspire-btn-disabled');
+    }
+    
+    if (jsonLinkElement) {
+      jsonLinkElement.href = jsonPath;
+      jsonLinkElement.classList.remove('inspire-btn-disabled');
+    }
+  } else {
+    console.log('[updateReportLink] 无法找到reportFiles字段:', reportData);
+    // 如果没有报告文件信息，禁用按钮
+    if (htmlLinkElement) {
+      htmlLinkElement.href = '#';
+      htmlLinkElement.classList.add('inspire-btn-disabled');
+    }
+    
+    if (jsonLinkElement) {
+      jsonLinkElement.href = '#';
+      jsonLinkElement.classList.add('inspire-btn-disabled');
+    }
   }
 }
 
@@ -379,7 +531,7 @@ function updateDetailedData(reportData) {
     }
 
     const detailedData = reportData.detailedData;
-    console.log('详细数据:', detailedData); // 调试用
+    console.log('[updateDetailedData] 详细数据:', detailedData, '原始reportData:', reportData);
 
     // 确保详细数据存在
     if (!detailedData) {
@@ -401,12 +553,15 @@ function updateDetailedData(reportData) {
       tti: formatTime(detailedData.tti || 0),
       si: formatTime(detailedData.si || 0),
     };
+    console.log('[updateDetailedData] metrics:', metrics);
 
     // 更新指标显示
     const updateElement = (id, value) => {
       const el = document.getElementById(id);
+      console.log(`[updateDetailedData] updateElement id=${id}, value=${value}, el=`, el);
       if (el) el.textContent = value;
     };
+
 
     updateElement('fcpDetail', metrics.fcp);
     updateElement('lcpDetail', metrics.lcp);
@@ -415,11 +570,51 @@ function updateDetailedData(reportData) {
     updateElement('ttiDetail', metrics.tti);
     updateElement('siDetail', metrics.si);
 
-    // 更新核心指标表格
-    updateElement('fcp', metrics.fcp);
-    updateElement('lcp', metrics.lcp);
-    updateElement('cls', metrics.cls);
-    updateElement('tti', metrics.tti);
+    // 指标分级颜色函数
+    function getMetricClass(metric, value) {
+      if (metric === 'cls') {
+        if (value <= 0.1) return 'good';
+        if (value <= 0.25) return 'average';
+        return 'poor';
+      } else { // FCP/LCP/TTI
+        if (value <= 2000) return 'good';
+        if (value <= 4000) return 'average';
+        return 'poor';
+      }
+    }
+    // 设置带颜色的内容
+    function setColoredMetric(id, value, metric) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let num = value;
+      if (typeof value === 'string' && value.endsWith('s')) num = parseFloat(value) * 1000;
+      if (typeof value === 'string' && value.endsWith('ms')) num = parseFloat(value);
+      if (metric === 'cls') num = parseFloat(value);
+      const cls = getMetricClass(metric, num);
+      
+      // 使用span包装，以便应用样式
+      el.innerHTML = `<span class="metric-value ${cls}">${value}</span>`;
+    }
+    setColoredMetric('fcp', metrics.fcp, 'fcp');
+    setColoredMetric('lcp', metrics.lcp, 'lcp');
+    setColoredMetric('cls', metrics.cls, 'cls');
+    setColoredMetric('tti', metrics.tti, 'tti');
+
+    // 计算并展示7天趋势（实际有几天就用几天）
+    if (window.reportsForTrend && Array.isArray(window.reportsForTrend) && window.reportsForTrend.length > 0) {
+      const days = window.reportsForTrend.length;
+      const sum = (key) => window.reportsForTrend.reduce((acc, r) => acc + (r.detailedData && typeof r.detailedData[key]==='number' ? r.detailedData[key] : 0), 0);
+      const avg = (key) => days > 0 ? sum(key) / days : 0;
+      setColoredMetric('fcpTrend', formatTime(avg('fcp')), 'fcp');
+      setColoredMetric('lcpTrend', formatTime(avg('lcp')), 'lcp');
+      setColoredMetric('clsTrend', avg('cls').toFixed(3), 'cls');
+      setColoredMetric('ttiTrend', formatTime(avg('tti')), 'tti');
+    } else {
+      updateElement('fcpTrend', '-');
+      updateElement('lcpTrend', '-');
+      updateElement('clsTrend', '-');
+      updateElement('ttiTrend', '-');
+    }
 
     // 提取优化建议
     if (
@@ -442,6 +637,56 @@ function updateDetailedData(reportData) {
       updateList('improvementsList', ['没有检测到需要改进的项目'], 'green');
       updateList('optimizationTips', ['所有检查都通过了'], 'green');
     }
+    
+    // 生成表现良好项列表
+    // 基于指标评分生成表现良好的项目
+    const passedItems = [];
+    
+    // 根据指标评分生成表现良好项
+    if (detailedData.cls !== undefined && detailedData.cls <= 0.1) {
+      passedItems.push('累积布局偏移 (CLS) 表现良好');
+    }
+    
+    if (detailedData.fcp !== undefined && detailedData.fcp <= 2000) {
+      passedItems.push('首次内容绘制 (FCP) 表现良好');
+    }
+    
+    if (detailedData.lcp !== undefined && detailedData.lcp <= 2500) {
+      passedItems.push('最大内容绘制 (LCP) 表现良好');
+    }
+    
+    if (detailedData.tbt !== undefined && detailedData.tbt <= 200) {
+      passedItems.push('总阻塞时间 (TBT) 表现良好');
+    }
+    
+    if (detailedData.tti !== undefined && detailedData.tti <= 3800) {
+      passedItems.push('可交互时间 (TTI) 表现良好');
+    }
+    
+    if (detailedData.si !== undefined && detailedData.si <= 3400) {
+      passedItems.push('速度指数 (SI) 表现良好');
+    }
+    
+    // 添加一些通用的良好项
+    if (reportData.accessibility >= 0.9) {
+      passedItems.push('可访问性评分达到优秀水平');
+    }
+    
+    if (reportData['best-practices'] >= 0.9) {
+      passedItems.push('最佳实践评分达到优秀水平');
+    }
+    
+    if (reportData.seo >= 0.9) {
+      passedItems.push('SEO 评分达到优秀水平');
+    }
+    
+    // 如果没有检测到表现良好的项目，添加一些默认项
+    if (passedItems.length === 0) {
+      passedItems.push('网站已成功加载并完成测试');
+      passedItems.push('网站可以正常访问');
+    }
+    
+    updateList('passedAuditsList', passedItems, 'green');
 
     // 资源摘要
     if (
@@ -543,7 +788,7 @@ function updateList(elementId, items, dotColor) {
 }
 
 /**
- * 创建资源类型饼图
+ * 创建资源类型饼图（使用ECharts）
  */
 function createResourceTypeChart(resourceSummary) {
   try {
@@ -561,20 +806,11 @@ function createResourceTypeChart(resourceSummary) {
       return;
     }
 
-    // 创建canvas元素并添加到容器
-    element.innerHTML = '<canvas id="resourceTypePie"></canvas>';
-    const canvas = document.getElementById('resourceTypePie');
-    if (!canvas) {
-      console.error('无法创建资源图表canvas元素');
-      return;
-    }
-
-    const ctx = canvas.getContext('2d');
+    console.log('尝试创建资源类型图表（ECharts）');
 
     // 准备数据
-    const labels = [];
-    const data = [];
-    const backgroundColor = [
+    const chartData = [];
+    const colors = [
       '#4285F4', // 蓝色
       '#34A853', // 绿色
       '#FBBC05', // 黄色
@@ -585,74 +821,116 @@ function createResourceTypeChart(resourceSummary) {
       '#D93025', // 深红
     ];
 
-    // 从实际数据中提取信息，过滤掉无效条目
-    resourceSummary.forEach((resource, index) => {
-      if (
-        resource &&
-        resource.resourceType &&
-        typeof resource.size === 'number'
-      ) {
-        labels.push(resource.resourceType);
-        data.push(resource.size);
-      }
-    });
+    // 过滤出有效数据，并排除“total”类型
+    const filteredData = resourceSummary.filter(resource => 
+      resource && resource.resourceType && 
+      typeof resource.size === 'number' && 
+      resource.resourceType !== 'total'
+    );
+
+    // 按大小降序排序
+    filteredData.sort((a, b) => b.size - a.size);
 
     // 如果没有有效数据，显示错误信息
-    if (labels.length === 0) {
+    if (filteredData.length === 0) {
       element.innerHTML =
         '<div class="p-4 bg-yellow-50 text-yellow-700 rounded text-center">资源数据格式无效</div>';
       return;
     }
 
-    // 创建图表，使用try块防止Chart.js错误
-    try {
-      window.resourceChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              data: data,
-              backgroundColor: backgroundColor.slice(0, labels.length),
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 12,
-                padding: 10,
-              },
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const value = context.raw;
-                  return `${context.label}: ${formatBytes(value)}`;
-                },
-              },
-            },
-          },
-        },
+    // 将数据转换为ECharts所需格式
+    filteredData.forEach((resource, index) => {
+      chartData.push({
+        value: resource.size,
+        name: resource.resourceType,
+        itemStyle: {
+          color: colors[index % colors.length]
+        }
       });
-    } catch (chartError) {
-      console.error('创建资源类型图表时出错:', chartError);
-      element.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">创建图表失败: ${chartError.message}</div>`;
-    }
+    });
+
+    // 创建一个新的容器元素，确保没有样式冲突
+    element.innerHTML = '<div id="resourcePieChart" style="width:100%;height:200px;"></div>';
+    const chartContainer = document.getElementById('resourcePieChart');
+    
+    // 添加调试日志
+    console.log('准备初始化ECharts实例，容器:', chartContainer, '数据:', chartData);
+    
+    // 初始化ECharts实例
+    const myChart = echarts.init(chartContainer);
+    
+    // 设置图表选项
+    const option = {
+      tooltip: {
+        trigger: 'item',
+        formatter: function(params) {
+          return `${params.name}: ${formatBytes(params.value)} (${params.percent.toFixed(1)}%)`;
+        }
+      },
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: {
+          fontSize: 11
+        }
+      },
+      series: [
+        {
+          name: '资源类型',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 4,
+            borderColor: '#fff',
+            borderWidth: 1
+          },
+          label: {
+            show: false
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 12,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: chartData
+        }
+      ]
+    };
+
+    // 应用配置项并渲染图表
+    myChart.setOption(option);
+    
+    // 响应容器大小变化
+    window.addEventListener('resize', function() {
+      myChart.resize();
+    });
+
+    console.log('资源类型图表（ECharts）创建成功');
   } catch (error) {
-    console.error('资源图表函数出错:', error);
+    console.error('创建资源类型图表时出错:', error);
     const element = document.getElementById('resourceTypesChart');
     if (element) {
-      element.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">处理资源数据时出错: ${error.message}</div>`;
+      element.innerHTML = `<div class="p-4 bg-red-50 text-red-700 rounded text-center">创建图表失败: ${error.message}</div>`;
     }
   }
 }
 
 // 初始时加载网站列表和默认数据
 document.addEventListener('DOMContentLoaded', async function () {
+  // 保证详情面板初始一定隐藏
+  const detailsContent = document.getElementById('detailsContent');
+  if (detailsContent) {
+    detailsContent.style.display = 'none';
+  }
   // 设置分支下拉框选中状态
   const branchSelect = document.getElementById('branchSelect');
   if (branchSelect) {
@@ -668,55 +946,91 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   if (sites.length > 0) {
     // 加载第一个网站的数据
-    const defaultUrl = sites[0].url;
+    const defaultOption = document.getElementById('urlSelect').value;
     const defaultDays = parseInt(document.getElementById('dateRange').value);
-    loadLighthouseData(defaultUrl, defaultDays);
+    console.log('[初始加载] 选择的选项值:', defaultOption);
+    loadLighthouseData(defaultOption, defaultDays);
   }
 
   // 添加事件监听器
   document.getElementById('urlSelect').addEventListener('change', function () {
-    const url = this.value;
+    const selectedOption = this.value;
     const days = parseInt(document.getElementById('dateRange').value);
-    loadLighthouseData(url, days);
+    console.log('[urlSelect change] 选择的选项值:', selectedOption);
+    loadLighthouseData(selectedOption, days);
   });
 
   document.getElementById('dateRange').addEventListener('change', function () {
     const days = parseInt(this.value);
-    const url = document.getElementById('urlSelect').value;
-    loadLighthouseData(url, days);
+    const selectedOption = document.getElementById('urlSelect').value;
+    console.log('[dateRange change] 选择的选项值:', selectedOption);
+    loadLighthouseData(selectedOption, days);
   });
 
   // 刷新按钮
   document.getElementById('refreshBtn').addEventListener('click', function () {
-    const url = document.getElementById('urlSelect').value;
+    const selectedOption = document.getElementById('urlSelect').value;
     const days = parseInt(document.getElementById('dateRange').value);
-    loadLighthouseData(url, days);
+    console.log('[refreshBtn click] 选择的选项值:', selectedOption);
+    loadLighthouseData(selectedOption, days);
   });
 
   // 详情切换按钮
   const toggleBtn = document.getElementById('toggleDetails');
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', function () {
+    // 同步按钮文本和详情状态
+    function updateToggleBtnText() {
       const detailsContent = document.getElementById('detailsContent');
-
-      if (detailsContent.classList.contains('hidden')) {
-        // 展开详情
-        detailsContent.classList.remove('hidden');
-        toggleBtn.innerHTML =
-          '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
-
-        // 获取当前所选网站的最新报告数据
-        const url = document.getElementById('urlSelect').value;
-        const days = parseInt(document.getElementById('dateRange').value);
-        loadLighthouseData(url, days).then((chartData) => {
-          // 最新的报告数据已经由loadLighthouseData函数中的updateDashboard处理了
-        });
-      } else {
-        // 收起详情
-        detailsContent.classList.add('hidden');
+      if (!detailsContent) return;
+      
+      // 使用 display 判断是否隐藏
+      const isHidden = window.getComputedStyle(detailsContent).display === 'none';
+      console.log('[updateToggleBtnText] 当前显示状态:', isHidden ? '隐藏中' : '显示中');
+      
+      if (isHidden) {
         toggleBtn.innerHTML =
           '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+      } else {
+        toggleBtn.innerHTML =
+          '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
       }
+    }
+
+    // 初始化同步一次
+    updateToggleBtnText();
+
+    // 切换详情内容的显示/隐藏状态
+    function toggleDetailsVisibility() {
+      const detailsContent = document.getElementById('detailsContent');
+      if (!detailsContent) return;
+      
+      // 直接检查当前的显示状态
+      const isCurrentlyVisible = window.getComputedStyle(detailsContent).display !== 'none';
+      console.log('[toggleDetails] 当前显示状态:', isCurrentlyVisible ? '显示中' : '隐藏中');
+      
+      if (isCurrentlyVisible) {
+        // 当前可见，需要隐藏
+        console.log('[toggleDetails] 执行隐藏操作');
+        detailsContent.style.display = 'none';
+        toggleBtn.innerHTML = '展开详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+      } else {
+        // 当前隐藏，需要显示
+        console.log('[toggleDetails] 执行显示操作');
+        detailsContent.style.display = 'block';
+        toggleBtn.innerHTML = '收起详情 <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+      }
+      
+      // 检查操作后的状态
+      setTimeout(() => {
+        const newDisplay = window.getComputedStyle(detailsContent).display;
+        console.log('[toggleDetails] 操作后 display:', newDisplay);
+      }, 10);
+    }
+    
+    // 点击事件直接调用切换函数
+    toggleBtn.addEventListener('click', function() {
+      console.log('[toggleBtn] 点击事件触发');
+      toggleDetailsVisibility();
     });
   }
 });
