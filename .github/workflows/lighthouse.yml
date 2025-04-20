@@ -57,7 +57,8 @@ jobs:
           npx lighthouse ${{ matrix.site.url }} \
             --output=json \
             --output=html \
-            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop
+            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop \
+            --chrome-flags="--no-sandbox --headless"
 
       - name: Run Lighthouse (Mobile)
         run: |
@@ -65,7 +66,8 @@ jobs:
             --output=json \
             --output=html \
             --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile \
-            --preset=mobile
+            --preset=mobile \
+            --chrome-flags="--no-sandbox --headless"
 
       - name: Process desktop report
         run: |
