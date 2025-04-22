@@ -17,30 +17,65 @@ function setSelectedBranch(branch) {
   localStorage.setItem('selectedBranch', branch);
 }
 
-async function loadSiteList() {
+async function loadSiteList(branch = getSelectedBranch()) {
   try {
-    const branch = getSelectedBranch();
     const response = await fetch(`reports/${branch}-history.json`);
     if (!response.ok) {
       throw new Error('无法加载报告数据');
     }
 
     const data = await response.json();
-
+    console.log('loadSiteList',data)
+    
+    // 先对报告按日期倒序排序，使最新的在前面
+    data.reports.sort((a, b) => {
+      // 处理不同的日期格式
+      const dateA = a.date;
+      const dateB = b.date;
+      
+      // 如果是数字格式的日期字符串 (20250420)
+      if (/^\d{8}$/.test(dateA) && /^\d{8}$/.test(dateB)) {
+        return dateB.localeCompare(dateA); // 倒序排列
+      }
+      
+      // 如果是其他格式，尝试直接比较
+      try {
+        return new Date(dateB) - new Date(dateA); // 倒序排列
+      } catch (e) {
+        return 0; // 无法比较时保持原有顺序
+      }
+    });
+    
     // 提取所有不同的网站和设备类型组合
     const sitesMap = {};
     data.reports.forEach((report) => {
       if (report.url) {
-        // 兼容没有 name 字段的情况
-        const siteName = report.name || report.url;
-        // 兼容没有 device 字段的情况
-        const deviceType = report.device || 'mobile';
-        const key = `${report.url}_${deviceType}`;
-        sitesMap[key] = {
-          url: report.url,
-          name: `${siteName} (${deviceType === 'desktop' ? 'PC端' : '移动端'})`,
-          device: deviceType
-        };
+        // 针对 desktop 和 mobile 分别创建选项
+        // 格式化日期显示
+        let displayDate = report.date;
+        if (/^\d{8}$/.test(report.date)) {
+          displayDate = `${report.date.slice(0,4)}-${report.date.slice(4,6)}-${report.date.slice(6,8)}`;
+        }
+        
+        if (report.desktop) {
+          const key = `${report.url}_desktop_${report.date}`;
+          sitesMap[key] = {
+            url: report.url,
+            name: `${report.url} (PC端 | ${displayDate})`,
+            device: 'desktop',
+            date: report.date
+          };
+        }
+        
+        if (report.mobile) {
+          const key = `${report.url}_mobile_${report.date}`;
+          sitesMap[key] = {
+            url: report.url,
+            name: `${report.url} (移动端 | ${displayDate})`,
+            device: 'mobile',
+            date: report.date
+          };
+        }
       }
     });
 
@@ -104,7 +139,7 @@ async function getBranchOptions() {
 // 兼容全局调用
 window.getBranchOptions = getBranchOptions;
 
-async function loadLighthouseData(urlOrData, days, branch = 'main') {
+async function loadLighthouseData(urlOrData, days, branch = getSelectedBranch()) {
     // 处理传入的是 JSON 字符串的情况
     let url, deviceType;
     
@@ -285,7 +320,7 @@ function updateDashboard(chartData, reports) {
   updateChart(chartDataForChart);
 
   // 更新最近报告列表
-  updateRecentReports(reports.slice(0, 5));
+  updateRecentReports(reports.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5));
 
   // 更新报告链接
   updateReportLink(latestData);
@@ -967,44 +1002,63 @@ document.addEventListener('DOMContentLoaded', async function () {
   const branchSelect = document.getElementById('branchSelect');
   if (branchSelect) {
     branchSelect.value = getSelectedBranch();
-    branchSelect.addEventListener('change', function () {
-      setSelectedBranch(this.value);
-      location.reload(); // 切换分支后刷新页面/数据
+    branchSelect.addEventListener('change', async function () {
+      const selectedBranch = this.value;
+      setSelectedBranch(selectedBranch);
+      
+      // 切换分支时，重新加载网站列表
+      const sites = await loadSiteList(selectedBranch);
+      if (sites.length > 0) {
+        // 自动选中第一个网站并加载数据
+        document.getElementById('urlSelect').value = JSON.stringify({
+          url: sites[0].url,
+          device: sites[0].device
+        });
+        const days = parseInt(document.getElementById('dateRange').value);
+        loadLighthouseData(JSON.stringify({
+          url: sites[0].url,
+          device: sites[0].device
+        }), days, selectedBranch);
+      }
     });
   }
 
   // 首先加载网站列表
-  const sites = await loadSiteList();
+  const currentBranch = getSelectedBranch();
+  const sites = await loadSiteList(currentBranch);
 
   if (sites.length > 0) {
     // 加载第一个网站的数据
     const defaultOption = document.getElementById('urlSelect').value;
     const defaultDays = parseInt(document.getElementById('dateRange').value);
     console.log('[初始加载] 选择的选项值:', defaultOption);
-    loadLighthouseData(defaultOption, defaultDays);
+    loadLighthouseData(defaultOption, defaultDays, currentBranch);
   }
 
   // 添加事件监听器
   document.getElementById('urlSelect').addEventListener('change', function () {
     const selectedOption = this.value;
     const days = parseInt(document.getElementById('dateRange').value);
-    console.log('[urlSelect change] 选择的选项值:', selectedOption);
-    loadLighthouseData(selectedOption, days);
+    const branch = getSelectedBranch();
+    console.log('[urlSelect change] 选择的选项值:', selectedOption, '分支:', branch);
+    loadLighthouseData(selectedOption, days, branch);
   });
 
   document.getElementById('dateRange').addEventListener('change', function () {
     const days = parseInt(this.value);
     const selectedOption = document.getElementById('urlSelect').value;
-    console.log('[dateRange change] 选择的选项值:', selectedOption);
-    loadLighthouseData(selectedOption, days);
+    const branch = getSelectedBranch();
+    console.log('[dateRange change] 选择的选项值:', selectedOption, '分支:', branch);
+    loadLighthouseData(selectedOption, days, branch);
   });
 
   // 刷新按钮
   document.getElementById('refreshBtn').addEventListener('click', function () {
     const selectedOption = document.getElementById('urlSelect').value;
     const days = parseInt(document.getElementById('dateRange').value);
-    console.log('[refreshBtn click] 选择的选项值:', selectedOption);
-    loadLighthouseData(selectedOption, days);
+    const branch = getSelectedBranch();
+    console.log('[refreshBtn click] 选择的选项值:', selectedOption, '分支:', branch);
+    loadLighthouseData(selectedOption, days, branch);
   });
 
   // 详情切换按钮
