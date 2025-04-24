@@ -1779,6 +1779,450 @@
           "json": "lhr-fadada-mobile.report.json"
         }
       }
+    },
+    {
+      "url": "https://www.fadada.com",
+      "date": "20250424",
+      "desktop": {
+        "scores": {
+          "performance": 0.43,
+          "accessibility": 0.74,
+          "best-practices": 0.75,
+          "seo": 0.85
+        },
+        "metrics": {
+          "fcp": 6910,
+          "lcp": 7918,
+          "tbt": 552,
+          "cls": 0,
+          "tti": 10723,
+          "si": 9405
+        },
+        "opportunities": [
+          {
+            "title": "First Contentful Paint",
+            "description": "First Contentful Paint marks the time at which the first text or image is painted. [Learn more about the First Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/)."
+          },
+          {
+            "title": "Largest Contentful Paint",
+            "description": "Largest Contentful Paint marks the time at which the largest text or image is painted. [Learn more about the Largest Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)"
+          },
+          {
+            "title": "Total Blocking Time",
+            "description": "Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds. [Learn more about the Total Blocking Time metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time/)."
+          },
+          {
+            "title": "Speed Index",
+            "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/)."
+          },
+          {
+            "title": "Document request latency",
+            "description": "Your first network request is the most important.  Reduce its latency by avoiding redirects, ensuring a fast server response, and enabling text compression."
+          },
+          {
+            "title": "Optimize DOM size",
+            "description": "A large DOM can increase the duration of style calculations and layout reflows, impacting page responsiveness. A large DOM will also increase memory usage. [Learn how to avoid an excessive DOM size](https://developer.chrome.com/docs/lighthouse/performance/dom-size/)."
+          },
+          {
+            "title": "Duplicated JavaScript",
+            "description": "Remove large, duplicate JavaScript modules from bundles to reduce unnecessary bytes consumed by network activity."
+          },
+          {
+            "title": "Font display",
+            "description": "Consider setting [font-display](https://developer.chrome.com/blog/font-display) to swap or optional to ensure text is consistently visible. swap can be further optimized to mitigate layout shifts with [font metric overrides](https://developer.chrome.com/blog/font-fallbacks)."
+          },
+          {
+            "title": "Forced reflow",
+            "description": "Many APIs, typically reading layout geometry, force the rendering engine to pause script execution in order to calculate the style and layout. Learn more about [forced reflow](https://developers.google.com/web/fundamentals/performance/rendering/avoid-large-complex-layouts-and-layout-thrashing#avoid-forced-synchronous-layouts) and its mitigations."
+          },
+          {
+            "title": "Improve image delivery",
+            "description": "Reducing the download time of images can improve the perceived load time of the page and LCP. [Learn more about optimizing image size](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)"
+          },
+          {
+            "title": "INP by phase",
+            "description": "Start investigating with the longest phase. [Delays can be minimized](https://web.dev/articles/optimize-inp#optimize_interactions). To reduce processing duration, [optimize the main-thread costs](https://web.dev/articles/optimize-long-tasks), often JS."
+          },
+          {
+            "title": "LCP request discovery",
+            "description": "Optimize LCP by making the LCP image [discoverable](https://web.dev/articles/optimize-lcp#1_eliminate_resource_load_delay) from the HTML immediately, and [avoiding lazy-loading](https://web.dev/articles/lcp-lazy-loading)"
+          },
+          {
+            "title": "Network dependency tree",
+            "description": "[Avoid chaining critical requests](https://developer.chrome.com/docs/lighthouse/performance/critical-request-chains) by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load."
+          },
+          {
+            "title": "Render blocking requests",
+            "description": "Requests are blocking the page's initial render, which may delay LCP. [Deferring or inlining](https://web.dev/learn/performance/understanding-the-critical-path#render-blocking_resources/) can move these network requests out of the critical path."
+          },
+          {
+            "title": "CSS Selector costs",
+            "description": "If Recalculate Style costs remain high, selector optimization can reduce them. [Optimize the selectors](https://developer.chrome.com/docs/devtools/performance/selector-stats) with both high elapsed time and high slow-path %. Simpler selectors, fewer selectors, a smaller DOM, and a shallower DOM will all reduce matching costs."
+          },
+          {
+            "title": "Use efficient cache lifetimes",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
+          },
+          {
+            "title": "Time to Interactive",
+            "description": "Time to Interactive is the amount of time it takes for the page to become fully interactive. [Learn more about the Time to Interactive metric](https://developer.chrome.com/docs/lighthouse/performance/interactive/)."
+          },
+          {
+            "title": "Max Potential First Input Delay",
+            "description": "The maximum potential First Input Delay that your users could experience is the duration of the longest task. [Learn more about the Maximum Potential First Input Delay metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-max-potential-fid/)."
+          },
+          {
+            "title": "First Meaningful Paint",
+            "description": "First Meaningful Paint measures when the primary content of a page is visible. [Learn more about the First Meaningful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-meaningful-paint/)."
+          },
+          {
+            "title": "Eliminate render-blocking resources",
+            "description": "Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline and deferring all non-critical JS/styles. [Learn how to eliminate render-blocking resources](https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/)."
+          },
+          {
+            "title": "Properly size images",
+            "description": "Serve images that are appropriately-sized to save cellular data and improve load time. [Learn how to size images](https://developer.chrome.com/docs/lighthouse/performance/uses-responsive-images/)."
+          },
+          {
+            "title": "Defer offscreen images",
+            "description": "Consider lazy-loading offscreen and hidden images after all critical resources have finished loading to lower time to interactive. [Learn how to defer offscreen images](https://developer.chrome.com/docs/lighthouse/performance/offscreen-images/)."
+          },
+          {
+            "title": "Reduce unused CSS",
+            "description": "Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. [Learn how to reduce unused CSS](https://developer.chrome.com/docs/lighthouse/performance/unused-css-rules/)."
+          },
+          {
+            "title": "Reduce unused JavaScript",
+            "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
+          },
+          {
+            "title": "Efficiently encode images",
+            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
+          },
+          {
+            "title": "Serve images in next-gen formats",
+            "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
+          },
+          {
+            "title": "Enable text compression",
+            "description": "Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more about text compression](https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression/)."
+          },
+          {
+            "title": "Avoid serving legacy JavaScript to modern browsers",
+            "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
+          },
+          {
+            "title": "Avoid enormous network payloads",
+            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
+          },
+          {
+            "title": "Serve static assets with an efficient cache policy",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more about efficient cache policies](https://developer.chrome.com/docs/lighthouse/performance/uses-long-cache-ttl/)."
+          },
+          {
+            "title": "Avoid an excessive DOM size",
+            "description": "A large DOM will increase memory usage, cause longer [style calculations](https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations), and produce costly [layout reflows](https://developers.google.com/speed/articles/reflow). [Learn how to avoid an excessive DOM size](https://developer.chrome.com/docs/lighthouse/performance/dom-size/)."
+          },
+          {
+            "title": "User Timing marks and measures",
+            "description": "Consider instrumenting your app with the User Timing API to measure your app's real-world performance during key user experiences. [Learn more about User Timing marks](https://developer.chrome.com/docs/lighthouse/performance/user-timings/)."
+          },
+          {
+            "title": "Reduce JavaScript execution time",
+            "description": "Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. [Learn how to reduce Javascript execution time](https://developer.chrome.com/docs/lighthouse/performance/bootup-time/)."
+          },
+          {
+            "title": "Minimize main-thread work",
+            "description": "Consider reducing the time spent parsing, compiling and executing JS. You may find delivering smaller JS payloads helps with this. [Learn how to minimize main-thread work](https://developer.chrome.com/docs/lighthouse/performance/mainthread-work-breakdown/)"
+          },
+          {
+            "title": "Ensure text remains visible during webfont load",
+            "description": "Leverage the `font-display` CSS feature to ensure text is user-visible while webfonts are loading. [Learn more about `font-display`](https://developer.chrome.com/docs/lighthouse/performance/font-display/)."
+          },
+          {
+            "title": "Lazy load third-party resources with facades",
+            "description": "Some third-party embeds can be lazy loaded. Consider replacing them with a facade until they are required. [Learn how to defer third-parties with a facade](https://developer.chrome.com/docs/lighthouse/performance/third-party-facades/)."
+          },
+          {
+            "title": "Largest Contentful Paint element",
+            "description": "This is the largest contentful element painted within the viewport. [Learn more about the Largest Contentful Paint element](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)"
+          },
+          {
+            "title": "Largest Contentful Paint image was not lazily loaded",
+            "description": "Above-the-fold images that are lazily loaded render later in the page lifecycle, which can delay the largest contentful paint. [Learn more about optimal lazy loading](https://web.dev/articles/lcp-lazy-loading)."
+          },
+          {
+            "title": "Image elements do not have explicit `width` and `height`",
+            "description": "Set an explicit width and height on image elements to reduce layout shifts and improve CLS. [Learn how to set image dimensions](https://web.dev/articles/optimize-cls#images_without_dimensions)"
+          },
+          {
+            "title": "Page prevented back/forward cache restoration",
+            "description": "Many navigations are performed by going back to a previous page, or forwards again. The back/forward cache (bfcache) can speed up these return navigations. [Learn more about the bfcache](https://developer.chrome.com/docs/lighthouse/performance/bf-cache/)"
+          }
+        ],
+        "resourceSummary": [
+          {
+            "resourceType": "total",
+            "size": 6078499
+          },
+          {
+            "resourceType": "media",
+            "size": 2565343
+          },
+          {
+            "resourceType": "image",
+            "size": 2387422
+          },
+          {
+            "resourceType": "document",
+            "size": 482256
+          },
+          {
+            "resourceType": "script",
+            "size": 374041
+          },
+          {
+            "resourceType": "font",
+            "size": 117245
+          },
+          {
+            "resourceType": "other",
+            "size": 76671
+          },
+          {
+            "resourceType": "stylesheet",
+            "size": 75521
+          },
+          {
+            "resourceType": "third-party",
+            "size": 71392
+          }
+        ],
+        "reportFiles": {
+          "html": "lhr-fadada-desktop.report.html",
+          "json": "lhr-fadada-desktop.report.json"
+        }
+      },
+      "mobile": {
+        "scores": {
+          "performance": 0.45,
+          "accessibility": 0.74,
+          "best-practices": 0.75,
+          "seo": 0.85
+        },
+        "metrics": {
+          "fcp": 6327,
+          "lcp": 7622,
+          "tbt": 503,
+          "cls": 0,
+          "tti": 10579,
+          "si": 8819
+        },
+        "opportunities": [
+          {
+            "title": "First Contentful Paint",
+            "description": "First Contentful Paint marks the time at which the first text or image is painted. [Learn more about the First Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/)."
+          },
+          {
+            "title": "Largest Contentful Paint",
+            "description": "Largest Contentful Paint marks the time at which the largest text or image is painted. [Learn more about the Largest Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)"
+          },
+          {
+            "title": "Total Blocking Time",
+            "description": "Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds. [Learn more about the Total Blocking Time metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time/)."
+          },
+          {
+            "title": "Speed Index",
+            "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/)."
+          },
+          {
+            "title": "Document request latency",
+            "description": "Your first network request is the most important.  Reduce its latency by avoiding redirects, ensuring a fast server response, and enabling text compression."
+          },
+          {
+            "title": "Optimize DOM size",
+            "description": "A large DOM can increase the duration of style calculations and layout reflows, impacting page responsiveness. A large DOM will also increase memory usage. [Learn how to avoid an excessive DOM size](https://developer.chrome.com/docs/lighthouse/performance/dom-size/)."
+          },
+          {
+            "title": "Duplicated JavaScript",
+            "description": "Remove large, duplicate JavaScript modules from bundles to reduce unnecessary bytes consumed by network activity."
+          },
+          {
+            "title": "Font display",
+            "description": "Consider setting [font-display](https://developer.chrome.com/blog/font-display) to swap or optional to ensure text is consistently visible. swap can be further optimized to mitigate layout shifts with [font metric overrides](https://developer.chrome.com/blog/font-fallbacks)."
+          },
+          {
+            "title": "Forced reflow",
+            "description": "Many APIs, typically reading layout geometry, force the rendering engine to pause script execution in order to calculate the style and layout. Learn more about [forced reflow](https://developers.google.com/web/fundamentals/performance/rendering/avoid-large-complex-layouts-and-layout-thrashing#avoid-forced-synchronous-layouts) and its mitigations."
+          },
+          {
+            "title": "Improve image delivery",
+            "description": "Reducing the download time of images can improve the perceived load time of the page and LCP. [Learn more about optimizing image size](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)"
+          },
+          {
+            "title": "INP by phase",
+            "description": "Start investigating with the longest phase. [Delays can be minimized](https://web.dev/articles/optimize-inp#optimize_interactions). To reduce processing duration, [optimize the main-thread costs](https://web.dev/articles/optimize-long-tasks), often JS."
+          },
+          {
+            "title": "LCP request discovery",
+            "description": "Optimize LCP by making the LCP image [discoverable](https://web.dev/articles/optimize-lcp#1_eliminate_resource_load_delay) from the HTML immediately, and [avoiding lazy-loading](https://web.dev/articles/lcp-lazy-loading)"
+          },
+          {
+            "title": "Network dependency tree",
+            "description": "[Avoid chaining critical requests](https://developer.chrome.com/docs/lighthouse/performance/critical-request-chains) by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load."
+          },
+          {
+            "title": "Render blocking requests",
+            "description": "Requests are blocking the page's initial render, which may delay LCP. [Deferring or inlining](https://web.dev/learn/performance/understanding-the-critical-path#render-blocking_resources/) can move these network requests out of the critical path."
+          },
+          {
+            "title": "CSS Selector costs",
+            "description": "If Recalculate Style costs remain high, selector optimization can reduce them. [Optimize the selectors](https://developer.chrome.com/docs/devtools/performance/selector-stats) with both high elapsed time and high slow-path %. Simpler selectors, fewer selectors, a smaller DOM, and a shallower DOM will all reduce matching costs."
+          },
+          {
+            "title": "Use efficient cache lifetimes",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
+          },
+          {
+            "title": "Time to Interactive",
+            "description": "Time to Interactive is the amount of time it takes for the page to become fully interactive. [Learn more about the Time to Interactive metric](https://developer.chrome.com/docs/lighthouse/performance/interactive/)."
+          },
+          {
+            "title": "Max Potential First Input Delay",
+            "description": "The maximum potential First Input Delay that your users could experience is the duration of the longest task. [Learn more about the Maximum Potential First Input Delay metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-max-potential-fid/)."
+          },
+          {
+            "title": "First Meaningful Paint",
+            "description": "First Meaningful Paint measures when the primary content of a page is visible. [Learn more about the First Meaningful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-meaningful-paint/)."
+          },
+          {
+            "title": "Eliminate render-blocking resources",
+            "description": "Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline and deferring all non-critical JS/styles. [Learn how to eliminate render-blocking resources](https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/)."
+          },
+          {
+            "title": "Properly size images",
+            "description": "Serve images that are appropriately-sized to save cellular data and improve load time. [Learn how to size images](https://developer.chrome.com/docs/lighthouse/performance/uses-responsive-images/)."
+          },
+          {
+            "title": "Defer offscreen images",
+            "description": "Consider lazy-loading offscreen and hidden images after all critical resources have finished loading to lower time to interactive. [Learn how to defer offscreen images](https://developer.chrome.com/docs/lighthouse/performance/offscreen-images/)."
+          },
+          {
+            "title": "Reduce unused CSS",
+            "description": "Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. [Learn how to reduce unused CSS](https://developer.chrome.com/docs/lighthouse/performance/unused-css-rules/)."
+          },
+          {
+            "title": "Reduce unused JavaScript",
+            "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
+          },
+          {
+            "title": "Efficiently encode images",
+            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
+          },
+          {
+            "title": "Serve images in next-gen formats",
+            "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
+          },
+          {
+            "title": "Enable text compression",
+            "description": "Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more about text compression](https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression/)."
+          },
+          {
+            "title": "Avoid serving legacy JavaScript to modern browsers",
+            "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
+          },
+          {
+            "title": "Avoid enormous network payloads",
+            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
+          },
+          {
+            "title": "Serve static assets with an efficient cache policy",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more about efficient cache policies](https://developer.chrome.com/docs/lighthouse/performance/uses-long-cache-ttl/)."
+          },
+          {
+            "title": "Avoid an excessive DOM size",
+            "description": "A large DOM will increase memory usage, cause longer [style calculations](https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations), and produce costly [layout reflows](https://developers.google.com/speed/articles/reflow). [Learn how to avoid an excessive DOM size](https://developer.chrome.com/docs/lighthouse/performance/dom-size/)."
+          },
+          {
+            "title": "User Timing marks and measures",
+            "description": "Consider instrumenting your app with the User Timing API to measure your app's real-world performance during key user experiences. [Learn more about User Timing marks](https://developer.chrome.com/docs/lighthouse/performance/user-timings/)."
+          },
+          {
+            "title": "Reduce JavaScript execution time",
+            "description": "Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. [Learn how to reduce Javascript execution time](https://developer.chrome.com/docs/lighthouse/performance/bootup-time/)."
+          },
+          {
+            "title": "Minimize main-thread work",
+            "description": "Consider reducing the time spent parsing, compiling and executing JS. You may find delivering smaller JS payloads helps with this. [Learn how to minimize main-thread work](https://developer.chrome.com/docs/lighthouse/performance/mainthread-work-breakdown/)"
+          },
+          {
+            "title": "Ensure text remains visible during webfont load",
+            "description": "Leverage the `font-display` CSS feature to ensure text is user-visible while webfonts are loading. [Learn more about `font-display`](https://developer.chrome.com/docs/lighthouse/performance/font-display/)."
+          },
+          {
+            "title": "Lazy load third-party resources with facades",
+            "description": "Some third-party embeds can be lazy loaded. Consider replacing them with a facade until they are required. [Learn how to defer third-parties with a facade](https://developer.chrome.com/docs/lighthouse/performance/third-party-facades/)."
+          },
+          {
+            "title": "Largest Contentful Paint element",
+            "description": "This is the largest contentful element painted within the viewport. [Learn more about the Largest Contentful Paint element](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)"
+          },
+          {
+            "title": "Largest Contentful Paint image was not lazily loaded",
+            "description": "Above-the-fold images that are lazily loaded render later in the page lifecycle, which can delay the largest contentful paint. [Learn more about optimal lazy loading](https://web.dev/articles/lcp-lazy-loading)."
+          },
+          {
+            "title": "Image elements do not have explicit `width` and `height`",
+            "description": "Set an explicit width and height on image elements to reduce layout shifts and improve CLS. [Learn how to set image dimensions](https://web.dev/articles/optimize-cls#images_without_dimensions)"
+          },
+          {
+            "title": "Page prevented back/forward cache restoration",
+            "description": "Many navigations are performed by going back to a previous page, or forwards again. The back/forward cache (bfcache) can speed up these return navigations. [Learn more about the bfcache](https://developer.chrome.com/docs/lighthouse/performance/bf-cache/)"
+          }
+        ],
+        "resourceSummary": [
+          {
+            "resourceType": "total",
+            "size": 6083502
+          },
+          {
+            "resourceType": "media",
+            "size": 2571403
+          },
+          {
+            "resourceType": "image",
+            "size": 2387384
+          },
+          {
+            "resourceType": "document",
+            "size": 482275
+          },
+          {
+            "resourceType": "script",
+            "size": 373937
+          },
+          {
+            "resourceType": "font",
+            "size": 117215
+          },
+          {
+            "resourceType": "other",
+            "size": 76366
+          },
+          {
+            "resourceType": "stylesheet",
+            "size": 74922
+          },
+          {
+            "resourceType": "third-party",
+            "size": 71379
+          }
+        ],
+        "reportFiles": {
+          "html": "lhr-fadada-mobile.report.html",
+          "json": "lhr-fadada-mobile.report.json"
+        }
+      }
     }
   ]
 }
