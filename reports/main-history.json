@@ -3565,18 +3565,18 @@
       "date": "20250428",
       "desktop": {
         "scores": {
-          "performance": 0.4,
+          "performance": 0.45,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7121,
-          "lcp": 8835,
-          "tbt": 589,
+          "fcp": 6737,
+          "lcp": 7498,
+          "tbt": 473,
           "cls": 0,
-          "tti": 10443,
-          "si": 13859
+          "tti": 10550,
+          "si": 9378
         },
         "opportunities": [
           {
@@ -3594,6 +3594,10 @@
           {
             "title": "Speed Index",
             "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/)."
+          },
+          {
+            "title": "Use efficient cache lifetimes",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
           },
           {
             "title": "Document request latency",
@@ -3628,20 +3632,20 @@
             "description": "Optimize LCP by making the LCP image [discoverable](https://web.dev/articles/optimize-lcp#1_eliminate_resource_load_delay) from the HTML immediately, and [avoiding lazy-loading](https://web.dev/articles/lcp-lazy-loading)"
           },
           {
+            "title": "Legacy JavaScript",
+            "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/articles/baseline-and-polyfills) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
+          },
+          {
+            "title": "Modern HTTP",
+            "description": "HTTP/2 and HTTP/3 offer many benefits over HTTP/1.1, such as multiplexing. [Learn more about using modern HTTP](https://developer.chrome.com/docs/lighthouse/best-practices/uses-http2/)."
+          },
+          {
             "title": "Network dependency tree",
             "description": "[Avoid chaining critical requests](https://developer.chrome.com/docs/lighthouse/performance/critical-request-chains) by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load."
           },
           {
             "title": "Render blocking requests",
             "description": "Requests are blocking the page's initial render, which may delay LCP. [Deferring or inlining](https://web.dev/learn/performance/understanding-the-critical-path#render-blocking_resources/) can move these network requests out of the critical path."
-          },
-          {
-            "title": "CSS Selector costs",
-            "description": "If Recalculate Style costs remain high, selector optimization can reduce them. [Optimize the selectors](https://developer.chrome.com/docs/devtools/performance/selector-stats) with both high elapsed time and high slow-path %. Simpler selectors, fewer selectors, a smaller DOM, and a shallower DOM will all reduce matching costs."
-          },
-          {
-            "title": "Use efficient cache lifetimes",
-            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
           },
           {
             "title": "Time to Interactive",
@@ -3743,39 +3747,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6055470
+            "size": 6084344
           },
           {
             "resourceType": "media",
-            "size": 2542607
+            "size": 2572024
           },
           {
             "resourceType": "image",
-            "size": 2387423
+            "size": 2387432
           },
           {
             "resourceType": "document",
-            "size": 481994
+            "size": 482256
           },
           {
             "resourceType": "script",
-            "size": 373865
+            "size": 374077
           },
           {
             "resourceType": "font",
-            "size": 117248
+            "size": 117239
           },
           {
             "resourceType": "other",
-            "size": 76907
+            "size": 76416
           },
           {
             "resourceType": "stylesheet",
-            "size": 75426
+            "size": 74900
           },
           {
             "resourceType": "third-party",
-            "size": 71388
+            "size": 71406
           }
         ],
         "reportFiles": {
@@ -3785,18 +3789,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.43,
+          "performance": 0.46,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 6920,
-          "lcp": 8030,
-          "tbt": 517,
+          "fcp": 7242,
+          "lcp": 7741,
+          "tbt": 446,
           "cls": 0,
-          "tti": 10181,
-          "si": 12960
+          "tti": 11051,
+          "si": 9711
         },
         "opportunities": [
           {
@@ -3814,6 +3818,10 @@
           {
             "title": "Speed Index",
             "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/)."
+          },
+          {
+            "title": "Use efficient cache lifetimes",
+            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
           },
           {
             "title": "Document request latency",
@@ -3848,20 +3856,20 @@
             "description": "Optimize LCP by making the LCP image [discoverable](https://web.dev/articles/optimize-lcp#1_eliminate_resource_load_delay) from the HTML immediately, and [avoiding lazy-loading](https://web.dev/articles/lcp-lazy-loading)"
           },
           {
+            "title": "Legacy JavaScript",
+            "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/articles/baseline-and-polyfills) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
+          },
+          {
+            "title": "Modern HTTP",
+            "description": "HTTP/2 and HTTP/3 offer many benefits over HTTP/1.1, such as multiplexing. [Learn more about using modern HTTP](https://developer.chrome.com/docs/lighthouse/best-practices/uses-http2/)."
+          },
+          {
             "title": "Network dependency tree",
             "description": "[Avoid chaining critical requests](https://developer.chrome.com/docs/lighthouse/performance/critical-request-chains) by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load."
           },
           {
             "title": "Render blocking requests",
             "description": "Requests are blocking the page's initial render, which may delay LCP. [Deferring or inlining](https://web.dev/learn/performance/understanding-the-critical-path#render-blocking_resources/) can move these network requests out of the critical path."
-          },
-          {
-            "title": "CSS Selector costs",
-            "description": "If Recalculate Style costs remain high, selector optimization can reduce them. [Optimize the selectors](https://developer.chrome.com/docs/devtools/performance/selector-stats) with both high elapsed time and high slow-path %. Simpler selectors, fewer selectors, a smaller DOM, and a shallower DOM will all reduce matching costs."
-          },
-          {
-            "title": "Use efficient cache lifetimes",
-            "description": "A long cache lifetime can speed up repeat visits to your page. [Learn more](https://web.dev/uses-long-cache-ttl/)."
           },
           {
             "title": "Time to Interactive",
@@ -3963,39 +3971,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6063729
+            "size": 6084045
           },
           {
             "resourceType": "media",
-            "size": 2554407
+            "size": 2572015
           },
           {
             "resourceType": "image",
-            "size": 2387474
+            "size": 2387337
           },
           {
             "resourceType": "document",
-            "size": 481995
+            "size": 482311
           },
           {
             "resourceType": "script",
-            "size": 373648
+            "size": 373922
           },
           {
             "resourceType": "font",
-            "size": 117213
-          },
-          {
-            "resourceType": "stylesheet",
-            "size": 75210
+            "size": 117223
           },
           {
             "resourceType": "other",
-            "size": 73782
+            "size": 76332
+          },
+          {
+            "resourceType": "stylesheet",
+            "size": 74905
           },
           {
             "resourceType": "third-party",
-            "size": 69662
+            "size": 71390
           }
         ],
         "reportFiles": {
