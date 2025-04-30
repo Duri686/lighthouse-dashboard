@@ -4473,18 +4473,18 @@
       "date": "20250430",
       "desktop": {
         "scores": {
-          "performance": 0.45,
+          "performance": 0.44,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7212,
-          "lcp": 8368,
-          "tbt": 435,
+          "fcp": 6645,
+          "lcp": 7605,
+          "tbt": 525,
           "cls": 0,
-          "tti": 11191,
-          "si": 13775
+          "tti": 10388,
+          "si": 9488
         },
         "opportunities": [
           {
@@ -4655,39 +4655,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6084231
+            "size": 6083832
           },
           {
             "resourceType": "media",
-            "size": 2572046
+            "size": 2572055
           },
           {
             "resourceType": "image",
-            "size": 2387505
+            "size": 2387652
           },
           {
             "resourceType": "document",
-            "size": 482310
+            "size": 482436
           },
           {
             "resourceType": "script",
-            "size": 373512
+            "size": 373086
           },
           {
             "resourceType": "font",
-            "size": 117252
+            "size": 117246
           },
           {
             "resourceType": "other",
-            "size": 76705
+            "size": 76747
           },
           {
             "resourceType": "stylesheet",
-            "size": 74901
+            "size": 74610
           },
           {
             "resourceType": "third-party",
-            "size": 71408
+            "size": 71394
           }
         ],
         "reportFiles": {
@@ -4703,12 +4703,12 @@
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7248,
-          "lcp": 9144,
-          "tbt": 500,
+          "fcp": 7369,
+          "lcp": 8880,
+          "tbt": 463,
           "cls": 0,
-          "tti": 10408,
-          "si": 10408
+          "tti": 10509,
+          "si": 10924
         },
         "opportunities": [
           {
@@ -4879,35 +4879,35 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6084236
+            "size": 6084367
           },
           {
             "resourceType": "media",
-            "size": 2572051
+            "size": 2572059
           },
           {
             "resourceType": "image",
-            "size": 2387672
+            "size": 2387695
           },
           {
             "resourceType": "document",
-            "size": 482463
+            "size": 482239
           },
           {
             "resourceType": "script",
-            "size": 374118
+            "size": 373498
           },
           {
             "resourceType": "font",
-            "size": 117230
+            "size": 117231
           },
           {
             "resourceType": "other",
-            "size": 76475
+            "size": 76641
           },
           {
             "resourceType": "stylesheet",
-            "size": 74227
+            "size": 75004
           },
           {
             "resourceType": "third-party",
