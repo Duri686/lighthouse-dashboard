@@ -5829,18 +5829,18 @@
       "date": "20250503",
       "desktop": {
         "scores": {
-          "performance": 0.45,
+          "performance": 0.49,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7335,
-          "lcp": 8444,
-          "tbt": 455,
+          "fcp": 12042,
+          "lcp": 13270,
+          "tbt": 317,
           "cls": 0,
-          "tti": 10808,
-          "si": 10358
+          "tti": 13563,
+          "si": 12042
         },
         "opportunities": [
           {
@@ -5944,10 +5944,6 @@
             "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
           },
           {
-            "title": "Efficiently encode images",
-            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
-          },
-          {
             "title": "Serve images in next-gen formats",
             "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
           },
@@ -5958,10 +5954,6 @@
           {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
-          },
-          {
-            "title": "Avoid enormous network payloads",
-            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
           },
           {
             "title": "Serve static assets with an efficient cache policy",
@@ -6011,39 +6003,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083572
-          },
-          {
-            "resourceType": "media",
-            "size": 2572056
+            "size": 1733178
           },
           {
             "resourceType": "image",
-            "size": 2387713
+            "size": 714773
           },
           {
             "resourceType": "document",
-            "size": 482121
+            "size": 482085
           },
           {
             "resourceType": "script",
-            "size": 373796
-          },
-          {
-            "resourceType": "font",
-            "size": 117257
-          },
-          {
-            "resourceType": "other",
-            "size": 75336
+            "size": 373612
           },
           {
             "resourceType": "stylesheet",
-            "size": 75293
+            "size": 75097
+          },
+          {
+            "resourceType": "other",
+            "size": 74994
+          },
+          {
+            "resourceType": "font",
+            "size": 11949
+          },
+          {
+            "resourceType": "media",
+            "size": 668
           },
           {
             "resourceType": "third-party",
-            "size": 71477
+            "size": 67548
           }
         ],
         "reportFiles": {
@@ -6053,18 +6045,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.46,
+          "performance": 0.5,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 6559,
-          "lcp": 7740,
-          "tbt": 423,
+          "fcp": 10346,
+          "lcp": 11769,
+          "tbt": 253,
           "cls": 0,
-          "tti": 10904,
-          "si": 10219
+          "tti": 12102,
+          "si": 27486
         },
         "opportunities": [
           {
@@ -6168,10 +6160,6 @@
             "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
           },
           {
-            "title": "Efficiently encode images",
-            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
-          },
-          {
             "title": "Serve images in next-gen formats",
             "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
           },
@@ -6182,10 +6170,6 @@
           {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
-          },
-          {
-            "title": "Avoid enormous network payloads",
-            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
           },
           {
             "title": "Serve static assets with an efficient cache policy",
@@ -6224,6 +6208,10 @@
             "description": "Above-the-fold images that are lazily loaded render later in the page lifecycle, which can delay the largest contentful paint. [Learn more about optimal lazy loading](https://web.dev/articles/lcp-lazy-loading)."
           },
           {
+            "title": "Avoid large layout shifts",
+            "description": "These are the largest layout shifts observed on the page. Each table item represents a single layout shift, and shows the element that shifted the most. Below each item are possible root causes that led to the layout shift. Some of these layout shifts may not be included in the CLS metric value due to [windowing](https://web.dev/articles/cls#what_is_cls). [Learn how to improve CLS](https://web.dev/articles/optimize-cls)"
+          },
+          {
             "title": "Image elements do not have explicit `width` and `height`",
             "description": "Set an explicit width and height on image elements to reduce layout shifts and improve CLS. [Learn how to set image dimensions](https://web.dev/articles/optimize-cls#images_without_dimensions)"
           },
@@ -6235,39 +6223,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6084272
-          },
-          {
-            "resourceType": "media",
-            "size": 2572051
-          },
-          {
-            "resourceType": "image",
-            "size": 2387609
+            "size": 1383551
           },
           {
             "resourceType": "document",
-            "size": 482094
+            "size": 482238
           },
           {
             "resourceType": "script",
-            "size": 373959
+            "size": 373926
+          },
+          {
+            "resourceType": "image",
+            "size": 278219
           },
           {
             "resourceType": "font",
-            "size": 117230
-          },
-          {
-            "resourceType": "other",
-            "size": 76006
+            "size": 101447
           },
           {
             "resourceType": "stylesheet",
-            "size": 75323
+            "size": 74662
+          },
+          {
+            "resourceType": "other",
+            "size": 73059
+          },
+          {
+            "resourceType": "media",
+            "size": 0
           },
           {
             "resourceType": "third-party",
-            "size": 71384
+            "size": 53916
           }
         ],
         "reportFiles": {
