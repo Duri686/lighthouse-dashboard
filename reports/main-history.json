@@ -6727,12 +6727,12 @@
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 6896,
-          "lcp": 8096,
-          "tbt": 538,
+          "fcp": 7416,
+          "lcp": 8547,
+          "tbt": 519,
           "cls": 0,
-          "tti": 9864,
-          "si": 10232
+          "tti": 10462,
+          "si": 11694
         },
         "opportunities": [
           {
@@ -6903,39 +6903,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083641
-          },
-          {
-            "resourceType": "media",
-            "size": 2572023
+            "size": 5146944
           },
           {
             "resourceType": "image",
-            "size": 2387444
+            "size": 2387638
+          },
+          {
+            "resourceType": "media",
+            "size": 1634880
           },
           {
             "resourceType": "document",
-            "size": 482121
+            "size": 482310
           },
           {
             "resourceType": "script",
-            "size": 373920
+            "size": 374188
           },
           {
             "resourceType": "font",
-            "size": 117250
+            "size": 117263
           },
           {
             "resourceType": "other",
-            "size": 76001
+            "size": 76495
           },
           {
             "resourceType": "stylesheet",
-            "size": 74882
+            "size": 74170
           },
           {
             "resourceType": "third-party",
-            "size": 71404
+            "size": 71451
           }
         ],
         "reportFiles": {
@@ -6951,12 +6951,12 @@
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7264,
-          "lcp": 8210,
-          "tbt": 465,
+          "fcp": 7616,
+          "lcp": 8712,
+          "tbt": 439,
           "cls": 0,
-          "tti": 9939,
-          "si": 10496
+          "tti": 10785,
+          "si": 12180
         },
         "opportunities": [
           {
@@ -7127,39 +7127,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083315
+            "size": 6083519
           },
           {
             "resourceType": "media",
-            "size": 2572051
+            "size": 2572026
           },
           {
             "resourceType": "image",
-            "size": 2387598
+            "size": 2387432
           },
           {
             "resourceType": "document",
-            "size": 482247
+            "size": 482264
           },
           {
             "resourceType": "script",
-            "size": 373619
+            "size": 373440
           },
           {
             "resourceType": "font",
-            "size": 117228
+            "size": 117223
           },
           {
             "resourceType": "other",
-            "size": 75715
+            "size": 76316
           },
           {
             "resourceType": "stylesheet",
-            "size": 74857
+            "size": 74818
           },
           {
             "resourceType": "third-party",
-            "size": 71379
+            "size": 71380
           }
         ],
         "reportFiles": {
