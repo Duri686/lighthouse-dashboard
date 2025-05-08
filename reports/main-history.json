@@ -8081,18 +8081,18 @@
       "date": "20250508",
       "desktop": {
         "scores": {
-          "performance": 0.43,
+          "performance": 0.47,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7344,
-          "lcp": 7987,
-          "tbt": 535,
+          "fcp": 7073,
+          "lcp": 7933,
+          "tbt": 390,
           "cls": 0,
-          "tti": 10538,
-          "si": 9360
+          "tti": 10327,
+          "si": 10776
         },
         "opportunities": [
           {
@@ -8263,39 +8263,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083571
+            "size": 6083265
           },
           {
             "resourceType": "media",
-            "size": 2572059
+            "size": 2572047
           },
           {
             "resourceType": "image",
-            "size": 2387650
+            "size": 2387533
           },
           {
             "resourceType": "document",
-            "size": 482023
+            "size": 481968
           },
           {
             "resourceType": "script",
-            "size": 373992
+            "size": 373527
           },
           {
             "resourceType": "font",
-            "size": 117272
+            "size": 117291
           },
           {
             "resourceType": "other",
-            "size": 75518
+            "size": 76424
           },
           {
             "resourceType": "stylesheet",
-            "size": 75057
+            "size": 74475
           },
           {
             "resourceType": "third-party",
-            "size": 71375
+            "size": 71405
           }
         ],
         "reportFiles": {
@@ -8305,18 +8305,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.5,
+          "performance": 0.45,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7853,
-          "lcp": 9015,
-          "tbt": 271,
+          "fcp": 7360,
+          "lcp": 8563,
+          "tbt": 437,
           "cls": 0,
-          "tti": 10452,
-          "si": 26149
+          "tti": 9977,
+          "si": 10318
         },
         "opportunities": [
           {
@@ -8420,6 +8420,10 @@
             "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
           },
           {
+            "title": "Efficiently encode images",
+            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
+          },
+          {
             "title": "Serve images in next-gen formats",
             "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
           },
@@ -8430,6 +8434,10 @@
           {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
+          },
+          {
+            "title": "Avoid enormous network payloads",
+            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
           },
           {
             "title": "Serve static assets with an efficient cache policy",
@@ -8479,39 +8487,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 1773757
-          },
-          {
-            "resourceType": "image",
-            "size": 654926
-          },
-          {
-            "resourceType": "document",
-            "size": 482247
-          },
-          {
-            "resourceType": "script",
-            "size": 373211
-          },
-          {
-            "resourceType": "font",
-            "size": 113388
-          },
-          {
-            "resourceType": "other",
-            "size": 75144
-          },
-          {
-            "resourceType": "stylesheet",
-            "size": 74841
+            "size": 6083825
           },
           {
             "resourceType": "media",
-            "size": 0
+            "size": 2572028
+          },
+          {
+            "resourceType": "image",
+            "size": 2387431
+          },
+          {
+            "resourceType": "document",
+            "size": 482266
+          },
+          {
+            "resourceType": "script",
+            "size": 374105
+          },
+          {
+            "resourceType": "font",
+            "size": 117242
+          },
+          {
+            "resourceType": "other",
+            "size": 76414
+          },
+          {
+            "resourceType": "stylesheet",
+            "size": 74339
           },
           {
             "resourceType": "third-party",
-            "size": 67496
+            "size": 71349
           }
         ],
         "reportFiles": {
