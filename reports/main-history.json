@@ -9899,12 +9899,12 @@
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7043,
-          "lcp": 8417,
-          "tbt": 483,
+          "fcp": 7229,
+          "lcp": 8173,
+          "tbt": 468,
           "cls": 0,
-          "tti": 10183,
-          "si": 13343
+          "tti": 10216,
+          "si": 15905
         },
         "opportunities": [
           {
@@ -9992,10 +9992,6 @@
             "description": "Resources are blocking the first paint of your page. Consider delivering critical JS/CSS inline and deferring all non-critical JS/styles. [Learn how to eliminate render-blocking resources](https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/)."
           },
           {
-            "title": "Properly size images",
-            "description": "Serve images that are appropriately-sized to save cellular data and improve load time. [Learn how to size images](https://developer.chrome.com/docs/lighthouse/performance/uses-responsive-images/)."
-          },
-          {
             "title": "Defer offscreen images",
             "description": "Consider lazy-loading offscreen and hidden images after all critical resources have finished loading to lower time to interactive. [Learn how to defer offscreen images](https://developer.chrome.com/docs/lighthouse/performance/offscreen-images/)."
           },
@@ -10008,10 +10004,6 @@
             "description": "Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. [Learn how to reduce unused JavaScript](https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/)."
           },
           {
-            "title": "Efficiently encode images",
-            "description": "Optimized images load faster and consume less cellular data. [Learn how to efficiently encode images](https://developer.chrome.com/docs/lighthouse/performance/uses-optimized-images/)."
-          },
-          {
             "title": "Serve images in next-gen formats",
             "description": "Image formats like WebP and AVIF often provide better compression than PNG or JPEG, which means faster downloads and less data consumption. [Learn more about modern image formats](https://developer.chrome.com/docs/lighthouse/performance/uses-webp-images/)."
           },
@@ -10022,10 +10014,6 @@
           {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
-          },
-          {
-            "title": "Avoid enormous network payloads",
-            "description": "Large network payloads cost users real money and are highly correlated with long load times. [Learn how to reduce payload sizes](https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/)."
           },
           {
             "title": "Serve static assets with an efficient cache policy",
@@ -10064,6 +10052,10 @@
             "description": "Above-the-fold images that are lazily loaded render later in the page lifecycle, which can delay the largest contentful paint. [Learn more about optimal lazy loading](https://web.dev/articles/lcp-lazy-loading)."
           },
           {
+            "title": "Avoid large layout shifts",
+            "description": "These are the largest layout shifts observed on the page. Each table item represents a single layout shift, and shows the element that shifted the most. Below each item are possible root causes that led to the layout shift. Some of these layout shifts may not be included in the CLS metric value due to [windowing](https://web.dev/articles/cls#what_is_cls). [Learn how to improve CLS](https://web.dev/articles/optimize-cls)"
+          },
+          {
             "title": "Image elements do not have explicit `width` and `height`",
             "description": "Set an explicit width and height on image elements to reduce layout shifts and improve CLS. [Learn how to set image dimensions](https://web.dev/articles/optimize-cls#images_without_dimensions)"
           },
@@ -10075,39 +10067,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083828
-          },
-          {
-            "resourceType": "media",
-            "size": 2571266
-          },
-          {
-            "resourceType": "image",
-            "size": 2387431
+            "size": 1444309
           },
           {
             "resourceType": "document",
-            "size": 482320
+            "size": 482256
           },
           {
             "resourceType": "script",
-            "size": 374035
+            "size": 374227
+          },
+          {
+            "resourceType": "image",
+            "size": 338054
           },
           {
             "resourceType": "font",
-            "size": 117243
-          },
-          {
-            "resourceType": "other",
-            "size": 76529
+            "size": 101448
           },
           {
             "resourceType": "stylesheet",
-            "size": 75004
+            "size": 74998
+          },
+          {
+            "resourceType": "other",
+            "size": 73326
+          },
+          {
+            "resourceType": "media",
+            "size": 0
           },
           {
             "resourceType": "third-party",
-            "size": 71358
+            "size": 53866
           }
         ],
         "reportFiles": {
@@ -10117,18 +10109,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.44,
+          "performance": 0.45,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 8058,
-          "lcp": 8728,
-          "tbt": 461,
+          "fcp": 6761,
+          "lcp": 8691,
+          "tbt": 471,
           "cls": 0,
-          "tti": 11536,
-          "si": 18323
+          "tti": 9815,
+          "si": 10046
         },
         "opportunities": [
           {
@@ -10299,23 +10291,23 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6082984
+            "size": 6083075
           },
           {
             "resourceType": "media",
-            "size": 2572042
+            "size": 2571281
           },
           {
             "resourceType": "image",
-            "size": 2387420
+            "size": 2387487
           },
           {
             "resourceType": "document",
-            "size": 482230
+            "size": 482266
           },
           {
             "resourceType": "script",
-            "size": 373621
+            "size": 374066
           },
           {
             "resourceType": "font",
@@ -10323,15 +10315,15 @@
           },
           {
             "resourceType": "other",
-            "size": 75505
+            "size": 76443
           },
           {
             "resourceType": "stylesheet",
-            "size": 74920
+            "size": 74286
           },
           {
             "resourceType": "third-party",
-            "size": 71353
+            "size": 71348
           }
         ],
         "reportFiles": {
