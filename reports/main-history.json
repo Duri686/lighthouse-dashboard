@@ -11693,18 +11693,18 @@
       "date": "20250516",
       "desktop": {
         "scores": {
-          "performance": 0.47,
+          "performance": 0.45,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 6705,
-          "lcp": 7586,
-          "tbt": 412,
+          "fcp": 6569,
+          "lcp": 7826,
+          "tbt": 494,
           "cls": 0,
-          "tti": 10657,
-          "si": 9553
+          "tti": 9951,
+          "si": 8827
         },
         "opportunities": [
           {
@@ -11820,10 +11820,6 @@
             "description": "Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more about text compression](https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression/)."
           },
           {
-            "title": "Preconnect to required origins",
-            "description": "Consider adding `preconnect` or `dns-prefetch` resource hints to establish early connections to important third-party origins. [Learn how to preconnect to required origins](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/)."
-          },
-          {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
           },
@@ -11879,35 +11875,35 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6086364
+            "size": 6083360
           },
           {
             "resourceType": "media",
-            "size": 2574291
+            "size": 2571266
           },
           {
             "resourceType": "image",
-            "size": 2387601
+            "size": 2387420
           },
           {
             "resourceType": "document",
-            "size": 482374
+            "size": 482085
           },
           {
             "resourceType": "script",
-            "size": 374251
+            "size": 374083
           },
           {
             "resourceType": "font",
-            "size": 117250
+            "size": 117243
           },
           {
             "resourceType": "other",
-            "size": 76282
+            "size": 76315
           },
           {
             "resourceType": "stylesheet",
-            "size": 74315
+            "size": 74948
           },
           {
             "resourceType": "third-party",
@@ -11921,18 +11917,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.46,
+          "performance": 0.45,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7232,
-          "lcp": 8402,
-          "tbt": 431,
+          "fcp": 6725,
+          "lcp": 8515,
+          "tbt": 456,
           "cls": 0,
-          "tti": 10579,
-          "si": 11622
+          "tti": 9930,
+          "si": 8987
         },
         "opportunities": [
           {
@@ -12103,39 +12099,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6084499
+            "size": 6067881
           },
           {
             "resourceType": "media",
-            "size": 2572056
+            "size": 2555646
           },
           {
             "resourceType": "image",
-            "size": 2387517
+            "size": 2387363
           },
           {
             "resourceType": "document",
-            "size": 482265
+            "size": 482310
           },
           {
             "resourceType": "script",
-            "size": 373873
+            "size": 374075
           },
           {
             "resourceType": "font",
-            "size": 117259
+            "size": 117244
           },
           {
             "resourceType": "other",
-            "size": 76576
+            "size": 76414
           },
           {
             "resourceType": "stylesheet",
-            "size": 74953
+            "size": 74829
           },
           {
             "resourceType": "third-party",
-            "size": 71355
+            "size": 71346
           }
         ],
         "reportFiles": {
