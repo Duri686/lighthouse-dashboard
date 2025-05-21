@@ -13953,18 +13953,18 @@
       "date": "20250521",
       "desktop": {
         "scores": {
-          "performance": 0.45,
+          "performance": 0.43,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7053,
-          "lcp": 9349,
-          "tbt": 451,
+          "fcp": 7084,
+          "lcp": 8409,
+          "tbt": 535,
           "cls": 0,
-          "tti": 11256,
-          "si": 10636
+          "tti": 10643,
+          "si": 11011
         },
         "opportunities": [
           {
@@ -14080,10 +14080,6 @@
             "description": "Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more about text compression](https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression/)."
           },
           {
-            "title": "Preconnect to required origins",
-            "description": "Consider adding `preconnect` or `dns-prefetch` resource hints to establish early connections to important third-party origins. [Learn how to preconnect to required origins](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/)."
-          },
-          {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
           },
@@ -14139,39 +14135,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6075319
+            "size": 6064121
           },
           {
             "resourceType": "media",
-            "size": 2563992
+            "size": 2552727
           },
           {
             "resourceType": "image",
-            "size": 2387458
+            "size": 2387430
           },
           {
             "resourceType": "document",
-            "size": 482229
+            "size": 482265
           },
           {
             "resourceType": "script",
-            "size": 373926
+            "size": 373671
           },
           {
             "resourceType": "font",
-            "size": 117272
+            "size": 117267
           },
           {
             "resourceType": "other",
-            "size": 75493
+            "size": 76198
           },
           {
             "resourceType": "stylesheet",
-            "size": 74949
+            "size": 74563
           },
           {
             "resourceType": "third-party",
-            "size": 71367
+            "size": 71369
           }
         ],
         "reportFiles": {
@@ -14181,18 +14177,18 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.46,
+          "performance": 0.43,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 7767,
-          "lcp": 8891,
-          "tbt": 431,
+          "fcp": 7464,
+          "lcp": 8796,
+          "tbt": 519,
           "cls": 0,
-          "tti": 10053,
-          "si": 10339
+          "tti": 10666,
+          "si": 10200
         },
         "opportunities": [
           {
@@ -14308,10 +14304,6 @@
             "description": "Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more about text compression](https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression/)."
           },
           {
-            "title": "Preconnect to required origins",
-            "description": "Consider adding `preconnect` or `dns-prefetch` resource hints to establish early connections to important third-party origins. [Learn how to preconnect to required origins](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/)."
-          },
-          {
             "title": "Avoid serving legacy JavaScript to modern browsers",
             "description": "Polyfills and transforms enable legacy browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile [Baseline](https://web.dev/baseline) features, unless you know you must support legacy browsers. [Learn why most sites can deploy ES6+ code without transpiling](https://philipwalton.com/articles/the-state-of-es5-on-the-web/)"
           },
@@ -14367,39 +14359,39 @@
         "resourceSummary": [
           {
             "resourceType": "total",
-            "size": 6083616
+            "size": 6084127
           },
           {
             "resourceType": "media",
-            "size": 2572055
+            "size": 2572046
           },
           {
             "resourceType": "image",
-            "size": 2387495
+            "size": 2387501
           },
           {
             "resourceType": "document",
-            "size": 482580
+            "size": 482265
           },
           {
             "resourceType": "script",
-            "size": 374236
+            "size": 373433
           },
           {
             "resourceType": "font",
-            "size": 117250
+            "size": 117247
           },
           {
             "resourceType": "other",
-            "size": 76213
+            "size": 76698
           },
           {
             "resourceType": "stylesheet",
-            "size": 73787
+            "size": 74937
           },
           {
             "resourceType": "third-party",
-            "size": 71345
+            "size": 71344
           }
         ],
         "reportFiles": {
