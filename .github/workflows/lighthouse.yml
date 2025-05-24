@@ -58,7 +58,10 @@ jobs:
 
       - name: Run Lighthouse CI
         run: |
+          echo "===== [STEP: LIGHTHOUSE CI] 开始运行Lighthouse CI测试 ====="
+          
           # Create LHCI configuration file
+          echo "[CONFIG] 创建Lighthouse配置文件"
           cat > lighthouserc.json << EOF
           {
             "ci": {
@@ -72,10 +75,10 @@ jobs:
             }
           }
           EOF
+          echo "[CONFIG] Lighthouse配置文件已创建: $(cat lighthouserc.json | tr -d '\n')"
           
           # Desktop
-          echo "Running desktop tests..."
-          mkdir -p .lighthouseci/desktop
+          echo "===== [DESKTOP] 开始运行桌面端测试 ====="
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=desktop \
@@ -84,16 +87,17 @@ jobs:
             --settings.screenEmulation.height=940 \
             --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.output=json,html \
-            --outDir=.lighthouseci/desktop
+            --settings.output=json,html
+          echo "[DESKTOP] 桌面端测试完成"
           
           # 检查是否生成了文件
-          echo "Checking desktop output files..."
-          find .lighthouseci/desktop -type f | sort
+          echo "[FILES] 检查桌面端测试后生成的文件:"
+          find .lighthouseci -type f | sort
+          echo "[FILES] 当前.lighthouseci目录结构:"
+          ls -la .lighthouseci/
           
           # Mobile
-          echo "Running mobile tests..."
-          mkdir -p .lighthouseci/mobile
+          echo "===== [MOBILE] 开始运行移动端测试 ====="
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=mobile \
@@ -102,151 +106,286 @@ jobs:
             --settings.screenEmulation.height=640 \
             --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.output=json,html \
-            --outDir=.lighthouseci/mobile
+            --settings.output=json,html
+          echo "[MOBILE] 移动端测试完成"
           
           # 检查是否生成了文件
-          echo "Checking mobile output files..."
-          find .lighthouseci/mobile -type f | sort
+          echo "===== [FILES] 所有测试完成后的文件列表 ====="
+          find .lighthouseci -type f | sort
+          
+          # Create device-specific directories and move files there
+          echo "===== [ORGANIZE] 开始整理文件到设备目录 ====="
+          echo "[ORGANIZE] 创建设备特定目录"
+          mkdir -p .lighthouseci/desktop
+          mkdir -p .lighthouseci/mobile
+          
+          # First run is desktop, second is mobile - move JSON and HTML reports
+          # to their respective directories
+          echo "[ORGANIZE] 识别并移动文件到各自目录"
+          echo "[ORGANIZE] 获取桌面端和移动端文件列表"
+          DESKTOP_FILES=$(find .lighthouseci -name "lhr-*.json" | sort | head -n 3)
+          MOBILE_FILES=$(find .lighthouseci -name "lhr-*.json" | sort | tail -n 3)
+          
+          echo "[ORGANIZE] 桌面端文件: $DESKTOP_FILES"
+          echo "[ORGANIZE] 移动端文件: $MOBILE_FILES"
+          
+          # Move desktop files
+          echo "[ORGANIZE] 开始移动桌面端文件"
+          for file in $DESKTOP_FILES; do
+            echo "[ORGANIZE] 移动桌面端 JSON: $file -> .lighthouseci/desktop/"
+            mv "$file" .lighthouseci/desktop/
+            HTML_FILE="${file%.json}.html"
+            if [ -f "$HTML_FILE" ]; then
+              echo "[ORGANIZE] 移动桌面端 HTML: $HTML_FILE -> .lighthouseci/desktop/"
+              mv "$HTML_FILE" .lighthouseci/desktop/
+            else
+              echo "[ORGANIZE] 未找到对应的HTML文件: $HTML_FILE"
+            fi
+          done
+          
+          # Move mobile files
+          echo "[ORGANIZE] 开始移动移动端文件"
+          for file in $MOBILE_FILES; do
+            echo "[ORGANIZE] 移动移动端 JSON: $file -> .lighthouseci/mobile/"
+            mv "$file" .lighthouseci/mobile/
+            HTML_FILE="${file%.json}.html"
+            if [ -f "$HTML_FILE" ]; then
+              echo "[ORGANIZE] 移动移动端 HTML: $HTML_FILE -> .lighthouseci/mobile/"
+              mv "$HTML_FILE" .lighthouseci/mobile/
+            else
+              echo "[ORGANIZE] 未找到对应的HTML文件: $HTML_FILE"
+            fi
+          done
           
           # List all contents recursively to debug
-          echo "All files in .lighthouseci:"
+          echo "===== [RESULT] 文件移动后的目录结构 ====="
           find .lighthouseci -type f | xargs ls -la
+          echo "[RESULT] 桌面端目录文件列表:"
+          ls -la .lighthouseci/desktop/
+          echo "[RESULT] 移动端目录文件列表:"
+          ls -la .lighthouseci/mobile/
 
       - name: Copy reports to reports directory
         run: |
+          echo "===== [COPY] 开始复制报告文件到目标目录 ====="
           # Copy desktop reports
-          echo "Finding desktop report files..."
-          DESKTOP_JSON=$(find .lighthouseci -path "*/desktop/*.json" | grep -v "manifest.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci -path "*/desktop/*.html" | sort -r | head -n 1)
+          echo "[COPY] 查找桌面端报告文件"
+          DESKTOP_JSON=$(find .lighthouseci/desktop -name "*.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci/desktop -name "*.html" | sort -r | head -n 1)
           
-          echo "Desktop JSON file: $DESKTOP_JSON"
-          echo "Desktop HTML file: $DESKTOP_HTML"
+          echo "[COPY] 桌面端 JSON文件: $DESKTOP_JSON"
+          echo "[COPY] 桌面端 HTML文件: $DESKTOP_HTML"
           
           # Create target directory if it doesn't exist
+          echo "[COPY] 创建目标目录: reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
           mkdir -p "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
           
           # Only copy if files exist
           if [ -n "$DESKTOP_JSON" ] && [ -f "$DESKTOP_JSON" ]; then
-            cp "$DESKTOP_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+            echo "[COPY] 复制桌面端 JSON文件: $DESKTOP_JSON -> $TARGET_PATH"
+            cp "$DESKTOP_JSON" "$TARGET_PATH"
+            echo "[COPY] 成功复制桌面端 JSON报告"
           else
-            echo "Warning: Desktop JSON file not found"
+            echo "[WARNING] 桌面端 JSON文件未找到"
           fi
           
           if [ -n "$DESKTOP_HTML" ] && [ -f "$DESKTOP_HTML" ]; then
-            cp "$DESKTOP_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
+            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
+            echo "[COPY] 复制桌面端 HTML文件: $DESKTOP_HTML -> $TARGET_PATH"
+            cp "$DESKTOP_HTML" "$TARGET_PATH"
+            echo "[COPY] 成功复制桌面端 HTML报告"
           else
-            echo "Warning: Desktop HTML file not found"
+            echo "[WARNING] 桌面端 HTML文件未找到"
           fi
           
           # Copy mobile reports
-          echo "Finding mobile report files..."
-          MOBILE_JSON=$(find .lighthouseci -path "*/mobile/*.json" | grep -v "manifest.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci -path "*/mobile/*.html" | sort -r | head -n 1)
+          echo "[COPY] 查找移动端报告文件"
+          MOBILE_JSON=$(find .lighthouseci/mobile -name "*.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci/mobile -name "*.html" | sort -r | head -n 1)
           
-          echo "Mobile JSON file: $MOBILE_JSON"
-          echo "Mobile HTML file: $MOBILE_HTML"
+          echo "[COPY] 移动端 JSON文件: $MOBILE_JSON"
+          echo "[COPY] 移动端 HTML文件: $MOBILE_HTML"
           
           # Only copy if files exist
           if [ -n "$MOBILE_JSON" ] && [ -f "$MOBILE_JSON" ]; then
-            cp "$MOBILE_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+            echo "[COPY] 复制移动端 JSON文件: $MOBILE_JSON -> $TARGET_PATH"
+            cp "$MOBILE_JSON" "$TARGET_PATH"
+            echo "[COPY] 成功复制移动端 JSON报告"
           else
-            echo "Warning: Mobile JSON file not found"
+            echo "[WARNING] 移动端 JSON文件未找到"
           fi
           
           if [ -n "$MOBILE_HTML" ] && [ -f "$MOBILE_HTML" ]; then
-            cp "$MOBILE_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
+            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
+            echo "[COPY] 复制移动端 HTML文件: $MOBILE_HTML -> $TARGET_PATH"
+            cp "$MOBILE_HTML" "$TARGET_PATH"
+            echo "[COPY] 成功复制移动端 HTML报告"
           else
-            echo "Warning: Mobile HTML file not found"
+            echo "[WARNING] 移动端 HTML文件未找到"
           fi
+          
+          # List the created report files
+          echo "===== [COPY] 目标目录文件列表 ====="
+          echo "[COPY] reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/目录内容:"
+          ls -la "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/"
 
       - name: Process reports (optimized format)
         run: |
+          echo "===== [PROCESS] 开始处理报告数据 ====="
           # 检查目标报告文件是否存在
+          echo "[PROCESS] 检查报告文件路径"
           DESKTOP_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
           MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
           
+          echo "[PROCESS] 桌面端报告路径: $DESKTOP_JSON"
+          echo "[PROCESS] 移动端报告路径: $MOBILE_JSON"
+          
           # 确保历史文件目录存在
+          echo "[PROCESS] 创建历史数据目录"
           mkdir -p "reports"
           
           # 使用项目中已存在的process-report.js处理报告
           # 处理桌面端报告
+          HISTORY_FILE="reports/$BRANCH_NAME-history.json"
+          echo "[PROCESS] 历史数据文件: $HISTORY_FILE"
+          
           if [ -f "$DESKTOP_JSON" ]; then
-            echo "Processing desktop report: $DESKTOP_JSON"
-            node process-report.js "$DESKTOP_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
+            echo "[PROCESS] 处理桌面端报告: $DESKTOP_JSON"
+            echo "[PROCESS] 执行: node process-report.js '$DESKTOP_JSON' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'desktop'"
+            node process-report.js "$DESKTOP_JSON" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
+            echo "[PROCESS] 桌面端报告处理完成"
           else
-            echo "Warning: Desktop report file not found: $DESKTOP_JSON"
+            echo "[WARNING] 桌面端报告文件未找到: $DESKTOP_JSON"
           fi
           
           # 处理移动端报告
           if [ -f "$MOBILE_JSON" ]; then
-            echo "Processing mobile report: $MOBILE_JSON"
-            node process-report.js "$MOBILE_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
+            echo "[PROCESS] 处理移动端报告: $MOBILE_JSON"
+            echo "[PROCESS] 执行: node process-report.js '$MOBILE_JSON' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'mobile'"
+            node process-report.js "$MOBILE_JSON" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
+            echo "[PROCESS] 移动端报告处理完成"
           else
-            echo "Warning: Mobile report file not found: $MOBILE_JSON"
+            echo "[WARNING] 移动端报告文件未找到: $MOBILE_JSON"
+          fi
+          
+          # 检查历史数据文件
+          if [ -f "$HISTORY_FILE" ]; then
+            echo "[PROCESS] 历史数据文件已生成/更新: $HISTORY_FILE"
+            echo "[PROCESS] 历史文件大小: $(ls -lh "$HISTORY_FILE" | awk '{print $5}')"
+            echo "[PROCESS] 历史数据条目数: $(cat "$HISTORY_FILE" | grep -o '"date"' | wc -l)"
+          else
+            echo "[WARNING] 历史数据文件未生成: $HISTORY_FILE"
           fi
           
           # 创建网站列表已加速加载
-          echo "Creating site list for quick loading"
+          echo "===== [SITES] 更新网站列表 ====="
           SITE_LIST_FILE="reports/$BRANCH_NAME-sites.json"
+          echo "[SITES] 网站列表文件: $SITE_LIST_FILE"
+          
           if [ ! -f "$SITE_LIST_FILE" ]; then
+            echo "[SITES] 创建新的网站列表文件"
             echo '{"sites":[]}' > "$SITE_LIST_FILE"
+          else
+            echo "[SITES] 网站列表文件已存在"
           fi
           
           # 使用jq将网站信息插入site列表
-          apt-get update && apt-get install -y jq
+          # 先检查jq是否已经安装
+          echo "[SITES] 检查jq工具"
+          if ! command -v jq &> /dev/null; then
+            echo "[SITES] jq未安装，正在安装..."
+            sudo apt-get update && sudo apt-get install -y jq
+          else
+            echo "[SITES] jq已安装，版本: $(jq --version)"
+          fi
           
           # 提取当前网站并检查是否已存在
           SITE_URL="${{ matrix.site.url }}"
           SITE_NAME="${{ matrix.site.name }}"
+          echo "[SITES] 当前网站: URL=$SITE_URL, 名称=$SITE_NAME"
           
           # 如果网站不存在于列表中，则添加它
+          echo "[SITES] 检查网站是否已存在于列表中"
           if ! jq -e ".sites[] | select(.url == \"$SITE_URL\")" "$SITE_LIST_FILE" > /dev/null; then
+            echo "[SITES] 网站不存在于列表中，添加中..."
             jq ".sites += [{\"url\": \"$SITE_URL\", \"name\": \"$SITE_NAME\"}]" "$SITE_LIST_FILE" > temp.json && mv temp.json "$SITE_LIST_FILE"
-            echo "Added site $SITE_URL to site list"
+            echo "[SITES] 成功添加网站 $SITE_URL 到列表"
           else
-            echo "Site $SITE_URL already in site list"
+            echo "[SITES] 网站 $SITE_URL 已存在于列表中"
           fi
+          
+          echo "[SITES] 当前网站列表内容:"
+          cat "$SITE_LIST_FILE"
 
       - name: List Reports Directory
         run: |
-          echo "Contents of reports directory:"
-          ls -la ./reports/
-          echo "Contents of the latest report directory:"
-          ls -la ./reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/
+          echo "===== [SUMMARY] 工作流程执行结果汇总 ====="
+          
+          echo "[SUMMARY] 报告目录结构:"
+          find reports -type f -name "*.json" | sort
+          
+          echo "[SUMMARY] 原始报告文件数量: $(find reports -name "*.report.json" | wc -l)"
+          echo "[SUMMARY] 历史数据文件大小:"
+          find reports -name "*-history.json" -exec ls -lh {} \;
+          
+          echo "[SUMMARY] 当前分支网站列表:"
+          if [ -f "reports/$BRANCH_NAME-sites.json" ]; then
+            jq . "reports/$BRANCH_NAME-sites.json"
+            echo "[SUMMARY] 网站总数: $(jq '.sites | length' "reports/$BRANCH_NAME-sites.json")"
+          else
+            echo "[WARNING] 未找到网站列表文件"
+          fi
+          
+          echo "===== [DONE] 工作流程执行完成 ====="
 
       - name: Commit and push changes
         run: |
+          echo "===== [GIT] 提交和推送报告到仓库 ====="
+          echo "[GIT] 配置Git用户信息"
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           # 首先获取最新更改
-          echo "Fetching latest changes..."
+          echo "[GIT] 获取最新仓库更改"
           git fetch origin
           
           # 处理未暂存文件，先将所有更改暂存再拉取
-          echo "Stashing any changes before pull..."
+          echo "[GIT] 暂存本地更改以避免冲突"
           git stash -u || true
           
           # 拉取最新代码
           CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          echo "[GIT] 当前分支: $CURRENT_BRANCH"
+          echo "[GIT] 拉取最新代码"
           git pull origin $CURRENT_BRANCH --ff-only || git pull origin $CURRENT_BRANCH
           
           # 如果有暂存的更改，恢复他们
+          echo "[GIT] 恢复暂存的更改"
           git stash pop || true
           
           # 添加所有报告文件和历史记录
+          echo "[GIT] 添加更新的文件到暂存区"
           git add reports/
           git add .gitignore
           git add lighthouserc.json
           
           # 检查是否有更改需要提交
+          echo "[GIT] 检查是否有更改需要提交"
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "[GIT] 没有检测到需要提交的更改"
             exit 0
           else
-            git commit -m "Update Lighthouse reports $REPORT_DATE ($BRANCH_NAME ${{ matrix.site.name }})"
+            COMMIT_MSG="Update Lighthouse reports $REPORT_DATE ($BRANCH_NAME ${{ matrix.site.name }})"
+            echo "[GIT] 提交更改: $COMMIT_MSG"
+            git commit -m "$COMMIT_MSG"
+            
+            echo "[GIT] 推送更改到远程仓库: origin/$CURRENT_BRANCH"
             git push origin HEAD:$CURRENT_BRANCH
+            echo "[GIT] 成功推送报告更新到仓库"
           fi
+          
+          echo "===== [GIT] 提交和推送完成 ====="
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
