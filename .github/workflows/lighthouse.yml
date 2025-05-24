@@ -162,83 +162,6 @@ jobs:
 
       - name: Process reports (optimized format)
         run: |
-          # 创建 process-report.js 文件，如果不存在
-          if [ ! -f "process-report.js" ]; then
-            cat > process-report.js << 'EOF'
-            const fs = require('fs-extra');
-            const path = require('path');
-            
-            // 获取命令行参数
-            const reportFile = process.argv[2];
-            const historyFile = process.argv[3];
-            const siteUrl = process.argv[4];
-            const date = process.argv[5];
-            const device = process.argv[6];
-            
-            // 确保报告文件存在
-            if (!fs.existsSync(reportFile)) {
-              console.error(`Error: Report file ${reportFile} does not exist`);
-              process.exit(1);
-            }
-            
-            try {
-              // 读取报告JSON
-              const report = fs.readJsonSync(reportFile);
-              
-              // 提取关键数据
-              const metrics = {
-                date,
-                device,
-                url: siteUrl,
-                scores: {
-                  performance: report.categories.performance.score * 100,
-                  accessibility: report.categories.accessibility.score * 100,
-                  'best-practices': report.categories['best-practices'].score * 100,
-                  seo: report.categories.seo.score * 100,
-                },
-                metrics: {
-                  'first-contentful-paint': report.audits['first-contentful-paint'].numericValue,
-                  'speed-index': report.audits['speed-index'].numericValue,
-                  'largest-contentful-paint': report.audits['largest-contentful-paint'].numericValue,
-                  'interactive': report.audits['interactive'].numericValue,
-                  'total-blocking-time': report.audits['total-blocking-time'].numericValue,
-                  'cumulative-layout-shift': report.audits['cumulative-layout-shift'].numericValue,
-                }
-              };
-              
-              // 确保历史文件目录存在
-              const historyDir = path.dirname(historyFile);
-              fs.ensureDirSync(historyDir);
-              
-              // 读取或创建历史记录文件
-              let history = { entries: [] };
-              if (fs.existsSync(historyFile)) {
-                try {
-                  history = fs.readJsonSync(historyFile);
-                } catch (e) {
-                  console.warn(`Warning: Could not parse history file, creating new one: ${e.message}`);
-                }
-              }
-              
-              // 确保有entries数组
-              if (!history.entries) history.entries = [];
-              
-              // 添加新记录
-              history.entries.push(metrics);
-              
-              // 保存更新的历史记录
-              fs.writeJsonSync(historyFile, history, { spaces: 2 });
-              
-              console.log(`Successfully processed ${device} report and updated history.`);
-              
-            } catch (error) {
-              console.error(`Error processing report: ${error.message}`);
-              process.exit(1);
-            }
-            EOF
-            echo "Created process-report.js file"
-          fi
-          
           # 检查目标报告文件是否存在
           DESKTOP_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
           MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
@@ -246,6 +169,7 @@ jobs:
           # 确保历史文件目录存在
           mkdir -p "reports"
           
+          # 使用项目中已存在的process-report.js处理报告
           # 处理桌面端报告
           if [ -f "$DESKTOP_JSON" ]; then
             echo "Processing desktop report: $DESKTOP_JSON"

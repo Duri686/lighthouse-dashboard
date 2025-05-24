@@ -68,6 +68,23 @@ function processReport(reportFilePath, historyPath, url, date, deviceType) {
             const historyContent = fs.readFileSync(historyPath, 'utf8');
             history = JSON.parse(historyContent);
             if (!Array.isArray(history.reports)) history.reports = [];
+            
+            // 限制历史数据仅保留最近15天
+            // 首先标记所有日期（便于后续筛选）
+            const dates = new Set();
+            history.reports.forEach(report => {
+                if (report.date) dates.add(report.date);
+            });
+            
+            // 对日期进行排序（从新到旧）
+            const sortedDates = Array.from(dates).sort().reverse();
+            
+            // 如果超过15天，只保留最近15天的数据
+            if (sortedDates.length > 15) {
+                const keepDates = new Set(sortedDates.slice(0, 15));
+                console.log(`Limiting history to the most recent 15 days: ${Array.from(keepDates).join(', ')}`);
+                history.reports = history.reports.filter(report => keepDates.has(report.date));
+            }
         } catch (e) {
             console.error(`Error reading history file: ${e.message}`);
             history = { reports: [] };
