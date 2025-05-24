@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - 'reports/**'  # 忽略报告目录的更改，防止循环触发
   schedule:
-    - cron: '0 0,3,5,7,12 * * *'
+    - cron: '0 1,13 * * *'  # 北京时间9点和21点
   workflow_dispatch:
 
 permissions:
@@ -34,14 +34,10 @@ jobs:
       - name: Install dependencies
         run: |
           npm init -y
-          npm install -g lighthouse
-
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg2
-          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          npm install -g @lhci/cli@0.12.x
+          npm install fs-extra
+          echo "node_modules/" > .gitignore
+          echo ".lighthouseci/" >> .gitignore
 
       - name: Set date and branch env
         id: set_env
@@ -52,226 +48,104 @@ jobs:
       - name: Create reports directory
         run: mkdir -p reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}
 
-      - name: Run Lighthouse (Desktop)
+      # Run both desktop and mobile tests using Lighthouse CI
+      - name: Run Lighthouse CI
         run: |
-          npx lighthouse ${{ matrix.site.url }} \
-            --output=json \
-            --output=html \
-            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop \
-            --chrome-flags="--no-sandbox --headless"
-
-      - name: Run Lighthouse (Mobile)
-        run: |
-          npx lighthouse ${{ matrix.site.url }} \
-            --output=json \
-            --output=html \
-            --output-path=reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile \
-            --form-factor=mobile \
-            --screenEmulation.mobile \
-            --screenEmulation.width=360 \
-            --screenEmulation.height=640 \
-            --screenEmulation.deviceScaleFactor=2 \
-            --chrome-flags="--no-sandbox --headless"
-
-      - name: Process desktop report
-        run: |
-          node process-report.js reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json reports/$BRANCH_NAME-history.json "${{ matrix.site.url }}" ${{ env.REPORT_DATE }} desktop
-
-      - name: Process mobile report
-        run: |
-          node process-report.js reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json reports/$BRANCH_NAME-history.json "${{ matrix.site.url }}" ${{ env.REPORT_DATE }} mobile
-
-      - name: List Reports Directory
-        run: |
-          echo "Contents of reports directory:"
-          ls -la ./reports/
-
-      - name: Cleanup and Prepare
-        run: |
-          rm -f google-chrome-stable_current_amd64.deb
-
-      - name: Commit and push changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Create LHCI configuration file
+          cat > lighthouserc.json << EOF
+          {
+            "ci": {
+              "collect": {
+                "settings": {
+                  "maxWaitForLoad": 30000,
+                  "skipAudits": []
+                },
+                "numberOfRuns": 1
+              }
+            }
+          }
+          EOF
           
-          # 首先获取最新更改
-          echo "Fetching latest changes..."
-          git fetch origin
+          # Desktop
+          echo "Running desktop tests..."
+          lhci collect \
+            --url=${{ matrix.site.url }} \
+            --settings.formFactor=desktop \
+            --settings.screenEmulation.mobile=false \
+            --settings.screenEmulation.width=1350 \
+            --settings.screenEmulation.height=940 \
+            --settings.screenEmulation.deviceScaleFactor=1 \
+            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.output=json,html \
+            --outDir=.lighthouseci/desktop
           
-          # 处理未暂存文件，先将所有更改暂存再拉取
-          echo "Stashing any changes before pull..."
-          git stash -u || true
+          # Mobile
+          echo "Running mobile tests..."
+          lhci collect \
+            --url=${{ matrix.site.url }} \
+            --settings.formFactor=mobile \
+            --settings.screenEmulation.mobile=true \
+            --settings.screenEmulation.width=360 \
+            --settings.screenEmulation.height=640 \
+            --settings.screenEmulation.deviceScaleFactor=2 \
+            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.output=json,html \
+            --outDir=.lighthouseci/mobile
+
+      - name: Copy reports to reports directory
+        run: |
+          # Copy desktop reports
+          DESKTOP_JSON=$(find .lighthouseci/desktop -name "*.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci/desktop -name "*.html" | sort -r | head -n 1)
+          cp "$DESKTOP_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+          cp "$DESKTOP_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
           
-          # 拉取最新代码
-          git pull origin $BRANCH_NAME --ff-only || git pull origin $BRANCH_NAME
+          # Copy mobile reports
+          MOBILE_JSON=$(find .lighthouseci/mobile -name "*.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci/mobile -name "*.html" | sort -r | head -n 1)
+          cp "$MOBILE_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+          cp "$MOBILE_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
+
+      - name: Process reports (optimized format)
+        run: |
+          # 处理桌面端报告
+          DESKTOP_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+          echo "Processing desktop report: $DESKTOP_JSON"
+          node process-report.js "$DESKTOP_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
           
-          # 如果有暂存的更改，恢复他们
-          git stash pop || true
+          # 处理移动端报告
+          MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+          echo "Processing mobile report: $MOBILE_JSON"
+          node process-report.js "$MOBILE_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
           
-          # 添加更改
-          git add reports
-          git add reports/$BRANCH_NAME-history.json || true
-          git add .gitignore || true
+          # 创建网站列表已加速加载
+          echo "Creating site list for quick loading"
+          SITE_LIST_FILE="reports/$BRANCH_NAME-sites.json"
+          if [ ! -f "$SITE_LIST_FILE" ]; then
+            echo '{"sites":[]}' > "$SITE_LIST_FILE"
+          fi
           
-          # 检查是否有更改需要提交
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
+          # 使用jq将网站信息插入site列表
+          apt-get update && apt-get install -y jq
+          
+          # 提取当前网站并检查是否已存在
+          SITE_URL="${{ matrix.site.url }}"
+          SITE_NAME="${{ matrix.site.name }}"
+          
+          # 如果网站不存在于列表中，则添加它
+          if ! jq -e ".sites[] | select(.url == \"$SITE_URL\")" "$SITE_LIST_FILE" > /dev/null; then
+            jq ".sites += [{\"url\": \"$SITE_URL\", \"name\": \"$SITE_NAME\"}]" "$SITE_LIST_FILE" > temp.json && mv temp.json "$SITE_LIST_FILE"
+            echo "Added site $SITE_URL to site list"
           else
-            git commit -m "Update Lighthouse reports ${{ env.REPORT_DATE }} ($BRANCH_NAME ${{ matrix.site.name }})"
-            git push origin $BRANCH_NAME
+            echo "Site $SITE_URL already in site list"
           fi
-
-      - name: Install dependencies
-        run: |
-          npm init -y
-          npm install -g @lhci/cli@0.12.x
-          # Add package.json to git tracking
-          git add package.json
-          echo "node_modules/" > .gitignore
-          echo ".lighthouseci/" >> .gitignore
-          echo "*.deb" >> .gitignore
-
-      - name: Run Lighthouse and Process Reports
-        run: |
-          set -ex  # Exit on error and print commands
-          
-          mkdir -p reports
-          NOW=$(date -u +"%Y-%m-%dT%H:%M:%S")
-          DATE=$(date -u +"%Y-%m-%d")
-          
-          # Create directories
-          mkdir -p .lighthouseci/{desktop,mobile}
-          
-          run_lighthouse() {
-            local device=$1
-            local formFactor=$2
-            local width=$3
-            local height=$4
-            local mobile=$5
-            local scale=$6
-
-            echo "Running $device test..."
-            
-            # Clear previous results
-            rm -rf ".lighthouseci/$device"
-            mkdir -p ".lighthouseci/$device"
-            
-            # Run Lighthouse
-            lhci collect \
-              --url https://www.fadada.com \
-              --settings.formFactor=$formFactor \
-              --settings.screenEmulation.mobile=$mobile \
-              --settings.screenEmulation.width=$width \
-              --settings.screenEmulation.height=$height \
-              --settings.screenEmulation.deviceScaleFactor=$scale \
-              --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-              --settings.maxWaitForLoad=30000 \
-              --output=json \
-              --outDir=".lighthouseci/$device" \
-              --numberOfRuns=1
-
-            # Debug output
-            echo "Lighthouse run completed. Checking for output..."
-            echo "Contents of .lighthouseci directory:"
-            ls -la .lighthouseci/
-            echo "Contents of .lighthouseci/$device:"
-            ls -la ".lighthouseci/$device" || true
-            
-            # Find the generated report
-            local json_file=$(find ".lighthouseci" -name "lhr-*.json" -type f | sort -r | head -n 1)
-            
-            if [ ! -f "$json_file" ]; then
-              echo "Error: No JSON report found"
-              return 1
-            fi
-            
-            # Move the report to the correct location
-            local target_file=".lighthouseci/$device/$(basename $json_file)"
-            if [ "$json_file" != "$target_file" ]; then
-              mkdir -p ".lighthouseci/$device"
-              mv "$json_file" "$target_file"
-            fi
-            
-            echo "Report generated successfully at: $target_file"
-            echo "File contents preview:"
-            head -n 20 "$target_file"
-            return 0
-          }
-
-          # Run tests
-          run_lighthouse "desktop" "desktop" 1350 940 "false" 1
-          run_lighthouse "mobile" "mobile" 360 640 "true" 2
-
-          # Process reports function with improved error handling
-          process_report() {
-            local device=$1
-            local json_file=$(find ".lighthouseci/$device" -name "lhr-*.json" -type f | sort -r | head -n 1)
-            
-            echo "Looking for report in .lighthouseci/$device"
-            ls -la ".lighthouseci/$device"
-            
-            if [ ! -f "$json_file" ]; then
-              echo "{\"error\": \"No report found for $device\", \"scores\":{}, \"metrics\":{}}"
-              return 0
-            fi
-
-            if [ ! -s "$json_file" ]; then
-              echo "{\"error\": \"Empty report file for $device\", \"scores\":{}, \"metrics\":{}}"
-              return 0
-            fi
-
-            # Process the report
-            local result=$(DEVICE_TYPE=$device DATE=$DATE node process-report.js "$json_file")
-            if [ $? -ne 0 ]; then
-              echo "{\"error\": \"Processing failed for $device\", \"scores\":{}, \"metrics\":{}}"
-              return 0
-            fi
-
-            echo "$result"
-          }
-
-          # 不再创建history.json文件
-          # [ -f reports/history.json ] || echo '{"reports":[]}' > reports/history.json
-
-          # Process reports and handle JSON properly
-          echo "Processing desktop report..."
-          DESKTOP_DATA=$(process_report "desktop" | tail -n 1 | jq -c '{
-            scores: .scores,
-            metrics: .metrics,
-            reportFiles: .reportFiles
-          }')
-          
-          echo "Processing mobile report..."
-          MOBILE_DATA=$(process_report "mobile" | tail -n 1 | jq -c '{
-            scores: .scores,
-            metrics: .metrics,
-            reportFiles: .reportFiles
-          }')
-
-          # Initialize and update history.json with error handling
-          echo "Updating history.json..."
-          if [ ! -f "reports/history.json" ]; then
-            echo '{"reports":[]}' > reports.history.json
-          fi
-
-          # Clean and validate JSON data
-          DESKTOP_DATA=$(echo "$DESKTOP_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
-          MOBILE_DATA=$(echo "$MOBILE_DATA" | jq -c '.' 2>/dev/null || echo '{"error":"Invalid JSON"}')
-
-          # 不再创建和更新额外的报告文件
-          echo "Skipping creating additional report files..."
 
       - name: List Reports Directory
         run: |
           echo "Contents of reports directory:"
           ls -la ./reports/
-
-      - name: Cleanup and Prepare
-        run: |
-          rm -f google-chrome-stable_current_amd64.deb
-          rm -rf .lighthouseci
+          echo "Contents of the latest report directory:"
+          ls -la ./reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/
 
       - name: Commit and push changes
         run: |
@@ -293,26 +167,18 @@ jobs:
           # 如果有暂存的更改，恢复他们
           git stash pop || true
           
-          echo "=== Git Status Before Add ==="
-          git status
+          # 添加所有报告文件和历史记录
+          git add reports/
+          git add .gitignore
+          git add lighthouserc.json
           
-          # 不再添加额外的报告文件到git
-          echo "Skipping adding additional report files to git..."
-          
-          git add .gitignore || true
-          
-          echo "=== Files staged for commit ==="
-          git status --short
-          
-          # 检查是否有文件要提交
+          # 检查是否有更改需要提交
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           else
-            git commit -m "Update Lighthouse reports $(date -u)"
-            # 使用当前分支名称
-            CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
-            git push origin "HEAD:$CURRENT_BRANCH"
+            git commit -m "Update Lighthouse reports $REPORT_DATE ($BRANCH_NAME ${{ matrix.site.name }})"
+            git push origin HEAD:$CURRENT_BRANCH
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
