@@ -1,0 +1,11 @@
+{
+  "ci": {
+    "collect": {
+      "settings": {
+        "maxWaitForLoad": 30000,
+        "skipAudits": []
+      },
+      "numberOfRuns": 1
+    }
+  }
+}
