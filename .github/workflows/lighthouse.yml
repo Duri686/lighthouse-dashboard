@@ -49,6 +49,13 @@ jobs:
         run: mkdir -p reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}
 
       # Run both desktop and mobile tests using Lighthouse CI
+      - name: Create Lighthouse directories
+        run: |
+          # 确保输出目录存在
+          mkdir -p .lighthouseci/desktop
+          mkdir -p .lighthouseci/mobile
+          ls -la .lighthouseci/
+
       - name: Run Lighthouse CI
         run: |
           # Create LHCI configuration file
@@ -68,6 +75,7 @@ jobs:
           
           # Desktop
           echo "Running desktop tests..."
+          mkdir -p .lighthouseci/desktop
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=desktop \
@@ -79,8 +87,13 @@ jobs:
             --settings.output=json,html \
             --outDir=.lighthouseci/desktop
           
+          # 检查是否生成了文件
+          echo "Checking desktop output files..."
+          find .lighthouseci/desktop -type f | sort
+          
           # Mobile
           echo "Running mobile tests..."
+          mkdir -p .lighthouseci/mobile
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=mobile \
@@ -91,6 +104,10 @@ jobs:
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.output=json,html \
             --outDir=.lighthouseci/mobile
+          
+          # 检查是否生成了文件
+          echo "Checking mobile output files..."
+          find .lighthouseci/mobile -type f | sort
 
       - name: Copy reports to reports directory
         run: |
