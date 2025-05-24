@@ -108,32 +108,159 @@ jobs:
           # 检查是否生成了文件
           echo "Checking mobile output files..."
           find .lighthouseci/mobile -type f | sort
+          
+          # List all contents recursively to debug
+          echo "All files in .lighthouseci:"
+          find .lighthouseci -type f | xargs ls -la
 
       - name: Copy reports to reports directory
         run: |
           # Copy desktop reports
-          DESKTOP_JSON=$(find .lighthouseci/desktop -name "*.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci/desktop -name "*.html" | sort -r | head -n 1)
-          cp "$DESKTOP_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
-          cp "$DESKTOP_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
+          echo "Finding desktop report files..."
+          DESKTOP_JSON=$(find .lighthouseci -path "*/desktop/*.json" | grep -v "manifest.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci -path "*/desktop/*.html" | sort -r | head -n 1)
+          
+          echo "Desktop JSON file: $DESKTOP_JSON"
+          echo "Desktop HTML file: $DESKTOP_HTML"
+          
+          # Create target directory if it doesn't exist
+          mkdir -p "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
+          
+          # Only copy if files exist
+          if [ -n "$DESKTOP_JSON" ] && [ -f "$DESKTOP_JSON" ]; then
+            cp "$DESKTOP_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+          else
+            echo "Warning: Desktop JSON file not found"
+          fi
+          
+          if [ -n "$DESKTOP_HTML" ] && [ -f "$DESKTOP_HTML" ]; then
+            cp "$DESKTOP_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
+          else
+            echo "Warning: Desktop HTML file not found"
+          fi
           
           # Copy mobile reports
-          MOBILE_JSON=$(find .lighthouseci/mobile -name "*.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci/mobile -name "*.html" | sort -r | head -n 1)
-          cp "$MOBILE_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
-          cp "$MOBILE_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
+          echo "Finding mobile report files..."
+          MOBILE_JSON=$(find .lighthouseci -path "*/mobile/*.json" | grep -v "manifest.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci -path "*/mobile/*.html" | sort -r | head -n 1)
+          
+          echo "Mobile JSON file: $MOBILE_JSON"
+          echo "Mobile HTML file: $MOBILE_HTML"
+          
+          # Only copy if files exist
+          if [ -n "$MOBILE_JSON" ] && [ -f "$MOBILE_JSON" ]; then
+            cp "$MOBILE_JSON" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+          else
+            echo "Warning: Mobile JSON file not found"
+          fi
+          
+          if [ -n "$MOBILE_HTML" ] && [ -f "$MOBILE_HTML" ]; then
+            cp "$MOBILE_HTML" "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
+          else
+            echo "Warning: Mobile HTML file not found"
+          fi
 
       - name: Process reports (optimized format)
         run: |
-          # 处理桌面端报告
+          # 创建 process-report.js 文件，如果不存在
+          if [ ! -f "process-report.js" ]; then
+            cat > process-report.js << 'EOF'
+            const fs = require('fs-extra');
+            const path = require('path');
+            
+            // 获取命令行参数
+            const reportFile = process.argv[2];
+            const historyFile = process.argv[3];
+            const siteUrl = process.argv[4];
+            const date = process.argv[5];
+            const device = process.argv[6];
+            
+            // 确保报告文件存在
+            if (!fs.existsSync(reportFile)) {
+              console.error(`Error: Report file ${reportFile} does not exist`);
+              process.exit(1);
+            }
+            
+            try {
+              // 读取报告JSON
+              const report = fs.readJsonSync(reportFile);
+              
+              // 提取关键数据
+              const metrics = {
+                date,
+                device,
+                url: siteUrl,
+                scores: {
+                  performance: report.categories.performance.score * 100,
+                  accessibility: report.categories.accessibility.score * 100,
+                  'best-practices': report.categories['best-practices'].score * 100,
+                  seo: report.categories.seo.score * 100,
+                },
+                metrics: {
+                  'first-contentful-paint': report.audits['first-contentful-paint'].numericValue,
+                  'speed-index': report.audits['speed-index'].numericValue,
+                  'largest-contentful-paint': report.audits['largest-contentful-paint'].numericValue,
+                  'interactive': report.audits['interactive'].numericValue,
+                  'total-blocking-time': report.audits['total-blocking-time'].numericValue,
+                  'cumulative-layout-shift': report.audits['cumulative-layout-shift'].numericValue,
+                }
+              };
+              
+              // 确保历史文件目录存在
+              const historyDir = path.dirname(historyFile);
+              fs.ensureDirSync(historyDir);
+              
+              // 读取或创建历史记录文件
+              let history = { entries: [] };
+              if (fs.existsSync(historyFile)) {
+                try {
+                  history = fs.readJsonSync(historyFile);
+                } catch (e) {
+                  console.warn(`Warning: Could not parse history file, creating new one: ${e.message}`);
+                }
+              }
+              
+              // 确保有entries数组
+              if (!history.entries) history.entries = [];
+              
+              // 添加新记录
+              history.entries.push(metrics);
+              
+              // 保存更新的历史记录
+              fs.writeJsonSync(historyFile, history, { spaces: 2 });
+              
+              console.log(`Successfully processed ${device} report and updated history.`);
+              
+            } catch (error) {
+              console.error(`Error processing report: ${error.message}`);
+              process.exit(1);
+            }
+            EOF
+            echo "Created process-report.js file"
+          fi
+          
+          # 检查目标报告文件是否存在
           DESKTOP_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
-          echo "Processing desktop report: $DESKTOP_JSON"
-          node process-report.js "$DESKTOP_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
+          MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+          
+          # 确保历史文件目录存在
+          mkdir -p "reports"
+          
+          # 处理桌面端报告
+          if [ -f "$DESKTOP_JSON" ]; then
+            echo "Processing desktop report: $DESKTOP_JSON"
+            node process-report.js "$DESKTOP_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
+          else
+            echo "Warning: Desktop report file not found: $DESKTOP_JSON"
+          fi
           
           # 处理移动端报告
-          MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
-          echo "Processing mobile report: $MOBILE_JSON"
-          node process-report.js "$MOBILE_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
+          if [ -f "$MOBILE_JSON" ]; then
+            echo "Processing mobile report: $MOBILE_JSON"
+            node process-report.js "$MOBILE_JSON" "reports/$BRANCH_NAME-history.json" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
+          else
+            echo "Warning: Mobile report file not found: $MOBILE_JSON"
+          fi
           
           # 创建网站列表已加速加载
           echo "Creating site list for quick loading"
