@@ -122,9 +122,16 @@ jobs:
           # First run is desktop, second is mobile - move JSON and HTML reports
           # to their respective directories
           echo "[ORGANIZE] 识别并移动文件到各自目录"
-          echo "[ORGANIZE] 获取桌面端和移动端文件列表"
-          DESKTOP_FILES=$(find .lighthouseci -name "lhr-*.json" | sort | head -n 3)
-          MOBILE_FILES=$(find .lighthouseci -name "lhr-*.json" | sort | tail -n 3)
+          echo "[ORGANIZE] 获取文件列表"
+          ALL_FILES=$(find .lighthouseci -name "lhr-*.json" | sort)
+          FILE_COUNT=$(echo "$ALL_FILES" | wc -l)
+          HALF_COUNT=$((FILE_COUNT / 2))
+          
+          echo "[ORGANIZE] 找到 $FILE_COUNT 个报告文件，每种设备分配 $HALF_COUNT 个文件"
+          
+          # 以时间戳排序，前半部分为桌面端（先运行），后半部分为移动端（后运行）
+          DESKTOP_FILES=$(echo "$ALL_FILES" | head -n $HALF_COUNT)
+          MOBILE_FILES=$(echo "$ALL_FILES" | tail -n $HALF_COUNT)
           
           echo "[ORGANIZE] 桌面端文件: $DESKTOP_FILES"
           echo "[ORGANIZE] 移动端文件: $MOBILE_FILES"
