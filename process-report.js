@@ -32,6 +32,9 @@ function processReport(reportFilePath, historyPath, url, date, deviceType) {
   const reportDir = path.dirname(reportFilePath);
   const baseDir = path.resolve(reportDir, '../../../'); // 回到reports根目录
   const relativePath = path.relative(baseDir, reportFilePath);
+  
+  // 提取资源并按类型分类
+  const resourcesByType = extractResourcesByType(report);
 
   // 组装设备数据 - 精简版，只包含必要的展示数据
   const processed = {
@@ -68,6 +71,8 @@ function processReport(reportFilePath, historyPath, url, date, deviceType) {
       totalByteWeight: Math.round(
         report.audits?.['total-byte-weight']?.numericValue || 0,
       ),
+      // 添加资源大小明细
+      resourceSizes: resourcesByType.resourceSizes
     },
     // 不再存储详细的审计数据，只保留文件引用
     // 报告文件路径 - 使用相对路径以便在不同环境中访问
@@ -141,6 +146,86 @@ function processReport(reportFilePath, historyPath, url, date, deviceType) {
 
   // 返回处理后的数据以便其他程序使用
   return processed;
+}
+
+/**
+ * 从Lighthouse报告中提取资源并按类型分类
+ * @param {Object} report Lighthouse报告对象
+ * @returns {Object} 按类型分类的资源对象
+ */
+function extractResourcesByType(report) {
+  // 初始化资源类型统计
+  const resourceSizes = {
+    js: 0,
+    css: 0,
+    image: 0,
+    font: 0,
+    other: 0
+  };
+  
+  // 如果存在 total-byte-weight 审计，获取总大小
+  const totalByteWeight = Math.round(
+    report.audits?.['total-byte-weight']?.numericValue || 0
+  );
+  
+  // 从 critical-request-chains 中提取所有请求
+  if (report.audits?.['critical-request-chains']?.details?.chains) {
+    const chains = report.audits['critical-request-chains'].details.chains;
+    
+    // 递归提取所有请求
+    function extractRequestsFromChain(chain) {
+      const requests = [];
+      if (!chain) return requests;
+      
+      // 添加当前请求
+      if (chain.request) {
+        requests.push(chain.request);
+      }
+      
+      // 递归处理子请求
+      if (chain.children) {
+        Object.values(chain.children).forEach(child => {
+          requests.push(...extractRequestsFromChain(child));
+        });
+      }
+      
+      return requests;
+    }
+    
+    // 获取所有请求
+    const allRequests = [];
+    Object.values(chains).forEach(chain => {
+      allRequests.push(...extractRequestsFromChain(chain));
+    });
+    
+    // 按类型分类并计算大小
+    allRequests.forEach(request => {
+      const url = request.url || '';
+      const transferSize = request.transferSize || 0;
+      
+      // 根据URL确定资源类型
+      if (url.match(/\.js(\?|$)/i)) {
+        resourceSizes.js += transferSize;
+      } else if (url.match(/\.css(\?|$)/i)) {
+        resourceSizes.css += transferSize;
+      } else if (url.match(/\.(jpe?g|png|gif|svg|webp|ico)(\?|$)/i)) {
+        resourceSizes.image += transferSize;
+      } else if (url.match(/\.(woff2?|ttf|otf|eot)(\?|$)/i)) {
+        resourceSizes.font += transferSize;
+      } else {
+        resourceSizes.other += transferSize;
+      }
+    });
+    
+    // 将大小转换为KB，并四舍五入到整数
+    Object.keys(resourceSizes).forEach(key => {
+      resourceSizes[key] = Math.round(resourceSizes[key] / 1024);
+    });
+  }
+  
+  return {
+    resourceSizes
+  };
 }
 
 // CLI usage: node process-report.js <reportFilePath> <historyPath> <url> <date> <deviceType>

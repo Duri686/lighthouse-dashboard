@@ -4,6 +4,7 @@
 import { getSelectedBranch, setSelectedBranch, loadLighthouseData, loadSiteList, getBranchOptions } from './data.js';
 import { updateDashboard, toggleDetailsVisibility, updateToggleBtnText, updateSiteSelect } from './ui.js';
 import { updatePerformanceChart } from './charts.js';
+import { initTabSwitching } from './components/tabManager.js';
 
 /**
  * 初始化应用
@@ -20,6 +21,10 @@ async function initApp() {
     detailsContent.style.display = 'none';
   }
 
+  // 初始化图表标签页切换
+  console.log('[main.js] 初始化图表标签页切换');
+  initTabSwitching();
+  
   // 设置事件监听器
   setupEventListeners();
   
@@ -88,9 +93,11 @@ async function initApp() {
         }, defaultDays, currentBranch);
         
         if (data && data.chartData && data.reports) {
+          // 输出原始图表数据以便调试
+          console.log('[initApp] 准备处理图表数据:', data.chartData);
           updatePerformanceChart(data.chartData);
           updateDashboard(data.chartData, data.reports);
-          console.log(`[initApp] 成功加载并更新了价格图表和仪表盘`);
+          console.log(`[initApp] 成功加载并更新了图表和仪表盘数据`);
         } else {
           console.error(`[initApp] 加载数据结构不完整:`, data);
           showError(`数据结构不完整，请检查浏览器控制台了解详情`);  

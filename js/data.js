@@ -251,8 +251,25 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
     // 初始化 chartData 对象
     const chartData = {
       dates: [],
-      scores: []
+      scores: [],
+      // 核心指标数组
+      accessibility: [],
+      bestPractices: [],
+      seo: [],
+      // 加载性能指标
+      fcp: [],
+      lcp: [],
+      si: [],
+      // 交互性能指标
+      tti: [],
+      tbt: [],
+      cls: [],
+      // 资源指标
+      totalByteWeight: [],
+      totalByteWeightDesktop: [],
+      totalByteWeightMobile: []
     };
+    console.log('[loadLighthouseData] 初始化完整chartData对象包含所有指标数组');
     
     const reports = filteredReports.map(report => {
       const data = report[deviceType];
@@ -277,6 +294,7 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
         tti: metrics.tti,
         si: metrics.si,
         serverResponseTime: metrics.serverResponseTime || 0,
+        totalByteWeight: metrics.totalByteWeight,
         // 报告文件路径
         reportFiles: data.reportFiles || {}
       };
@@ -284,6 +302,29 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
       // 添加到图表数据
       chartData.dates.push(reportDate);
       chartData.scores.push(data.scores.performance);
+      
+      // 添加所有核心指标到图表数据
+      chartData.accessibility.push(data.scores.accessibility || 0);
+      chartData.bestPractices.push(data.scores['best-practices'] || 0);
+      chartData.seo.push(data.scores.seo || 0);
+      
+      // 添加加载性能指标
+      chartData.fcp.push(metrics.fcp || 0);
+      chartData.lcp.push(metrics.lcp || 0);
+      chartData.si.push(metrics.si || 0);
+      
+      // 添加交互性能指标
+      chartData.tti.push(metrics.tti || 0);
+      chartData.tbt.push(metrics.tbt || 0);
+      chartData.cls.push(metrics.cls || 0);
+      
+      // 添加资源大小指标
+      chartData.totalByteWeight.push(metrics.totalByteWeight || 0);
+      if (deviceType === 'desktop') {
+        chartData.totalByteWeightDesktop.push(metrics.totalByteWeight || 0);
+      } else if (deviceType === 'mobile') {
+        chartData.totalByteWeightMobile.push(metrics.totalByteWeight || 0);
+      }
       
       return {
         date: reportDate,
@@ -299,7 +340,17 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
       };
     });
 
-    console.log('chartData for updateDashboard:', chartData);
+    console.log('[loadLighthouseData] chartData 处理完成，所有指标数组长度:', {
+      dates: chartData.dates.length,
+      performance: chartData.scores.length,
+      accessibility: chartData.accessibility.length,
+      bestPractices: chartData.bestPractices.length,
+      seo: chartData.seo.length,
+      fcp: chartData.fcp.length,
+      lcp: chartData.lcp.length,
+      tti: chartData.tti.length
+    });
+    console.log('[loadLighthouseData] chartData 完整对象:', chartData);
     
     return {
       chartData,
