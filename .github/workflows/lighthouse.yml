@@ -49,16 +49,19 @@ jobs:
         run: mkdir -p reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}
 
       # Run both desktop and mobile tests using Lighthouse CI
-      - name: Create Lighthouse directories
+      - name: Create Lighthouse directory
         run: |
           # 确保输出目录存在
-          mkdir -p .lighthouseci/desktop
-          mkdir -p .lighthouseci/mobile
-          ls -la .lighthouseci/
+          mkdir -p .lighthouseci
+          # 创建目标报告目录
+          TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
+          mkdir -p "$TARGET_DIR"
+          echo "[SETUP] 已创建Lighthouse输出目录: .lighthouseci/"
+          echo "[SETUP] 已创建报告目标目录: $TARGET_DIR"
 
-      - name: Run Lighthouse CI
+      - name: Run Desktop Lighthouse Test and Save Reports
         run: |
-          echo "===== [STEP: LIGHTHOUSE CI] 开始运行Lighthouse CI测试 ====="
+          echo "===== [DESKTOP] 开始运行桌面端Lighthouse测试 ====="
           
           # Create LHCI configuration file
           echo "[CONFIG] 创建Lighthouse配置文件"
@@ -75,10 +78,14 @@ jobs:
             }
           }
           EOF
-          echo "[CONFIG] Lighthouse配置文件已创建: $(cat lighthouserc.json | tr -d '\n')"
+          echo "[CONFIG] Lighthouse配置文件已创建"
           
-          # Desktop
-          echo "===== [DESKTOP] 开始运行桌面端测试 ====="
+          # 清空输出目录，确保只有当前测试的报告
+          echo "[DESKTOP] 清空输出目录，准备桌面端测试"
+          rm -rf .lighthouseci/*
+          
+          # 运行桌面端测试
+          echo "[DESKTOP] 开始运行桌面端测试"
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=desktop \
@@ -88,17 +95,56 @@ jobs:
             --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.output=json,html \
-            --outputDir=.lighthouseci/desktop/
+            --outputDir=.lighthouseci/
           echo "[DESKTOP] 桌面端测试完成"
           
-          # 检查是否生成了文件
-          echo "[FILES] 检查桌面端测试后生成的文件 (.lighthouseci/desktop):"
-          find .lighthouseci/desktop -type f | sort
-          echo "[FILES] 当前.lighthouseci/desktop目录结构:"
-          ls -la .lighthouseci/desktop/
+          # 检查生成的文件
+          echo "[DESKTOP] 检查生成的桌面端报告文件:"
+          find .lighthouseci/ -type f | sort
           
-          # Mobile
-          echo "===== [MOBILE] 开始运行移动端测试 ====="
+          # 立即复制桌面端报告到目标目录
+          echo "[DESKTOP] 复制桌面端报告到目标目录"
+          TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
+          
+          # 查找最新的JSON和HTML报告文件
+          DESKTOP_JSON=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.html" | sort -r | head -n 1)
+          
+          echo "[DESKTOP] 找到桌面端JSON报告: $DESKTOP_JSON"
+          echo "[DESKTOP] 找到桌面端HTML报告: $DESKTOP_HTML"
+          
+          # 复制JSON报告
+          if [ -n "$DESKTOP_JSON" ] && [ -f "$DESKTOP_JSON" ]; then
+            TARGET_JSON_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.json"
+            echo "[DESKTOP] 复制桌面端JSON报告: $DESKTOP_JSON -> $TARGET_JSON_PATH"
+            cp "$DESKTOP_JSON" "$TARGET_JSON_PATH"
+            echo "[DESKTOP] 桌面端JSON报告已保存至: $TARGET_JSON_PATH"
+          else
+            echo "[WARNING] 未找到桌面端JSON报告文件"
+          fi
+          
+          # 复制HTML报告
+          if [ -n "$DESKTOP_HTML" ] && [ -f "$DESKTOP_HTML" ]; then
+            TARGET_HTML_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.html"
+            echo "[DESKTOP] 复制桌面端HTML报告: $DESKTOP_HTML -> $TARGET_HTML_PATH"
+            cp "$DESKTOP_HTML" "$TARGET_HTML_PATH"
+            echo "[DESKTOP] 桌面端HTML报告已保存至: $TARGET_HTML_PATH"
+          else
+            echo "[WARNING] 未找到桌面端HTML报告文件"
+          fi
+          
+          echo "[DESKTOP] 桌面端测试和报告保存完成"
+
+      - name: Run Mobile Lighthouse Test and Save Reports
+        run: |
+          echo "===== [MOBILE] 开始运行移动端Lighthouse测试 ====="
+          
+          # 清空输出目录，确保只有当前测试的报告
+          echo "[MOBILE] 清空输出目录，准备移动端测试"
+          rm -rf .lighthouseci/*
+          
+          # 运行移动端测试
+          echo "[MOBILE] 开始运行移动端测试"
           lhci collect \
             --url=${{ matrix.site.url }} \
             --settings.formFactor=mobile \
@@ -108,113 +154,50 @@ jobs:
             --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.output=json,html \
-            --outputDir=.lighthouseci/mobile/
+            --outputDir=.lighthouseci/
           echo "[MOBILE] 移动端测试完成"
           
-          # 检查移动端生成的文件
-          echo "[FILES] 检查移动端测试后生成的文件 (.lighthouseci/mobile):"
-          find .lighthouseci/mobile -type f | sort
-          echo "[FILES] 当前.lighthouseci/mobile目录结构:"
-          ls -la .lighthouseci/mobile/
+          # 检查生成的文件
+          echo "[MOBILE] 检查生成的移动端报告文件:"
+          find .lighthouseci/ -type f | sort
           
-          # 检查是否生成了文件
-          echo "===== [FILES] 所有测试完成后的文件列表 ====="
-          find .lighthouseci -type f | sort
-          
-          # Reports are now directly output to .lighthouseci/desktop and .lighthouseci/mobile
-          # The [ORGANIZE] step is no longer needed.
-          echo "===== [ORGANIZE] Reports directly output to device-specific directories. No organization step needed. ====="
-          echo "[RESULT] 桌面端目录文件列表(.lighthouseci/desktop):"
-          ls -la .lighthouseci/desktop/
-          echo "[RESULT] 移动端目录文件列表(.lighthouseci/mobile):"
-          ls -la .lighthouseci/mobile/
-
-      - name: Copy reports to reports directory
-        run: |
-          echo "===== [COPY] 开始复制报告文件到目标目录 ====="
-          # Copy desktop reports
-          echo "[COPY] 查找桌面端报告文件"
-          echo "[COPY DEBUG] Listing files in .lighthouseci/desktop/ before find:"
-          ls -la .lighthouseci/desktop/
-          DESKTOP_JSON=$(find .lighthouseci/desktop/ -type f -name "*.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci/desktop/ -type f -name "*.html" | sort -r | head -n 1)
-          
-          echo "[COPY] 桌面端 JSON文件路径 (来自find): '$DESKTOP_JSON'"
-          echo "[COPY] 桌面端 HTML文件路径 (来自find): '$DESKTOP_HTML'"
-          
-          # Create target directory if it doesn't exist
+          # 立即复制移动端报告到目标目录
+          echo "[MOBILE] 复制移动端报告到目标目录"
           TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
-          echo "[COPY] 目标目录: $TARGET_DIR"
-          mkdir -p "$TARGET_DIR"
           
-          # Only copy if files exist
-          if [ -n "$DESKTOP_JSON" ] && [ -f "$DESKTOP_JSON" ]; then
-            TARGET_JSON_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.json"
-            echo "[COPY DEBUG] Verifying source desktop JSON file: $DESKTOP_JSON"
-            ls -la "$DESKTOP_JSON"
-            echo "[COPY] 复制桌面端 JSON文件: $DESKTOP_JSON -> $TARGET_JSON_PATH"
-            cp "$DESKTOP_JSON" "$TARGET_JSON_PATH"
-            echo "[COPY DEBUG] Verifying destination desktop JSON file: $TARGET_JSON_PATH"
-            ls -la "$TARGET_JSON_PATH"
-            echo "[COPY] 成功复制桌面端 JSON报告"
-          else
-            echo "[WARNING] 桌面端 JSON文件 '$DESKTOP_JSON' 未找到或为空."
-          fi
+          # 查找最新的JSON和HTML报告文件
+          MOBILE_JSON=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.html" | sort -r | head -n 1)
           
-          if [ -n "$DESKTOP_HTML" ] && [ -f "$DESKTOP_HTML" ]; then
-            TARGET_HTML_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.html"
-            echo "[COPY DEBUG] Verifying source desktop HTML file: $DESKTOP_HTML"
-            ls -la "$DESKTOP_HTML"
-            echo "[COPY] 复制桌面端 HTML文件: $DESKTOP_HTML -> $TARGET_HTML_PATH"
-            cp "$DESKTOP_HTML" "$TARGET_HTML_PATH"
-            echo "[COPY DEBUG] Verifying destination desktop HTML file: $TARGET_HTML_PATH"
-            ls -la "$TARGET_HTML_PATH"
-            echo "[COPY] 成功复制桌面端 HTML报告"
-          else
-            echo "[WARNING] 桌面端 HTML文件 '$DESKTOP_HTML' 未找到或为空."
-          fi
+          echo "[MOBILE] 找到移动端JSON报告: $MOBILE_JSON"
+          echo "[MOBILE] 找到移动端HTML报告: $MOBILE_HTML"
           
-          # Copy mobile reports
-          echo "[COPY] 查找移动端报告文件"
-          echo "[COPY DEBUG] Listing files in .lighthouseci/mobile/ before find:"
-          ls -la .lighthouseci/mobile/
-          MOBILE_JSON=$(find .lighthouseci/mobile/ -type f -name "*.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci/mobile/ -type f -name "*.html" | sort -r | head -n 1)
-          
-          echo "[COPY] 移动端 JSON文件路径 (来自find): '$MOBILE_JSON'"
-          echo "[COPY] 移动端 HTML文件路径 (来自find): '$MOBILE_HTML'"
-          
-          # Only copy if files exist
+          # 复制JSON报告
           if [ -n "$MOBILE_JSON" ] && [ -f "$MOBILE_JSON" ]; then
             TARGET_JSON_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-mobile.report.json"
-            echo "[COPY DEBUG] Verifying source mobile JSON file: $MOBILE_JSON"
-            ls -la "$MOBILE_JSON"
-            echo "[COPY] 复制移动端 JSON文件: $MOBILE_JSON -> $TARGET_JSON_PATH"
+            echo "[MOBILE] 复制移动端JSON报告: $MOBILE_JSON -> $TARGET_JSON_PATH"
             cp "$MOBILE_JSON" "$TARGET_JSON_PATH"
-            echo "[COPY DEBUG] Verifying destination mobile JSON file: $TARGET_JSON_PATH"
-            ls -la "$TARGET_JSON_PATH"
-            echo "[COPY] 成功复制移动端 JSON报告"
+            echo "[MOBILE] 移动端JSON报告已保存至: $TARGET_JSON_PATH"
           else
-            echo "[WARNING] 移动端 JSON文件 '$MOBILE_JSON' 未找到或为空."
+            echo "[WARNING] 未找到移动端JSON报告文件"
           fi
           
+          # 复制HTML报告
           if [ -n "$MOBILE_HTML" ] && [ -f "$MOBILE_HTML" ]; then
             TARGET_HTML_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-mobile.report.html"
-            echo "[COPY DEBUG] Verifying source mobile HTML file: $MOBILE_HTML"
-            ls -la "$MOBILE_HTML"
-            echo "[COPY] 复制移动端 HTML文件: $MOBILE_HTML -> $TARGET_HTML_PATH"
+            echo "[MOBILE] 复制移动端HTML报告: $MOBILE_HTML -> $TARGET_HTML_PATH"
             cp "$MOBILE_HTML" "$TARGET_HTML_PATH"
-            echo "[COPY DEBUG] Verifying destination mobile HTML file: $TARGET_HTML_PATH"
-            ls -la "$TARGET_HTML_PATH"
-            echo "[COPY] 成功复制移动端 HTML报告"
+            echo "[MOBILE] 移动端HTML报告已保存至: $TARGET_HTML_PATH"
           else
-            echo "[WARNING] 移动端 HTML文件 '$MOBILE_HTML' 未找到或为空."
+            echo "[WARNING] 未找到移动端HTML报告文件"
           fi
           
-          # List the created report files
-          echo "===== [COPY] 目标目录文件列表 ====="
-          echo "[COPY] reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/目录内容:"
-          ls -la "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/"
+          echo "[MOBILE] 移动端测试和报告保存完成"
+          
+          # 列出所有生成的报告文件
+          echo "===== [REPORTS] 查看所有生成的报告文件 ====="
+          echo "[REPORTS] 目标目录中的报告文件:"
+          ls -la "$TARGET_DIR"
 
       - name: Process reports (optimized format)
         run: |
