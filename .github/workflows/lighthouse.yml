@@ -88,14 +88,14 @@ jobs:
             --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.output=json,html \
-            --outputDir=.lighthouseci/desktop
+            --outputDir=.lighthouseci/desktop/
           echo "[DESKTOP] 桌面端测试完成"
           
           # 检查是否生成了文件
-          echo "[FILES] 检查桌面端测试后生成的文件:"
-          find .lighthouseci -type f | sort
-          echo "[FILES] 当前.lighthouseci目录结构:"
-          ls -la .lighthouseci/
+          echo "[FILES] 检查桌面端测试后生成的文件 (.lighthouseci/desktop):"
+          find .lighthouseci/desktop -type f | sort
+          echo "[FILES] 当前.lighthouseci/desktop目录结构:"
+          ls -la .lighthouseci/desktop/
           
           # Mobile
           echo "===== [MOBILE] 开始运行移动端测试 ====="
@@ -108,8 +108,14 @@ jobs:
             --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
             --settings.output=json,html \
-            --outputDir=.lighthouseci/mobile
+            --outputDir=.lighthouseci/mobile/
           echo "[MOBILE] 移动端测试完成"
+          
+          # 检查移动端生成的文件
+          echo "[FILES] 检查移动端测试后生成的文件 (.lighthouseci/mobile):"
+          find .lighthouseci/mobile -type f | sort
+          echo "[FILES] 当前.lighthouseci/mobile目录结构:"
+          ls -la .lighthouseci/mobile/
           
           # 检查是否生成了文件
           echo "===== [FILES] 所有测试完成后的文件列表 ====="
@@ -128,60 +134,81 @@ jobs:
           echo "===== [COPY] 开始复制报告文件到目标目录 ====="
           # Copy desktop reports
           echo "[COPY] 查找桌面端报告文件"
-          DESKTOP_JSON=$(find .lighthouseci/desktop -type f -name "*.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci/desktop -type f -name "*.html" | sort -r | head -n 1)
+          echo "[COPY DEBUG] Listing files in .lighthouseci/desktop/ before find:"
+          ls -la .lighthouseci/desktop/
+          DESKTOP_JSON=$(find .lighthouseci/desktop/ -type f -name "*.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci/desktop/ -type f -name "*.html" | sort -r | head -n 1)
           
-          echo "[COPY] 桌面端 JSON文件: $DESKTOP_JSON"
-          echo "[COPY] 桌面端 HTML文件: $DESKTOP_HTML"
+          echo "[COPY] 桌面端 JSON文件路径 (来自find): '$DESKTOP_JSON'"
+          echo "[COPY] 桌面端 HTML文件路径 (来自find): '$DESKTOP_HTML'"
           
           # Create target directory if it doesn't exist
-          echo "[COPY] 创建目标目录: reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
-          mkdir -p "reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
+          TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
+          echo "[COPY] 目标目录: $TARGET_DIR"
+          mkdir -p "$TARGET_DIR"
           
           # Only copy if files exist
           if [ -n "$DESKTOP_JSON" ] && [ -f "$DESKTOP_JSON" ]; then
-            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
-            echo "[COPY] 复制桌面端 JSON文件: $DESKTOP_JSON -> $TARGET_PATH"
-            cp "$DESKTOP_JSON" "$TARGET_PATH"
+            TARGET_JSON_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.json"
+            echo "[COPY DEBUG] Verifying source desktop JSON file: $DESKTOP_JSON"
+            ls -la "$DESKTOP_JSON"
+            echo "[COPY] 复制桌面端 JSON文件: $DESKTOP_JSON -> $TARGET_JSON_PATH"
+            cp "$DESKTOP_JSON" "$TARGET_JSON_PATH"
+            echo "[COPY DEBUG] Verifying destination desktop JSON file: $TARGET_JSON_PATH"
+            ls -la "$TARGET_JSON_PATH"
             echo "[COPY] 成功复制桌面端 JSON报告"
           else
-            echo "[WARNING] 桌面端 JSON文件未找到"
+            echo "[WARNING] 桌面端 JSON文件 '$DESKTOP_JSON' 未找到或为空."
           fi
           
           if [ -n "$DESKTOP_HTML" ] && [ -f "$DESKTOP_HTML" ]; then
-            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.html"
-            echo "[COPY] 复制桌面端 HTML文件: $DESKTOP_HTML -> $TARGET_PATH"
-            cp "$DESKTOP_HTML" "$TARGET_PATH"
+            TARGET_HTML_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-desktop.report.html"
+            echo "[COPY DEBUG] Verifying source desktop HTML file: $DESKTOP_HTML"
+            ls -la "$DESKTOP_HTML"
+            echo "[COPY] 复制桌面端 HTML文件: $DESKTOP_HTML -> $TARGET_HTML_PATH"
+            cp "$DESKTOP_HTML" "$TARGET_HTML_PATH"
+            echo "[COPY DEBUG] Verifying destination desktop HTML file: $TARGET_HTML_PATH"
+            ls -la "$TARGET_HTML_PATH"
             echo "[COPY] 成功复制桌面端 HTML报告"
           else
-            echo "[WARNING] 桌面端 HTML文件未找到"
+            echo "[WARNING] 桌面端 HTML文件 '$DESKTOP_HTML' 未找到或为空."
           fi
           
           # Copy mobile reports
           echo "[COPY] 查找移动端报告文件"
-          MOBILE_JSON=$(find .lighthouseci/mobile -type f -name "*.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci/mobile -type f -name "*.html" | sort -r | head -n 1)
+          echo "[COPY DEBUG] Listing files in .lighthouseci/mobile/ before find:"
+          ls -la .lighthouseci/mobile/
+          MOBILE_JSON=$(find .lighthouseci/mobile/ -type f -name "*.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci/mobile/ -type f -name "*.html" | sort -r | head -n 1)
           
-          echo "[COPY] 移动端 JSON文件: $MOBILE_JSON"
-          echo "[COPY] 移动端 HTML文件: $MOBILE_HTML"
+          echo "[COPY] 移动端 JSON文件路径 (来自find): '$MOBILE_JSON'"
+          echo "[COPY] 移动端 HTML文件路径 (来自find): '$MOBILE_HTML'"
           
           # Only copy if files exist
           if [ -n "$MOBILE_JSON" ] && [ -f "$MOBILE_JSON" ]; then
-            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
-            echo "[COPY] 复制移动端 JSON文件: $MOBILE_JSON -> $TARGET_PATH"
-            cp "$MOBILE_JSON" "$TARGET_PATH"
+            TARGET_JSON_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-mobile.report.json"
+            echo "[COPY DEBUG] Verifying source mobile JSON file: $MOBILE_JSON"
+            ls -la "$MOBILE_JSON"
+            echo "[COPY] 复制移动端 JSON文件: $MOBILE_JSON -> $TARGET_JSON_PATH"
+            cp "$MOBILE_JSON" "$TARGET_JSON_PATH"
+            echo "[COPY DEBUG] Verifying destination mobile JSON file: $TARGET_JSON_PATH"
+            ls -la "$TARGET_JSON_PATH"
             echo "[COPY] 成功复制移动端 JSON报告"
           else
-            echo "[WARNING] 移动端 JSON文件未找到"
+            echo "[WARNING] 移动端 JSON文件 '$MOBILE_JSON' 未找到或为空."
           fi
           
           if [ -n "$MOBILE_HTML" ] && [ -f "$MOBILE_HTML" ]; then
-            TARGET_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.html"
-            echo "[COPY] 复制移动端 HTML文件: $MOBILE_HTML -> $TARGET_PATH"
-            cp "$MOBILE_HTML" "$TARGET_PATH"
+            TARGET_HTML_PATH="$TARGET_DIR/lhr-${{ matrix.site.name }}-mobile.report.html"
+            echo "[COPY DEBUG] Verifying source mobile HTML file: $MOBILE_HTML"
+            ls -la "$MOBILE_HTML"
+            echo "[COPY] 复制移动端 HTML文件: $MOBILE_HTML -> $TARGET_HTML_PATH"
+            cp "$MOBILE_HTML" "$TARGET_HTML_PATH"
+            echo "[COPY DEBUG] Verifying destination mobile HTML file: $TARGET_HTML_PATH"
+            ls -la "$TARGET_HTML_PATH"
             echo "[COPY] 成功复制移动端 HTML报告"
           else
-            echo "[WARNING] 移动端 HTML文件未找到"
+            echo "[WARNING] 移动端 HTML文件 '$MOBILE_HTML' 未找到或为空."
           fi
           
           # List the created report files
@@ -194,11 +221,27 @@ jobs:
           echo "===== [PROCESS] 开始处理报告数据 ====="
           # 检查目标报告文件是否存在
           echo "[PROCESS] 检查报告文件路径"
-          DESKTOP_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
-          MOBILE_JSON="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
+          # Use different variable names for paths used in processing to avoid conflicts with copy step variables
+          DESKTOP_JSON_PROCESS_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-desktop.report.json"
+          MOBILE_JSON_PROCESS_PATH="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}/lhr-${{ matrix.site.name }}-mobile.report.json"
           
-          echo "[PROCESS] 桌面端报告路径: $DESKTOP_JSON"
-          echo "[PROCESS] 移动端报告路径: $MOBILE_JSON"
+          echo "[PROCESS] 预期桌面端报告路径 (for processing): $DESKTOP_JSON_PROCESS_PATH"
+          echo "[PROCESS DEBUG] 检查桌面端报告文件是否存在: $DESKTOP_JSON_PROCESS_PATH"
+          if [ -f "$DESKTOP_JSON_PROCESS_PATH" ]; then
+            echo "[PROCESS DEBUG] 桌面端报告文件存在。"
+            ls -la "$DESKTOP_JSON_PROCESS_PATH"
+          else
+            echo "[PROCESS WARNING] 桌面端报告文件不存在于预期路径: $DESKTOP_JSON_PROCESS_PATH"
+          fi
+
+          echo "[PROCESS] 预期移动端报告路径 (for processing): $MOBILE_JSON_PROCESS_PATH"
+          echo "[PROCESS DEBUG] 检查移动端报告文件是否存在: $MOBILE_JSON_PROCESS_PATH"
+          if [ -f "$MOBILE_JSON_PROCESS_PATH" ]; then
+            echo "[PROCESS DEBUG] 移动端报告文件存在。"
+            ls -la "$MOBILE_JSON_PROCESS_PATH"
+          else
+            echo "[PROCESS WARNING] 移动端报告文件不存在于预期路径: $MOBILE_JSON_PROCESS_PATH"
+          fi
           
           # 确保历史文件目录存在
           echo "[PROCESS] 创建历史数据目录"
@@ -209,23 +252,23 @@ jobs:
           HISTORY_FILE="reports/$BRANCH_NAME-history.json"
           echo "[PROCESS] 历史数据文件: $HISTORY_FILE"
           
-          if [ -f "$DESKTOP_JSON" ]; then
-            echo "[PROCESS] 处理桌面端报告: $DESKTOP_JSON"
-            echo "[PROCESS] 执行: node process-report.js '$DESKTOP_JSON' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'desktop'"
-            node process-report.js "$DESKTOP_JSON" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
+          if [ -f "$DESKTOP_JSON_PROCESS_PATH" ]; then
+            echo "[PROCESS] 处理桌面端报告: $DESKTOP_JSON_PROCESS_PATH"
+            echo "[PROCESS] 执行: node process-report.js '$DESKTOP_JSON_PROCESS_PATH' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'desktop'"
+            node process-report.js "$DESKTOP_JSON_PROCESS_PATH" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "desktop"
             echo "[PROCESS] 桌面端报告处理完成"
           else
-            echo "[WARNING] 桌面端报告文件未找到: $DESKTOP_JSON"
+            echo "[PROCESS WARNING] 桌面端报告文件未找到，跳过处理: $DESKTOP_JSON_PROCESS_PATH"
           fi
           
           # 处理移动端报告
-          if [ -f "$MOBILE_JSON" ]; then
-            echo "[PROCESS] 处理移动端报告: $MOBILE_JSON"
-            echo "[PROCESS] 执行: node process-report.js '$MOBILE_JSON' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'mobile'"
-            node process-report.js "$MOBILE_JSON" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
+          if [ -f "$MOBILE_JSON_PROCESS_PATH" ]; then
+            echo "[PROCESS] 处理移动端报告: $MOBILE_JSON_PROCESS_PATH"
+            echo "[PROCESS] 执行: node process-report.js '$MOBILE_JSON_PROCESS_PATH' '$HISTORY_FILE' '${{ matrix.site.url }}' '$REPORT_DATE' 'mobile'"
+            node process-report.js "$MOBILE_JSON_PROCESS_PATH" "$HISTORY_FILE" "${{ matrix.site.url }}" "$REPORT_DATE" "mobile"
             echo "[PROCESS] 移动端报告处理完成"
           else
-            echo "[WARNING] 移动端报告文件未找到: $MOBILE_JSON"
+            echo "[PROCESS WARNING] 移动端报告文件未找到，跳过处理: $MOBILE_JSON_PROCESS_PATH"
           fi
           
           # 检查历史数据文件
