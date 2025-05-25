@@ -267,7 +267,13 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
       // 资源指标
       totalByteWeight: [],
       totalByteWeightDesktop: [],
-      totalByteWeightMobile: []
+      totalByteWeightMobile: [],
+      // 分类资源大小指标
+      resourceSizesJs: { desktop: [], mobile: [] },
+      resourceSizesCss: { desktop: [], mobile: [] },
+      resourceSizesImage: { desktop: [], mobile: [] },
+      resourceSizesFont: { desktop: [], mobile: [] },
+      resourceSizesOther: { desktop: [], mobile: [] }
     };
     console.log('[loadLighthouseData] 初始化完整chartData对象包含所有指标数组');
     
@@ -322,8 +328,26 @@ export async function loadLighthouseData(urlOrData, days, branch = getSelectedBr
       chartData.totalByteWeight.push(metrics.totalByteWeight || 0);
       if (deviceType === 'desktop') {
         chartData.totalByteWeightDesktop.push(metrics.totalByteWeight || 0);
+        
+        // 添加分类资源大小 - 桌面端
+        if (metrics.resourceSizes) {
+          chartData.resourceSizesJs.desktop.push(metrics.resourceSizes.js || 0);
+          chartData.resourceSizesCss.desktop.push(metrics.resourceSizes.css || 0);
+          chartData.resourceSizesImage.desktop.push(metrics.resourceSizes.image || 0);
+          chartData.resourceSizesFont.desktop.push(metrics.resourceSizes.font || 0);
+          chartData.resourceSizesOther.desktop.push(metrics.resourceSizes.other || 0);
+        }
       } else if (deviceType === 'mobile') {
         chartData.totalByteWeightMobile.push(metrics.totalByteWeight || 0);
+        
+        // 添加分类资源大小 - 移动端
+        if (metrics.resourceSizes) {
+          chartData.resourceSizesJs.mobile.push(metrics.resourceSizes.js || 0);
+          chartData.resourceSizesCss.mobile.push(metrics.resourceSizes.css || 0);
+          chartData.resourceSizesImage.mobile.push(metrics.resourceSizes.image || 0);
+          chartData.resourceSizesFont.mobile.push(metrics.resourceSizes.font || 0);
+          chartData.resourceSizesOther.mobile.push(metrics.resourceSizes.other || 0);
+        }
       }
       
       return {

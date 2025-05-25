@@ -2,24 +2,33 @@
  * 资源大小图表模块 - 处理资源大小趋势图和趋势指示器
  * 支持按资源类型（JS、CSS、图片等）显示数据
  */
-import { CHART_COLORS } from './chartConfig.js';
+import { CHART_COLORS } from '../../config.js';
 import { formatBytes } from '../../utils.js';
+import { getScoreColor } from '../../charts.js';
 
 /**
  * 初始化资源大小趋势图
  * @param {Object} chartData - 图表数据
  * @param {Object} chartInstances - 图表实例对象
- * @param {string} resourceType - 资源类型（'all', 'js', 'css', 'image', 'font', 'other'）
+ * @param {string} resourceType - 资源类型（'total', 'js', 'css', 'images', 'fonts', 'other'）
  */
-export function initResourceSizeChart(chartData, chartInstances, resourceType = 'all') {
+export function initResourceSizeChart(chartData, chartInstances, resourceType = 'total') {
+  console.log('[charts/resourceChart] 开始初始化资源大小趋势图，chartData:', chartData);
   console.log('[charts/resourceChart] 开始初始化资源大小趋势图，资源类型:', resourceType);
-  console.log('[charts/resourceChart] 资源大小数据:', {
-    dates: chartData.dates,
-    totalByteWeight: chartData.totalByteWeight,
-    totalByteWeightDesktop: chartData.totalByteWeightDesktop,
-    totalByteWeightMobile: chartData.totalByteWeightMobile,
-    resourcesByType: chartData.resourcesByType
-  });
+  
+  // 初始化资源类型选择器
+  const resourceTypeSelector = document.getElementById('resource-view-type');
+  if (resourceTypeSelector) {
+    // 设置初始值
+    resourceTypeSelector.value = resourceType;
+    
+    // 添加变化监听
+    resourceTypeSelector.addEventListener('change', function() {
+      const selectedType = this.value;
+      console.log('[charts/resourceChart] 资源类型改变为:', selectedType);
+      initResourceSizeChart(chartData, chartInstances, selectedType);
+    });
+  }
   
   const chartElement = document.getElementById('resourceSizeChart');
   if (!chartElement) {
@@ -48,23 +57,35 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
   let legendData = ['桌面端', '移动端'];
   
   // 根据选择的资源类型获取相应数据
-  if (resourceType === 'all') {
+  if (resourceType === 'total') {
     // 总体资源大小
     desktopData = chartData.totalByteWeightDesktop || [];
     mobileData = chartData.totalByteWeightMobile || [];
-  } else if (chartData.resourcesByType && chartData.resourcesByType.desktop && chartData.resourcesByType.mobile) {
-    // 按资源类型筛选数据
-    desktopData = chartData.resourcesByType.desktop[resourceType] || [];
-    mobileData = chartData.resourcesByType.mobile[resourceType] || [];
-    
-    // 更新图例名称以反映资源类型
-    const typeName = getResourceTypeName(resourceType);
-    legendData = [`桌面端(${typeName})`, `移动端(${typeName})`];
   } else {
-    // 如果没有按类型的数据，回退到总体数据
-    console.warn('[charts/resourceChart] 没有找到按资源类型的数据，使用总体数据');
-    desktopData = chartData.totalByteWeightDesktop || [];
-    mobileData = chartData.totalByteWeightMobile || [];
+    // 根据选择的资源类型获取相应数据
+    // 将select选项的value值映射到数据字段名
+    const typeMapping = {
+      'js': 'resourceSizesJs',
+      'css': 'resourceSizesCss',
+      'images': 'resourceSizesImage',
+      'fonts': 'resourceSizesFont',
+      'other': 'resourceSizesOther'
+    };
+    
+    const dataField = typeMapping[resourceType];
+    if (dataField && chartData[dataField]) {
+      desktopData = chartData[dataField].desktop || [];
+      mobileData = chartData[dataField].mobile || [];
+      
+      // 更新图例名称以反映资源类型
+      const typeName = getResourceTypeName(resourceType);
+      legendData = [`桌面端(${typeName})`, `移动端(${typeName})`];
+    } else {
+      // 如果没有指定类型的数据，回退到总体数据
+      console.warn(`[charts/resourceChart] 没有找到 ${resourceType} 类型的资源数据，使用总体数据`);
+      desktopData = chartData.totalByteWeightDesktop || [];
+      mobileData = chartData.totalByteWeightMobile || [];
+    }
   }
   
   // 构建资源大小趋势图表选项
@@ -214,13 +235,18 @@ export function updateResourceTrendIndicator(chartData, resourceType = 'all') {
  * @returns {string} 资源类型中文名称
  */
 function getResourceTypeName(type) {
-  const typeNames = {
-    'js': 'JavaScript',
-    'css': 'CSS',
-    'image': '图片',
-    'font': '字体',
-    'other': '其他'
-  };
-  
-  return typeNames[type] || type;
+  switch (type) {
+    case 'js':
+      return 'JavaScript';
+    case 'css':
+      return 'CSS';
+    case 'images':
+      return '图片';
+    case 'fonts':
+      return '字体';
+    case 'other':
+      return '其他';
+    default:
+      return '总计';
+  }
 }

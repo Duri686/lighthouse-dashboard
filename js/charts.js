@@ -29,6 +29,10 @@ export function updatePerformanceChart(chartData) {
   // 记录处理后的图表数据用于调试
   console.log('[charts.js] 处理后的增强图表数据:', enhancedChartData);
   
+  // 将增强后的数据保存到全局变量，便于资源图表组件使用
+  window.chartData = enhancedChartData;
+  console.log('[charts.js] 已将增强图表数据保存到 window.chartData', window.chartData);
+  
   // 初始化所有趋势图表
   initTrendCharts(enhancedChartData);
 }
@@ -66,8 +70,26 @@ function processChartData(originalData) {
     // 资源指标
     totalByteWeight: originalData.totalByteWeight || [],
     totalByteWeightDesktop: originalData.totalByteWeightDesktop || [],
-    totalByteWeightMobile: originalData.totalByteWeightMobile || []
+    totalByteWeightMobile: originalData.totalByteWeightMobile || [],
+    // 分类资源大小指标 - 䳝语从 data.js 传递过来
+    resourceSizesJs: originalData.resourceSizesJs || { desktop: [], mobile: [] },
+    resourceSizesCss: originalData.resourceSizesCss || { desktop: [], mobile: [] },
+    resourceSizesImage: originalData.resourceSizesImage || { desktop: [], mobile: [] },
+    resourceSizesFont: originalData.resourceSizesFont || { desktop: [], mobile: [] },
+    resourceSizesOther: originalData.resourceSizesOther || { desktop: [], mobile: [] }
   };
+  
+  // 调试输出资源分类数据
+  console.log('[charts.js] 分类资源数据检查:', {
+    原始数据: {
+      js: originalData.resourceSizesJs,
+      css: originalData.resourceSizesCss
+    },
+    增强数据: {
+      js: enhancedData.resourceSizesJs,
+      css: enhancedData.resourceSizesCss
+    }
+  });
   
   // 从原始数据提取详细指标数据
   if (originalData.reports && originalData.reports.length > 0) {
