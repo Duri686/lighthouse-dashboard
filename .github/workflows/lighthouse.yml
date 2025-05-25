@@ -128,8 +128,8 @@ jobs:
           echo "===== [COPY] 开始复制报告文件到目标目录 ====="
           # Copy desktop reports
           echo "[COPY] 查找桌面端报告文件"
-          DESKTOP_JSON=$(find .lighthouseci/desktop -name "*.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci/desktop -name "*.html" | sort -r | head -n 1)
+          DESKTOP_JSON=$(find .lighthouseci/desktop -type f -name "*.json" | sort -r | head -n 1)
+          DESKTOP_HTML=$(find .lighthouseci/desktop -type f -name "*.html" | sort -r | head -n 1)
           
           echo "[COPY] 桌面端 JSON文件: $DESKTOP_JSON"
           echo "[COPY] 桌面端 HTML文件: $DESKTOP_HTML"
@@ -159,8 +159,8 @@ jobs:
           
           # Copy mobile reports
           echo "[COPY] 查找移动端报告文件"
-          MOBILE_JSON=$(find .lighthouseci/mobile -name "*.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci/mobile -name "*.html" | sort -r | head -n 1)
+          MOBILE_JSON=$(find .lighthouseci/mobile -type f -name "*.json" | sort -r | head -n 1)
+          MOBILE_HTML=$(find .lighthouseci/mobile -type f -name "*.html" | sort -r | head -n 1)
           
           echo "[COPY] 移动端 JSON文件: $MOBILE_JSON"
           echo "[COPY] 移动端 HTML文件: $MOBILE_HTML"
