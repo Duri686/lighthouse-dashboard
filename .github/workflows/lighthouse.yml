@@ -87,7 +87,8 @@ jobs:
             --settings.screenEmulation.height=940 \
             --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.output=json,html
+            --settings.output=json,html \
+            --outputDir=.lighthouseci/desktop
           echo "[DESKTOP] 桌面端测试完成"
           
           # 检查是否生成了文件
@@ -106,70 +107,20 @@ jobs:
             --settings.screenEmulation.height=640 \
             --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.output=json,html
+            --settings.output=json,html \
+            --outputDir=.lighthouseci/mobile
           echo "[MOBILE] 移动端测试完成"
           
           # 检查是否生成了文件
           echo "===== [FILES] 所有测试完成后的文件列表 ====="
           find .lighthouseci -type f | sort
           
-          # Create device-specific directories and move files there
-          echo "===== [ORGANIZE] 开始整理文件到设备目录 ====="
-          echo "[ORGANIZE] 创建设备特定目录"
-          mkdir -p .lighthouseci/desktop
-          mkdir -p .lighthouseci/mobile
-          
-          # First run is desktop, second is mobile - move JSON and HTML reports
-          # to their respective directories
-          echo "[ORGANIZE] 识别并移动文件到各自目录"
-          echo "[ORGANIZE] 获取文件列表"
-          ALL_FILES=$(find .lighthouseci -name "lhr-*.json" | sort)
-          FILE_COUNT=$(echo "$ALL_FILES" | wc -l)
-          HALF_COUNT=$((FILE_COUNT / 2))
-          
-          echo "[ORGANIZE] 找到 $FILE_COUNT 个报告文件，每种设备分配 $HALF_COUNT 个文件"
-          
-          # 以时间戳排序，前半部分为桌面端（先运行），后半部分为移动端（后运行）
-          DESKTOP_FILES=$(echo "$ALL_FILES" | head -n $HALF_COUNT)
-          MOBILE_FILES=$(echo "$ALL_FILES" | tail -n $HALF_COUNT)
-          
-          echo "[ORGANIZE] 桌面端文件: $DESKTOP_FILES"
-          echo "[ORGANIZE] 移动端文件: $MOBILE_FILES"
-          
-          # Move desktop files
-          echo "[ORGANIZE] 开始移动桌面端文件"
-          for file in $DESKTOP_FILES; do
-            echo "[ORGANIZE] 移动桌面端 JSON: $file -> .lighthouseci/desktop/"
-            mv "$file" .lighthouseci/desktop/
-            HTML_FILE="${file%.json}.html"
-            if [ -f "$HTML_FILE" ]; then
-              echo "[ORGANIZE] 移动桌面端 HTML: $HTML_FILE -> .lighthouseci/desktop/"
-              mv "$HTML_FILE" .lighthouseci/desktop/
-            else
-              echo "[ORGANIZE] 未找到对应的HTML文件: $HTML_FILE"
-            fi
-          done
-          
-          # Move mobile files
-          echo "[ORGANIZE] 开始移动移动端文件"
-          for file in $MOBILE_FILES; do
-            echo "[ORGANIZE] 移动移动端 JSON: $file -> .lighthouseci/mobile/"
-            mv "$file" .lighthouseci/mobile/
-            HTML_FILE="${file%.json}.html"
-            if [ -f "$HTML_FILE" ]; then
-              echo "[ORGANIZE] 移动移动端 HTML: $HTML_FILE -> .lighthouseci/mobile/"
-              mv "$HTML_FILE" .lighthouseci/mobile/
-            else
-              echo "[ORGANIZE] 未找到对应的HTML文件: $HTML_FILE"
-            fi
-          done
-          
-          # List all contents recursively to debug
-          echo "===== [RESULT] 文件移动后的目录结构 ====="
-          find .lighthouseci -type f | xargs ls -la
-          echo "[RESULT] 桌面端目录文件列表:"
+          # Reports are now directly output to .lighthouseci/desktop and .lighthouseci/mobile
+          # The [ORGANIZE] step is no longer needed.
+          echo "===== [ORGANIZE] Reports directly output to device-specific directories. No organization step needed. ====="
+          echo "[RESULT] 桌面端目录文件列表(.lighthouseci/desktop):"
           ls -la .lighthouseci/desktop/
-          echo "[RESULT] 移动端目录文件列表:"
+          echo "[RESULT] 移动端目录文件列表(.lighthouseci/mobile):"
           ls -la .lighthouseci/mobile/
 
       - name: Copy reports to reports directory

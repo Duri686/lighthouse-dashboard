@@ -116,27 +116,43 @@ export async function loadSiteList(branch = getSelectedBranch()) {
  */
 export async function loadLighthouseData(urlOrData, days, branch = getSelectedBranch()) {
   console.log('%c[loadLighthouseData] 开始加载数据...', 'color: #4CAF50; font-weight: bold');
-  console.log(`[loadLighthouseData] 参数 - urlOrData: ${urlOrData}, days: ${days}, branch: ${branch}`);
+  console.log(`[loadLighthouseData] 参数 - urlOrData: ${JSON.stringify(urlOrData)}, days: ${days}, branch: ${branch}`);
   
-  // 处理传入的是 JSON 字符串的情况
+  // 处理传入的是 JSON 字符串或对象的情况
   let url, deviceType;
   
   try {
     if (typeof urlOrData === 'string' && urlOrData.startsWith('{')) {
-      // 尝试解析 JSON
+      // 尝试解析 JSON 字符串
       const data = JSON.parse(urlOrData);
       url = data.url;
       deviceType = data.device;
-      console.log('[loadLighthouseData] 从 JSON 解析出 URL 和设备类型:', url, deviceType);
-    } else {
+      console.log('[loadLighthouseData] 从 JSON 字符串解析出 URL 和设备类型:', url, deviceType);
+    } else if (typeof urlOrData === 'object' && urlOrData.url) {
+      // 处理对象类型的 urlOrData
+      url = urlOrData.url;
+      deviceType = urlOrData.device || (window.innerWidth <= 768 ? 'mobile' : 'desktop');
+      console.log('[loadLighthouseData] 从对象解析出 URL 和设备类型:', url, deviceType);
+    } else if (typeof urlOrData === 'string') {
+      // 处理纯 URL 字符串
       url = urlOrData;
-      // 如果没有指定设备类型，则使用默认值
       deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
-      console.log('[loadLighthouseData] 使用默认设备类型:', deviceType);
+      console.log('[loadLighthouseData] 使用纯 URL 字符串和默认设备类型:', url, deviceType);
+    } else {
+      // 无效的 urlOrData 格式
+      console.error('[loadLighthouseData] 无效的 urlOrData 格式:', urlOrData);
+      throw new Error('无效的URL或数据格式');
     }
   } catch (e) {
     console.error('解析 URL 数据失败:', e);
-    url = urlOrData;
+    // 如果解析失败，尝试将 urlOrData 直接作为 URL，并使用默认设备类型
+    if (typeof urlOrData === 'string') {
+        url = urlOrData;
+    } else {
+        // 如果 urlOrData 也不是字符串，则无法继续
+        console.error('[loadLighthouseData] 无法从 urlOrData 获取有效 URL:', urlOrData);
+        throw new Error('无法从提供的参数中获取有效URL');
+    }
     deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
     console.log('[loadLighthouseData] 解析错误后使用默认设备类型:', deviceType);
   }
