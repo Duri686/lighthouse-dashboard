@@ -94,6 +94,7 @@ jobs:
             --settings.screenEmulation.height=940 \
             --settings.screenEmulation.deviceScaleFactor=1 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.locale=zh-CN \
             --settings.output=json,html \
             --outputDir=.lighthouseci/
           echo "[DESKTOP] 桌面端测试完成"
@@ -153,6 +154,7 @@ jobs:
             --settings.screenEmulation.height=640 \
             --settings.screenEmulation.deviceScaleFactor=2 \
             --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
+            --settings.locale=zh-CN \
             --settings.output=json,html \
             --outputDir=.lighthouseci/
           echo "[MOBILE] 移动端测试完成"
