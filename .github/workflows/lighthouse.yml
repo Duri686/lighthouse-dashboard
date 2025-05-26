@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm init -y
-          npm install -g @lhci/cli@0.12.x
+          npm install -g lighthouse
           npm install fs-extra
           echo "node_modules/" > .gitignore
           echo ".lighthouseci/" >> .gitignore
@@ -86,17 +86,17 @@ jobs:
           
           # 运行桌面端测试
           echo "[DESKTOP] 开始运行桌面端测试"
-          lhci collect \
-            --url=${{ matrix.site.url }} \
-            --settings.formFactor=desktop \
-            --settings.screenEmulation.mobile=false \
-            --settings.screenEmulation.width=1350 \
-            --settings.screenEmulation.height=940 \
-            --settings.screenEmulation.deviceScaleFactor=1 \
-            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.locale=zh-CN \
-            --settings.output=json,html \
-            --outputDir=.lighthouseci/
+          lighthouse ${{ matrix.site.url }} \
+            --preset=desktop \
+            --quiet \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
+            --screenEmulation.width=1350 \
+            --screenEmulation.height=940 \
+            --screenEmulation.deviceScaleFactor=1 \
+            --screenEmulation.disabled=false \
+            --locale=zh-CN \
+            --output=json,html \
+            --output-path=.lighthouseci/desktop-report
           echo "[DESKTOP] 桌面端测试完成"
           
           # 检查生成的文件
@@ -107,9 +107,9 @@ jobs:
           echo "[DESKTOP] 复制桌面端报告到目标目录"
           TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
           
-          # 查找最新的JSON和HTML报告文件
-          DESKTOP_JSON=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.json" | sort -r | head -n 1)
-          DESKTOP_HTML=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.html" | sort -r | head -n 1)
+          # 查找生成的JSON和HTML报告文件
+          DESKTOP_JSON=".lighthouseci/desktop-report.report.json"
+          DESKTOP_HTML=".lighthouseci/desktop-report.report.html"
           
           echo "[DESKTOP] 找到桌面端JSON报告: $DESKTOP_JSON"
           echo "[DESKTOP] 找到桌面端HTML报告: $DESKTOP_HTML"
@@ -146,17 +146,17 @@ jobs:
           
           # 运行移动端测试
           echo "[MOBILE] 开始运行移动端测试"
-          lhci collect \
-            --url=${{ matrix.site.url }} \
-            --settings.formFactor=mobile \
-            --settings.screenEmulation.mobile=true \
-            --settings.screenEmulation.width=360 \
-            --settings.screenEmulation.height=640 \
-            --settings.screenEmulation.deviceScaleFactor=2 \
-            --settings.chromeFlags="--no-sandbox --headless=new --disable-gpu" \
-            --settings.locale=zh-CN \
-            --settings.output=json,html \
-            --outputDir=.lighthouseci/
+          lighthouse ${{ matrix.site.url }} \
+            --preset=mobile \
+            --quiet \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
+            --screenEmulation.width=360 \
+            --screenEmulation.height=640 \
+            --screenEmulation.deviceScaleFactor=2 \
+            --screenEmulation.mobile=true \
+            --locale=zh-CN \
+            --output=json,html \
+            --output-path=.lighthouseci/mobile-report
           echo "[MOBILE] 移动端测试完成"
           
           # 检查生成的文件
@@ -167,9 +167,9 @@ jobs:
           echo "[MOBILE] 复制移动端报告到目标目录"
           TARGET_DIR="reports/$REPORT_DATE/$BRANCH_NAME/${{ matrix.site.name }}"
           
-          # 查找最新的JSON和HTML报告文件
-          MOBILE_JSON=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.json" | sort -r | head -n 1)
-          MOBILE_HTML=$(find .lighthouseci/ -maxdepth 1 -type f -name "*.html" | sort -r | head -n 1)
+          # 查找生成的JSON和HTML报告文件
+          MOBILE_JSON=".lighthouseci/mobile-report.report.json"
+          MOBILE_HTML=".lighthouseci/mobile-report.report.html"
           
           echo "[MOBILE] 找到移动端JSON报告: $MOBILE_JSON"
           echo "[MOBILE] 找到移动端HTML报告: $MOBILE_HTML"
