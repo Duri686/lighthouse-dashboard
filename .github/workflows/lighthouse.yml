@@ -177,8 +177,9 @@ jobs:
           set -x
           # 移动端使用更完整的参数配置
           lighthouse ${{ matrix.site.url }} \
-            --form-factor=mobile \
-            --chrome-flags="--no-sandbox --headless=new --disable-gpu --window-size=768,1024 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking" \
+            --preset=mobile \
+            --device="iPhone SE" \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu --window-size=375,667 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking --enable-features=NetworkService" \
             --max-wait-for-load=300000 \
             --disable-storage-reset \
             --only-audits=first-contentful-paint,largest-contentful-paint,speed-index,interactive,total-blocking-time \
@@ -187,11 +188,11 @@ jobs:
             --throttling.rttMs=170 \
             --throttling.throughputKbps=1600 \
             --throttling-method=devtools \
-            --screenEmulation.width=768 \
-            --screenEmulation.height=1024 \
+            --screenEmulation.width=375 \
+            --screenEmulation.height=667 \
             --screenEmulation.deviceScaleFactor=2 \
             --screenEmulation.mobile=true \
-            --emulated-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1" \
+            --emulated-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.53 Mobile/15E148 Safari/604.1" \
             --locale=zh-CN \
             --only-categories=performance,accessibility,best-practices,seo \
             --output=json,html \
