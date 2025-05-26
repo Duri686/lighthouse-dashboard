@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - 'reports/**'  # 忽略报告目录的更改，防止循环触发
   schedule:
-    - cron: '0 1,13 * * *'  # 北京时间9点和21点
+    - cron: '0 1,13 * * *'  # UTC时间1点和13点，对应北京时间9点和21点
   workflow_dispatch:
 
 permissions:
@@ -42,7 +42,8 @@ jobs:
       - name: Set date and branch env
         id: set_env
         run: |
-          echo "REPORT_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          # 使用北京时间(Asia/Shanghai)设置报告日期
+          echo "REPORT_DATE=$(TZ='Asia/Shanghai' date +'%Y%m%d')" >> $GITHUB_ENV
           echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Create reports directory
