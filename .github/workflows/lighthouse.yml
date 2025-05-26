@@ -177,8 +177,6 @@ jobs:
           set -x
           # 移动端使用标准移动设备配置和精确的节流参数
           lighthouse ${{ matrix.site.url }} \
-            --preset=mobileSlow4G \
-            --formFactor=mobile \
             --chrome-flags="--no-sandbox --headless=new --disable-gpu --enable-mobile-emulation --window-size=375,667 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking --enable-features=NetworkService" \
             --max-wait-for-load=300000 \
             --disable-storage-reset \
@@ -190,11 +188,12 @@ jobs:
             --throttling.throughputKbps=1638.4 \
             --throttling.downloadThroughputKbps=1474.56 \
             --throttling.uploadThroughputKbps=750 \
+            --emulated-form-factor=mobile \
             --screenEmulation.width=375 \
             --screenEmulation.height=667 \
             --screenEmulation.deviceScaleFactor=2 \
             --screenEmulation.mobile=true \
-            --emulatedUserAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.53 Mobile/15E148 Safari/604.1" \
+            --emulated-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.53 Mobile/15E148 Safari/604.1" \
             --locale=zh-CN \
             --only-categories=performance,accessibility,best-practices,seo \
             --output=json,html \
