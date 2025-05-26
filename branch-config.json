@@ -1,7 +1,5 @@
 {
   "branches": [
-    { "name": "main", "label": "主分支" },
-    { "name": "staging", "label": "测试分支" },
-    { "name": "release/*", "label": "发布分支" }
+    { "name": "main", "label": "主分支" }
   ]
 }
