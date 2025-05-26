@@ -175,24 +175,26 @@ jobs:
           
           echo "[MOBILE] 运行移动端测试命令："
           set -x
-          # 移动端使用更完整的参数配置
+          # 移动端使用标准移动设备配置和精确的节流参数
           lighthouse ${{ matrix.site.url }} \
-            --preset=mobile \
-            --device="iPhone SE" \
-            --chrome-flags="--no-sandbox --headless=new --disable-gpu --window-size=375,667 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking --enable-features=NetworkService" \
+            --preset=mobileSlow4G \
+            --formFactor=mobile \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu --enable-mobile-emulation --window-size=375,667 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking --enable-features=NetworkService" \
             --max-wait-for-load=300000 \
             --disable-storage-reset \
             --only-audits=first-contentful-paint,largest-contentful-paint,speed-index,interactive,total-blocking-time \
             --skip-audits=uses-responsive-images,efficient-animated-content \
-            --throttling.cpuSlowdownMultiplier=4 \
-            --throttling.rttMs=170 \
-            --throttling.throughputKbps=1600 \
             --throttling-method=devtools \
+            --throttling.cpuSlowdownMultiplier=4 \
+            --throttling.rttMs=150 \
+            --throttling.throughputKbps=1638.4 \
+            --throttling.downloadThroughputKbps=1474.56 \
+            --throttling.uploadThroughputKbps=750 \
             --screenEmulation.width=375 \
             --screenEmulation.height=667 \
             --screenEmulation.deviceScaleFactor=2 \
             --screenEmulation.mobile=true \
-            --emulated-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.53 Mobile/15E148 Safari/604.1" \
+            --emulatedUserAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/96.0.4664.53 Mobile/15E148 Safari/604.1" \
             --locale=zh-CN \
             --only-categories=performance,accessibility,best-practices,seo \
             --output=json,html \
