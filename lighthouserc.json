@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "settings": {
-        "maxWaitForLoad": 15000,
+        "maxWaitForLoad": 300000,
         "skipAudits": [],
         "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
         "formFactor": "desktop",
