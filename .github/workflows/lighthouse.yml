@@ -70,8 +70,18 @@ jobs:
             "ci": {
               "collect": {
                 "settings": {
-                  "maxWaitForLoad": 30000,
-                  "skipAudits": []
+                  "maxWaitForLoad": 15000,
+                  "skipAudits": [],
+                  "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
+                  "formFactor": "desktop",
+                  "throttling": {
+                    "rttMs": 0,
+                    "throughputKbps": 0,
+                    "cpuSlowdownMultiplier": 1,
+                    "requestLatencyMs": 0,
+                    "downloadThroughputKbps": 0,
+                    "uploadThroughputKbps": 0
+                  }
                 },
                 "numberOfRuns": 1
               }
@@ -88,16 +98,25 @@ jobs:
           echo "[DESKTOP] 开始运行桌面端测试"
           echo "[DESKTOP] 运行框架化的测试命令："
           set -x
+          # 桌面端使用更完整的参数配置
           lighthouse ${{ matrix.site.url }} \
             --form-factor=desktop \
-            --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
-            --screenEmulation.width=1350 \
-            --screenEmulation.height=940 \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu --window-size=1920,1080 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking" \
+            --max-wait-for-load=15000 \
+            --throttling.cpuSlowdownMultiplier=1 \
+            --throttling.rttMs=0 \
+            --throttling.throughputKbps=0 \
+            --throttling-method=provided \
+            --screenEmulation.width=1920 \
+            --screenEmulation.height=1080 \
             --screenEmulation.deviceScaleFactor=1 \
             --screenEmulation.mobile=false \
-            --throttling-method=simulate \
+            --emulated-user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36" \
             --locale=zh-CN \
+            --only-categories=performance,accessibility,best-practices,seo \
             --output=json,html \
+            --save-assets \
+            --view \
             --output-path=.lighthouseci/desktop-report
           set +x
           echo "[DESKTOP] 桌面端测试完成"
@@ -153,17 +172,25 @@ jobs:
           
           echo "[MOBILE] 运行移动端测试命令："
           set -x
+          # 移动端使用更完整的参数配置
           lighthouse ${{ matrix.site.url }} \
             --form-factor=mobile \
-            --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
-            --screenEmulation.width=360 \
-            --screenEmulation.height=640 \
+            --chrome-flags="--no-sandbox --headless=new --disable-gpu --window-size=768,1024 --allow-running-insecure-content --disable-extensions --enable-automation --disable-background-networking" \
+            --max-wait-for-load=15000 \
+            --throttling.cpuSlowdownMultiplier=4 \
+            --throttling.rttMs=170 \
+            --throttling.throughputKbps=1600 \
+            --throttling-method=devtools \
+            --screenEmulation.width=768 \
+            --screenEmulation.height=1024 \
             --screenEmulation.deviceScaleFactor=2 \
             --screenEmulation.mobile=true \
-            --throttling.cpuSlowdownMultiplier=4 \
-            --throttling-method=simulate \
+            --emulated-user-agent="Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1" \
             --locale=zh-CN \
+            --only-categories=performance,accessibility,best-practices,seo \
             --output=json,html \
+            --save-assets \
+            --view \
             --output-path=.lighthouseci/mobile-report
           set +x
           

@@ -9,6 +9,8 @@
 - 可视化展示性能、可访问性、最佳实践和SEO等指标
 - 支持多个网站的数据展示和对比
 - 可自定义时间范围查看历史数据趋势
+- 采用原生Lighthouse CLI进行测试，确保结果准确性
+- 分别针对桌面端和移动端进行优化的测试配置
 
 ## 安装和使用
 
@@ -38,6 +40,25 @@
 2. 转到"Actions"标签
 3. 选择"Lighthouse CI"工作流
 4. 点击"Run workflow"按钮
+
+## 测试配置说明
+
+### 桌面端测试配置
+
+- 屏幕分辨率：1920×1080（全高清）
+- 网络模拟：无节流（模拟高速网络）
+- 浏览器：Chrome（Windows 10）
+- 等待时间：15秒
+- 测试类别：性能、可访问性、最佳实践、SEO
+
+### 移动端测试配置
+
+- 屏幕分辨率：768×1024（平板/大屏手机）
+- 网络模拟：4G网络（RTT 170ms，带宽 1600Kbps）
+- 设备模拟：iOS 16.5设备（iPhone）
+- 等待时间：15秒
+- CPU节流：4倍减速
+- 测试类别：性能、可访问性、最佳实践、SEO
 
 ## 数据存储
 
@@ -76,6 +97,15 @@
 schedule:
   - cron: '0 1,13 * * *'  # 北京时间9点和21点
 ```
+
+### 自定义测试参数
+
+你可以在[.github/workflows/lighthouse.yml](cci:7://file:///d:/lighthouse-dashboard/.github/workflows/lighthouse.yml:0:0-0:0)文件中修改测试参数：
+
+- 修改屏幕尺寸：更改`--screenEmulation.width`和`--screenEmulation.height`参数
+- 调整网络模拟：修改`--throttling.rttMs`和`--throttling.throughputKbps`参数
+- 更改等待时间：调整`--max-wait-for-load`参数
+- 自定义测试类别：编辑`--only-categories`参数
 
 ### 自定义性能指标阈值
 
