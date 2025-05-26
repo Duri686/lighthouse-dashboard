@@ -86,17 +86,20 @@ jobs:
           
           # 运行桌面端测试
           echo "[DESKTOP] 开始运行桌面端测试"
+          echo "[DESKTOP] 运行框架化的测试命令："
+          set -x
           lighthouse ${{ matrix.site.url }} \
-            --preset=desktop \
-            --quiet \
+            --form-factor=desktop \
             --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
             --screenEmulation.width=1350 \
             --screenEmulation.height=940 \
             --screenEmulation.deviceScaleFactor=1 \
-            --screenEmulation.disabled=false \
+            --screenEmulation.mobile=false \
+            --throttling-method=simulate \
             --locale=zh-CN \
             --output=json,html \
             --output-path=.lighthouseci/desktop-report
+          set +x
           echo "[DESKTOP] 桌面端测试完成"
           
           # 检查生成的文件
@@ -146,15 +149,12 @@ jobs:
           
           # 运行移动端测试
           echo "[MOBILE] 开始运行移动端测试"
-          echo "[MOBILE] 开始运行移动端测试，检查Lighthouse可用参数..."
-          lighthouse --help | grep -i mobile || true
-          lighthouse --help | grep -i form || true
-          lighthouse --help | grep -i preset || true
+          echo "[MOBILE] 开始运行移动端测试，根据错误调整参数..."
           
-          echo "[MOBILE] 运行详细命令："
+          echo "[MOBILE] 运行移动端测试命令："
           set -x
           lighthouse ${{ matrix.site.url }} \
-            --preset=desktop \
+            --form-factor=mobile \
             --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
             --screenEmulation.width=360 \
             --screenEmulation.height=640 \
