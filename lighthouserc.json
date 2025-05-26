@@ -2,8 +2,18 @@
   "ci": {
     "collect": {
       "settings": {
-        "maxWaitForLoad": 30000,
-        "skipAudits": []
+        "maxWaitForLoad": 15000,
+        "skipAudits": [],
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
+        "formFactor": "desktop",
+        "throttling": {
+          "rttMs": 0,
+          "throughputKbps": 0,
+          "cpuSlowdownMultiplier": 1,
+          "requestLatencyMs": 0,
+          "downloadThroughputKbps": 0,
+          "uploadThroughputKbps": 0
+        }
       },
       "numberOfRuns": 1
     }
