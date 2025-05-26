@@ -55,14 +55,22 @@ async function initApp() {
         if (siteList && Array.isArray(siteList.sites)) {
           console.log(`[initApp] 已加载优化的站点列表, 包含 ${siteList.sites.length} 个站点`);
           // 转换为我们的用户界面需要的格式
+          console.log(`[initApp] 站点列表样例:`, siteList.sites[0]);
+          
+          // 获取当前日期作为默认日期
+          const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+          console.log(`[initApp] 使用当前日期作为默认日期: ${currentDate}`);
+          
           sites = siteList.sites.map(site => ({
             url: site.url,
             name: `${site.name || site.url} (PC端)`, // 默认给每个站点创建桌面版和移动版选项
-            device: 'desktop'
+            device: 'desktop',
+            date: site.date || currentDate // 添加日期字段，如果站点数据中没有则使用当前日期
           })).concat(siteList.sites.map(site => ({
             url: site.url,
             name: `${site.name || site.url} (移动端)`,
-            device: 'mobile'
+            device: 'mobile',
+            date: site.date || currentDate // 添加日期字段，如果站点数据中没有则使用当前日期
           })));
         }
       }

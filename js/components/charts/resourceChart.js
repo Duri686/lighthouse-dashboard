@@ -88,6 +88,13 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
     }
   }
   
+  // 检查移动端数据是否有效
+  const hasMobileData = mobileData && mobileData.length > 0 && mobileData.some(value => value > 0);
+  console.log(`[charts/resourceChart] 移动端数据${hasMobileData ? '可用' : '不可用'}, 长度:`, mobileData.length);
+  
+  // 根据数据可用性决定图例数据
+  const effectiveLegendData = hasMobileData ? legendData : [legendData[0]];
+
   // 构建资源大小趋势图表选项
   const option = {
     tooltip: {
@@ -95,15 +102,30 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
       formatter: function(params) {
         let result = params[0].axisValue + '<br/>';
         params.forEach(param => {
-          // 将字节数格式化为易读的形式
-          const formattedValue = formatBytes(param.value);
+          // 获取原始值，默认为0
+          const value = param.value || 0;
+          
+          // 根据数据大小自动选择合适的单位
+          let formattedValue;
+          if (value === 0) {
+            formattedValue = '0 B';
+          } else if (value < 1024) {
+            formattedValue = value.toFixed(0) + ' B';
+          } else if (value < 1024 * 1024) {
+            formattedValue = (value / 1024).toFixed(2) + ' KB';
+          } else if (value < 1024 * 1024 * 1024) {
+            formattedValue = (value / (1024 * 1024)).toFixed(2) + ' MB';
+          } else {
+            formattedValue = (value / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+          }
+          
           result += `${param.marker} ${param.seriesName}: ${formattedValue}<br/>`;
         });
         return result;
       }
     },
     legend: {
-      data: legendData,
+      data: effectiveLegendData,
       bottom: 0
     },
     grid: {
@@ -122,7 +144,15 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
       type: 'value',
       axisLabel: {
         formatter: function(value) {
-          return (value / (1024 * 1024)).toFixed(2) + ' MB';
+          // 根据数据大小自动选择合适的单位
+          if (value === 0) return '0 B';
+          if (value < 1024) {
+            return value.toFixed(0) + ' B';
+          } else if (value < 1024 * 1024) {
+            return (value / 1024).toFixed(2) + ' KB';
+          } else {
+            return (value / (1024 * 1024)).toFixed(2) + ' MB';
+          }
         }
       }
     },
@@ -143,7 +173,8 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
           width: 2
         }
       },
-      {
+      // 只在移动端数据可用时添加移动端系列
+      ...(hasMobileData ? [{
         name: legendData[1],
         type: 'line',
         areaStyle: {
@@ -158,7 +189,7 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
         lineStyle: {
           width: 2
         }
-      }
+      }] : [])
     ]
   };
   

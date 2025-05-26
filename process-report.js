@@ -168,63 +168,57 @@ function extractResourcesByType(report) {
     report.audits?.['total-byte-weight']?.numericValue || 0
   );
   
-  // 从 critical-request-chains 中提取所有请求
-  if (report.audits?.['critical-request-chains']?.details?.chains) {
-    const chains = report.audits['critical-request-chains'].details.chains;
+  console.log(`Total byte weight from audit: ${totalByteWeight} bytes`);
+  
+  // 首先从 network-requests 中提取所有请求 - 这比critical-request-chains更完整
+  if (report.audits?.['network-requests']?.details?.items) {
+    const requests = report.audits['network-requests'].details.items;
+    console.log(`Total network requests: ${requests.length}`);
     
-    // 递归提取所有请求
-    function extractRequestsFromChain(chain) {
-      const requests = [];
-      if (!chain) return requests;
-      
-      // 添加当前请求
-      if (chain.request) {
-        requests.push(chain.request);
-      }
-      
-      // 递归处理子请求
-      if (chain.children) {
-        Object.values(chain.children).forEach(child => {
-          requests.push(...extractRequestsFromChain(child));
-        });
-      }
-      
-      return requests;
-    }
-    
-    // 获取所有请求
-    const allRequests = [];
-    Object.values(chains).forEach(chain => {
-      allRequests.push(...extractRequestsFromChain(chain));
-    });
+    let totalTrackedBytes = 0;
     
     // 按类型分类并计算大小
-    allRequests.forEach(request => {
+    requests.forEach(request => {
       const url = request.url || '';
-      const transferSize = request.transferSize || 0;
+      // 使用transferSize或resourceSize，取凣有值的
+      const transferSize = request.transferSize || request.resourceSize || 0;
       
-      // 根据URL确定资源类型
-      if (url.match(/\.js(\?|$)/i)) {
+      if (transferSize <= 0) return; // 跳过无大小的资源
+      
+      totalTrackedBytes += transferSize;
+      
+      // 根据URL或响应类型确定资源类型
+      const mimeType = (request.mimeType || '').toLowerCase();
+      
+      if (url.match(/\.js(\?|$)/i) || mimeType.includes('javascript') || mimeType.includes('json')) {
         resourceSizes.js += transferSize;
-      } else if (url.match(/\.css(\?|$)/i)) {
+      } else if (url.match(/\.css(\?|$)/i) || mimeType.includes('css')) {
         resourceSizes.css += transferSize;
-      } else if (url.match(/\.(jpe?g|png|gif|svg|webp|ico)(\?|$)/i)) {
+      } else if (url.match(/\.(jpe?g|png|gif|svg|webp|ico)(\?|$)/i) || mimeType.includes('image')) {
         resourceSizes.image += transferSize;
-      } else if (url.match(/\.(woff2?|ttf|otf|eot)(\?|$)/i)) {
+      } else if (url.match(/\.(woff2?|ttf|otf|eot)(\?|$)/i) || mimeType.includes('font')) {
         resourceSizes.font += transferSize;
       } else {
         resourceSizes.other += transferSize;
       }
     });
     
-    // 将大小转换为KB，并四舍五入到整数
+    console.log(`Total tracked bytes: ${totalTrackedBytes} bytes`);
+    console.log('Raw resource sizes (in bytes):', JSON.stringify(resourceSizes));
+    
+    // 将大小转换为KB，并四舍五入到整数 - 保持与totalByteWeight的单位一致
     Object.keys(resourceSizes).forEach(key => {
       resourceSizes[key] = Math.round(resourceSizes[key] / 1024);
     });
+    
+    console.log('Resource sizes (in KB):', JSON.stringify(resourceSizes));
+  } else {
+    console.log('No network requests found in the report');
   }
   
   return {
-    resourceSizes
+    resourceSizes,
+    totalTrackedBytes: Math.round(Object.values(resourceSizes).reduce((sum, size) => sum + size, 0))
   };
 }
 

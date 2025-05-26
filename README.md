@@ -53,12 +53,18 @@
 
 ### 移动端测试配置
 
-- 屏幕分辨率：768×1024（平板/大屏手机）
-- 网络模拟：4G网络（RTT 170ms，带宽 1600Kbps）
-- 设备模拟：iOS 16.5设备（iPhone）
-- 等待时间：15秒
-- CPU节流：4倍减速
+- 设备形态：使用`--emulated-form-factor=mobile`精确模拟移动设备
+- 屏幕模拟：375×667（iPhone SE尺寸），设备缩放因子2倍
+- 网络模拟：标准慢速4G网络
+  - RTT: 150ms
+  - 下载吞吐量: 1638.4Kbps
+  - 上传吞吐量: 750Kbps
+- 浏览器模拟：启用`--enable-mobile-emulation`确保更精确的移动体验
+- CPU节流：4倍减速（`--throttling.cpuSlowdownMultiplier=4`）
+- 等待时间：最长300秒
+- 移动用户代理：模拟iOS设备User-Agent
 - 测试类别：性能、可访问性、最佳实践、SEO
+- 语言设置：中文（`--locale=zh-CN`）
 
 ## 数据存储
 

@@ -48,7 +48,12 @@ export async function loadSiteList(branch = getSelectedBranch()) {
     }
 
     const data = await response.json();
-    console.log('loadSiteList', data);
+    console.log('[loadSiteList] 原始数据加载成功，报告数量:', data.reports?.length || 0);
+    
+    if (!Array.isArray(data.reports) || data.reports.length === 0) {
+      console.warn('[loadSiteList] 未找到有效的报告数据');
+      return [];
+    }
     
     // 先对报告按日期倒序排序，使最新的在前面
     data.reports.sort((a, b) => {
@@ -69,40 +74,60 @@ export async function loadSiteList(branch = getSelectedBranch()) {
       }
     });
     
+    console.log('[loadSiteList] 报告按日期倒序排序完成，最新日期:', data.reports[0].date);
+    
     // 提取所有不同的网站和设备类型组合
     const sitesMap = {};
     data.reports.forEach((report) => {
       if (report.url) {
-        // 针对 desktop 和 mobile 分别创建选项
         // 格式化日期显示
         let displayDate = formatDateDisplay(report.date);
         
+        // 网站名称 (默认使用URL)
+        const siteName = report.name || report.url;
+        
+        // 确保日期字段有效
+        const reportDate = report.date || '';
+        console.log(`[处理报告] URL: ${report.url}, 日期: ${reportDate}`);
+      
+        // 创建桌面端选项
         if (report.desktop) {
-          const key = `${report.url}_desktop_${report.date}`;
+          const key = `${report.url}_desktop_${reportDate}`;
           sitesMap[key] = {
             url: report.url,
-            name: `${report.url} (PC端 | ${displayDate})`,
+            name: `${siteName} (PC端 | ${displayDate})`,
             device: 'desktop',
-            date: report.date
+            date: reportDate,
+            rawReport: report // 保存原始报告数据供后续使用
           };
+          console.log(`[创建选项] 桌面端: ${siteName}, 日期: ${reportDate}`);
         }
         
+        // 创建移动端选项
         if (report.mobile) {
-          const key = `${report.url}_mobile_${report.date}`;
+          const key = `${report.url}_mobile_${reportDate}`;
           sitesMap[key] = {
             url: report.url,
-            name: `${report.url} (移动端 | ${displayDate})`,
+            name: `${siteName} (移动端 | ${displayDate})`,
             device: 'mobile',
-            date: report.date
+            date: reportDate,
+            rawReport: report // 保存原始报告数据供后续使用
           };
+          console.log(`[创建选项] 移动端: ${siteName}, 日期: ${reportDate}`);
         }
       }
     });
 
     // 转换为数组
-    return Object.values(sitesMap);
+    const sitesList = Object.values(sitesMap);
+    
+    console.log('[loadSiteList] 成功提取网站列表，总计:', sitesList.length, 
+                '桌面端:', sitesList.filter(s => s.device === 'desktop').length,
+                '移动端:', sitesList.filter(s => s.device === 'mobile').length);
+    
+    return sitesList;
   } catch (error) {
-    console.error('加载网站列表时出错:', error);
+    console.error('[loadSiteList] 加载网站列表时出错:', error);
     return [];
   }
 }
