@@ -146,17 +146,28 @@ jobs:
           
           # 运行移动端测试
           echo "[MOBILE] 开始运行移动端测试"
+          echo "[MOBILE] 开始运行移动端测试，检查Lighthouse可用参数..."
+          lighthouse --help | grep -i mobile || true
+          lighthouse --help | grep -i form || true
+          lighthouse --help | grep -i preset || true
+          
+          echo "[MOBILE] 运行详细命令："
+          set -x
           lighthouse ${{ matrix.site.url }} \
-            --preset=mobile \
-            --quiet \
+            --preset=desktop \
             --chrome-flags="--no-sandbox --headless=new --disable-gpu" \
             --screenEmulation.width=360 \
             --screenEmulation.height=640 \
             --screenEmulation.deviceScaleFactor=2 \
             --screenEmulation.mobile=true \
+            --throttling.cpuSlowdownMultiplier=4 \
+            --throttling-method=simulate \
             --locale=zh-CN \
             --output=json,html \
             --output-path=.lighthouseci/mobile-report
+          set +x
+          
+          echo "[MOBILE] 移动端测试命令执行完成"
           echo "[MOBILE] 移动端测试完成"
           
           # 检查生成的文件
