@@ -105,8 +105,10 @@ export function initResourceSizeChart(chartData, chartInstances, resourceType = 
           // 获取原始值，默认为0
           const value = param.value || 0;
           
+          // 所有数据现在都是字节单位
           // 根据数据大小自动选择合适的单位
           let formattedValue;
+          
           if (value === 0) {
             formattedValue = '0 B';
           } else if (value < 1024) {

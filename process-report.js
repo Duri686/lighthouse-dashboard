@@ -204,14 +204,15 @@ function extractResourcesByType(report) {
     });
     
     console.log(`Total tracked bytes: ${totalTrackedBytes} bytes`);
-    console.log('Raw resource sizes (in bytes):', JSON.stringify(resourceSizes));
+    console.log('Resource sizes (in bytes):', JSON.stringify(resourceSizes));
     
-    // 将大小转换为KB，并四舍五入到整数 - 保持与totalByteWeight的单位一致
-    Object.keys(resourceSizes).forEach(key => {
-      resourceSizes[key] = Math.round(resourceSizes[key] / 1024);
-    });
+    // 不再将原始字节大小转换为KB，保留原始字节数
+    // 前端图表将负责适当地显示单位
+    // 注释掉转换代码:
+    // Object.keys(resourceSizes).forEach(key => {
+    //   resourceSizes[key] = Math.round(resourceSizes[key] / 1024);
+    // });
     
-    console.log('Resource sizes (in KB):', JSON.stringify(resourceSizes));
   } else {
     console.log('No network requests found in the report');
   }
