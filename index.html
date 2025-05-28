@@ -1,1 +1,821 @@
-<!DOCTYPE html><html><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width, initial-scale=1.0" data-next-head=""/><title data-next-head="">Lighthouse Dashboard</title><meta name="description" content="监控网站性能的Lighthouse仪表盘" data-next-head=""/><link rel="preload" href="./_next/static/css/e102644a1e8ba30f.css" as="style"/><link href="https://cdn.jsdelivr.net/npm/@inspire-ui/css@2.2.0/dist/css/inspire-ui.min.css" rel="stylesheet" data-next-head=""/><link rel="stylesheet" href="./_next/static/css/e102644a1e8ba30f.css" data-n-g=""/><noscript data-n-css=""></noscript><script defer="" noModule="" src="./_next/static/chunks/polyfills-42372ed130431b0a.js"></script><script src="https://cdn.tailwindcss.com" defer="" data-nscript="beforeInteractive"></script><script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" defer="" data-nscript="beforeInteractive"></script><script src="./_next/static/chunks/webpack-502a0195d0ce5784.js" defer=""></script><script src="./_next/static/chunks/framework-2f335d22a7318891.js" defer=""></script><script src="./_next/static/chunks/main-5e3ff9355442ff8e.js" defer=""></script><script src="./_next/static/chunks/pages/_app-d0614901fa67878c.js" defer=""></script><script src="./_next/static/chunks/pages/index-394a54e67716f392.js" defer=""></script><script src="./_next/static/1km7p8Ih91BdxDixXOBir/_buildManifest.js" defer=""></script><script src="./_next/static/1km7p8Ih91BdxDixXOBir/_ssgManifest.js" defer=""></script></head><body><link rel="preload" as="image" href="https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg"/><div id="__next"><div class="bg-gray-50 dark:bg-gray-900 min-h-screen"><nav class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50 transition-all duration-200"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex justify-between h-16"><div class="flex items-center"><svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="ml-2 text-xl font-bold">Lighthouse Dashboard</span></div><div class="flex items-center space-x-4"><button class="p-2 rounded-full text-gray-200 hover:text-white hover:bg-gray-700 transition-colors"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg></button><a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" rel="noreferrer" class="flex items-center hover:text-blue-200 transition-colors"><svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>GitHub</a></div></div></div></nav><main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"><header class="mb-8"><div class="flex justify-between items-center"><h1 class="text-3xl font-bold text-gray-900 dark:text-white">数据控制面板</h1><div class="text-sm text-gray-500 dark:text-gray-400">数据每日更新于北京时间9点和21点</div></div></header><div class="bg-gradient-to-br from-blue-50 to-indigo-50 py-8 mb-8 rounded-lg shadow-sm dark:from-blue-900/30 dark:to-indigo-900/30"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="md:flex md:items-center md:justify-between"><div class="md:w-2/3"><h2 class="text-2xl font-bold text-gray-800 dark:text-white">网站性能监控仪表板</h2><p class="mt-2 text-gray-600 dark:text-gray-300">通过Lighthouse自动化测试监控网站性能，跟踪核心网页指标变化趋势，提升用户体验。 每天在北京时间9点和21点自动运行测试，生成详细的性能报告和趋势图表。</p><div class="mt-4 flex space-x-3"><a href="#features" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">了解功能</a><a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" rel="noreferrer" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:text-white dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600">查看源码</a></div></div><div class="hidden md:block md:w-1/3"><img src="https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg" alt="Lighthouse Logo" class="h-32 mx-auto"/></div></div></div></div><div id="features" class="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 dark:bg-gray-800"><h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center"><svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>功能特点</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 dashboard-card transition-all duration-300"><div class="flex items-center mb-2"><svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><h4 class="font-medium text-gray-800 dark:text-gray-200">自动化测试</h4></div><p class="text-sm text-gray-600 dark:text-gray-300">每天在北京时间9点和21点自动运行Lighthouse测试并生成报告</p></div><div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 dashboard-card transition-all duration-300"><div class="flex items-center mb-2"><svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><h4 class="font-medium text-gray-800 dark:text-gray-200">趋势分析</h4></div><p class="text-sm text-gray-600 dark:text-gray-300">存储历史报告数据，支持多维度趋势分析和性能对比</p></div><div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 dashboard-card transition-all duration-300"><div class="flex items-center mb-2"><svg class="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg><h4 class="font-medium text-gray-800 dark:text-gray-200">多设备优化</h4></div><p class="text-sm text-gray-600 dark:text-gray-300">分别针对桌面端和移动端进行优化的测试配置</p></div></div></div><div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 p-6 mb-6 transition-all duration-300"><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center"><svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>控制面板</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-100 dark:border-gray-700"><label for="branchSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择分支</label><div class="relative mb-3"><div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg></div><select id="branchSelect" class="w-full pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"><option value="" disabled="" selected="">选择分支...</option></select></div><label for="urlSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择网站</label><div class="relative"><div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><select id="urlSelect" class="w-full pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"><option value="" disabled="" selected="">选择网站...</option></select></div></div><div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-100 dark:border-gray-700"><label for="dateRange" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">日期范围</label><div class="relative"><div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><select id="dateRange" class="w-full pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"><option value="7" selected="">最近7天</option><option value="14">最近14天</option><option value="30">最近30天</option><option value="90">最近90天</option></select></div></div></div></div><div class="flex justify-center items-center py-10"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div><span class="ml-3 text-gray-600 dark:text-gray-400">加载数据中...</span></div></main><footer class="bg-gray-800 text-white py-8 mt-12 rounded-lg"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="md:flex md:justify-between"><div class="mb-6 md:mb-0"><h2 class="text-lg font-bold flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>Lighthouse Dashboard</h2><p class="mt-2 text-sm text-gray-400">使用Google Lighthouse技术自动监控网站性能</p></div><div class="grid grid-cols-2 gap-8"><div><h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase">相关资源</h3><ul class="mt-4 space-y-2"><li><a href="https://developers.google.com/web/tools/lighthouse" target="_blank" rel="noreferrer" class="text-gray-400 hover:text-white">Lighthouse官方文档</a></li><li><a href="https://web.dev/learn-web-vitals/" target="_blank" rel="noreferrer" class="text-gray-400 hover:text-white">Web Vitals指标说明</a></li></ul></div><div><h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase">项目信息</h3><ul class="mt-4 space-y-2"><li><a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" rel="noreferrer" class="text-gray-400 hover:text-white">GitHub仓库</a></li><li><a href="https://github.com/Duri686/lighthouse-dashboard/issues" target="_blank" rel="noreferrer" class="text-gray-400 hover:text-white">提交问题</a></li></ul></div></div></div><div class="mt-8 border-t border-gray-700 pt-4"><p class="text-sm text-gray-400">© 2025 Lighthouse Dashboard. 基于Google Lighthouse构建。</p></div></div></footer></div></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"initialData":{"branches":["main","develop"],"sites":[{"value":"https://example.com","label":"Example Website"},{"value":"https://test.com","label":"Test Website"}],"initialBranch":"main"}},"__N_SSG":true},"page":"/","query":{},"buildId":"1km7p8Ih91BdxDixXOBir","assetPrefix":".","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lighthouse Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ECharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+  <!-- InspireUI 组件 (通过CDN引入) -->
+  <link href="https://cdn.jsdelivr.net/npm/@inspire-ui/css@2.2.0/dist/css/inspire-ui.min.css" rel="stylesheet">
+  <style>
+    /* 定义颜色变量 */
+    :root {
+      --color-good: #0cce6b;
+      --color-average: #ffa400;
+      --color-poor: #ff4e42;
+      
+      /* 深色模式颜色 */
+      --color-bg-dark: #111827;
+      --color-card-dark: #1f2937;
+      --color-text-dark: #f3f4f6;
+      --color-text-secondary-dark: #9ca3af;
+      --color-border-dark: #374151;
+    }
+    
+    .good { color: var(--color-good); }
+    .average { color: var(--color-average); }
+    .poor { color: var(--color-poor); }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: bold;
+      line-height: 1;
+    }
+    /* 核心网页指标表格样式 */
+    .core-metrics-table td .metric-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .core-metrics-table td .trend-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    /* 隐藏元素 */
+    .hidden {
+      display: none !important;
+    }
+    /* 增强卡片效果 */
+    .dashboard-card {
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .dashboard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 深色模式下卡片效果 */
+    .dark .dashboard-card {
+      border: 1px solid var(--color-border-dark);
+      background-color: var(--color-card-dark);
+    }
+    .dark .dashboard-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 渐变背景 */
+    .bg-gradient-blue {
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    }
+    .dark .bg-gradient-blue {
+      background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+    }
+    
+    /* 动画过渡 */
+    .transition-smooth {
+      transition: all 0.3s ease-in-out;
+    }
+    
+    /* 标签切换样式 */
+    .tab-button {
+      color: #4b5563;
+      background-color: transparent;
+    }
+    .tab-button:hover {
+      color: #2563eb;
+      background-color: #f9fafb;
+    }
+    .tab-button.active {
+      color: white;
+      background-color: #2563eb;
+    }
+    
+    /* 深色模式标签样式 */
+    .dark .tab-button {
+      color: #d1d5db;
+    }
+    .dark .tab-button:hover {
+      color: #3b82f6;
+      background-color: #374151;
+    }
+    .dark .tab-button.active {
+      color: #f3f4f6;
+      background-color: #3b82f6;
+    }
+    
+    /* 深色模式文字颜色 */
+    .dark {
+      background-color: var(--color-bg-dark);
+      color: var(--color-text-dark);
+    }
+    .dark .bg-white {
+      background-color: var(--color-card-dark);
+    }
+    .dark .bg-gray-50 {
+      background-color: #111827;
+    }
+    .dark .text-gray-900 {
+      color: #f3f4f6;
+    }
+    .dark .text-gray-800 {
+      color: #f3f4f6;
+    }
+    .dark .text-gray-700 {
+      color: #d1d5db;
+    }
+    .dark .text-gray-600 {
+      color: #9ca3af;
+    }
+    .dark .text-gray-500 {
+      color: #6b7280;
+    }
+    .dark .border-gray-200 {
+      border-color: #374151;
+    }
+    .dark .border-gray-100 {
+      border-color: #374151;
+    }
+    
+    /* 深色模式渐变背景 */
+    .dark .from-blue-50 {
+      --tw-gradient-from: #1e3a8a;
+    }
+    .dark .to-indigo-50 {
+      --tw-gradient-to: #312e81;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- 导航栏 -->
+  <nav class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50 transition-all duration-200">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span class="ml-2 text-xl font-bold">Lighthouse Dashboard</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="theme-toggle" class="p-2 rounded-full text-gray-200 hover:text-white hover:bg-gray-700 transition-colors">
+            <!-- 太阳图标 (浅色模式显示) -->
+            <svg id="light-icon" class="h-5 w-5 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+            </svg>
+            <!-- 月亮图标 (深色模式显示) -->
+            <svg id="dark-icon" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+          </button>
+          
+          <a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" class="flex items-center hover:text-blue-200 transition-colors">
+            <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 项目介绍 -->
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 py-8 mb-8 rounded-lg shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="md:flex md:items-center md:justify-between">
+        <div class="md:w-2/3">
+          <h2 class="text-2xl font-bold text-gray-800">网站性能监控仪表板</h2>
+          <p class="mt-2 text-gray-600">
+            通过Lighthouse自动化测试监控网站性能，跟踪核心网页指标变化趋势，提升用户体验。
+            每天在北京时间9点和21点自动运行测试，生成详细的性能报告和趋势图表。
+          </p>
+          <div class="mt-4 flex space-x-3">
+            <a href="#features" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+              了解功能
+            </a>
+            <a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              查看源码
+            </a>
+          </div>
+        </div>
+        <div class="hidden md:block md:w-1/3">
+          <img src="https://developers.google.com/web/tools/lighthouse/images/lighthouse-logo.svg" alt="Lighthouse Logo" class="h-32 mx-auto">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <header class="mb-8">
+      <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-900">数据控制面板</h1>
+        <div class="text-sm text-gray-500">数据每日更新于北京时间9点和21点</div>
+      </div>
+    </header>
+    
+    <!-- 功能特点展示 -->
+    <div id="features" class="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300">
+      <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        功能特点
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 dashboard-card transition-all duration-300">
+          <div class="flex items-center mb-2">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h4 class="font-medium text-gray-800 dark:text-black">自动化测试</h4>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">每天在北京时间9点和21点自动运行Lighthouse测试并生成报告</p>
+        </div>
+        <div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 dashboard-card transition-all duration-300">
+          <div class="flex items-center mb-2">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <h4 class="font-medium text-gray-800 dark:text-black">趋势分析</h4>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">存储历史报告数据，支持多维度趋势分析和性能对比</p>
+        </div>
+        <div class="p-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 dashboard-card transition-all duration-300">
+          <div class="flex items-center mb-2">
+            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <h4 class="font-medium text-gray-800 dark:text-black">多设备优化</h4>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">分别针对桌面端和移动端进行优化的测试配置</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 p-6 mb-6 transition-all duration-300">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        控制面板
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+          <label for="urlSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择网站</label>
+          <div class="relative mb-3">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <select id="branchSelect" class="w-full inspire-select inspire-select-bordered pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+            </select>
+          </div>
+          
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <select id="urlSelect" class="w-full inspire-select inspire-select-bordered pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+              <option value="">加载中...</option>
+              <!-- 网站选项将由JS动态加载 -->
+            </select>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+          <label for="dateRange" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">日期范围</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <select id="dateRange" class="w-full inspire-select inspire-select-bordered pl-10 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+              <option value="7">最近7天</option>
+              <option value="14">最近14天</option>
+              <option value="30">最近30天</option>
+              <option value="90">最近90天</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 指标卡片区域 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dashboard-card transition-all duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">性能</h3>
+          <div class="metric-value good" id="performanceScore">-</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+    
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dashboard-card transition-all duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">可访问性</h3>
+          <div class="metric-value good" id="accessibilityScore">-</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dashboard-card transition-all duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">最佳实践</h3>
+          <div class="metric-value good" id="bestPracticesScore">-</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 dashboard-card transition-all duration-300 border border-gray-100 dark:border-gray-700">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/40 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">SEO</h3>
+          <div class="metric-value good" id="seoScore">-</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">得分范围: 0-100</div>
+        </div>
+      </div>
+    </div>
+    <!-- 趋势图表区域 -->
+    <div class="mb-8">
+      <!-- 图表标题 -->
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">性能趋势分析</h3>
+        <div class="text-sm text-gray-600 flex items-center">
+          <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>每12小时更新一次数据</span>
+        </div>
+      </div>
+      
+      <!-- 图表选择标签 -->
+      <div class="flex flex-wrap border-b border-gray-200 mb-6 bg-gray-50 dark:bg-gray-800 rounded-t-lg p-1">
+        <button id="tab-performance" class="tab-button active px-4 py-2 text-sm font-medium rounded-md shadow-sm ml-1 transition-colors">核心指标趋势</button>
+        <button id="tab-loading" class="tab-button px-4 py-2 text-sm font-medium rounded-md transition-colors ml-1">加载性能</button>
+        <button id="tab-interactivity" class="tab-button px-4 py-2 text-sm font-medium rounded-md transition-colors ml-1">交互性能</button>
+        <button id="tab-resources" class="tab-button px-4 py-2 text-sm font-medium rounded-md transition-colors ml-1">资源分析</button>
+      </div>
+      
+      <!-- 图表容器 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 border border-gray-100">
+      
+        <!-- 核心指标趋势图 -->
+        <div id="chart-performance" class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">核心指标趋势</h3>
+            <div class="flex space-x-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>性能
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>可访问性
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>最佳实践
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>SEO
+              </span>
+            </div>
+          </div>
+          <div class="h-80">
+            <div id="performanceChart" style="width:100%;height:100%;"></div>
+          </div>
+        </div>
+        
+        <!-- 加载性能趋势图 -->
+        <div id="chart-loading" class="hidden p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">加载性能趋势</h3>
+            <div class="flex space-x-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>FCP
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>LCP
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>SI
+              </span>
+            </div>
+          </div>
+          <div class="h-80">
+            <div id="loadingSpeedChart" style="width:100%;height:100%;"></div>
+          </div>
+        </div>
+        
+        <!-- 交互性能趋势图 -->
+        <div id="chart-interactivity" class="hidden p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">交互性能趋势</h3>
+            <div class="flex space-x-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>TTI
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>TBT
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>CLS
+              </span>
+            </div>
+          </div>
+          <div class="h-80">
+            <div id="interactivityChart" style="width:100%;height:100%;"></div>
+          </div>
+        </div>
+        
+        <!-- 资源分析趋势图 -->
+        <div id="chart-resources" class="hidden p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">资源总大小趋势</h3>
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center">
+                <span class="w-3 h-3 bg-blue-500 rounded-sm mr-1"></span>
+                <span class="text-xs text-gray-600">桌面端</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-3 h-3 bg-green-500 rounded-sm mr-1"></span>
+                <span class="text-xs text-gray-600">移动端</span>
+              </div>
+              <div class="relative inline-block text-left">
+                <select id="resource-view-type" class="block pl-3 pr-8 py-1 text-xs border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                  <option value="total">总大小</option>
+                  <option value="js">JavaScript</option>
+                  <option value="css">CSS</option>
+                  <option value="images">图片</option>
+                  <option value="fonts">字体</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="h-80">
+            <div id="resourceSizeChart" style="width:100%;height:100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 详细问题分析部分 -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border border-gray-100 dark:border-gray-700 transition-all duration-300">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+          <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          详细问题分析
+        </h3>
+        <button id="toggleDetails" class="inspire-btn inspire-btn-sm inspire-btn-ghost flex items-center hover:bg-blue-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors">
+          展开详情 
+          <svg id="expandIcon" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div id="detailsContent" style="display: none;">
+        <!-- 原生Lighthouse报告嵌入 -->
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6 bg-gray-50 dark:bg-gray-900 transition-all duration-300">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+              <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Lighthouse 原生报告
+            </h4>
+            <button id="toggleReportView" class="inspire-btn inspire-btn-sm inspire-btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white">展开/收起报告</button>
+          </div>
+          <div id="lighthouseReportContainer" style="display: none; height: 600px; overflow: hidden;" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-inner">
+            <iframe id="lighthouseReportFrame" style="width: 100%; height: 100%; border: none;" src="about:blank"></iframe>
+          </div>
+        </div>
+        
+        <!-- 性能指标详情 -->
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 transition-all duration-300">
+          <h4 class="font-medium text-gray-800 dark:text-white mb-4 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            性能指标详情
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">首次内容绘制 (FCP)</div>
+              <div id="fcpDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">最大内容绘制 (LCP)</div>
+              <div id="lcpDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">总阻塞时间 (TBT)</div>
+              <div id="tbtDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">累积布局偏移 (CLS)</div>
+              <div id="clsDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">交互到可用时间 (TTI)</div>
+              <div id="ttiDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">交互时间</div>
+              <div id="interactive-value" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">速度指数 (SI)</div>
+              <div id="siDetail" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">服务器响应时间</div>
+              <div id="server-response-time-value" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm dashboard-card border border-gray-100 dark:border-gray-700">
+              <div class="text-sm text-gray-500 dark:text-gray-400">资源总大小</div>
+              <div id="total-byte-weight-value" class="text-lg font-semibold text-gray-900 dark:text-white">-</div>
+              <div class="text-xs text-gray-400 mt-1 flex items-center resource-trend">
+                <span id="resource-trend-icon" class="mr-1"></span>
+                <span id="resource-trend-value">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 查看原始报告链接 -->
+        <div class="mt-6 text-center">
+          <a id="fullReportLink" href="#" target="_blank" class="inspire-btn inspire-btn-outline bg-blue-50 hover:bg-blue-100 transition-colors mr-3">
+            <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            查看完整 HTML 报告
+          </a>
+          <a id="jsonReportLink" href="#" target="_blank" class="inspire-btn inspire-btn-outline bg-gray-50 hover:bg-gray-100 transition-colors">
+            <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            查看原始 JSON 数据
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部数据展示区 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      <!-- 核心网页指标表格 -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-100 dark:border-gray-700 dashboard-card transition-all duration-300">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          核心网页指标
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 core-metrics-table rounded-lg overflow-hidden">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">指标</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">当前值</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">7天趋势</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white ">
+                  <div class="font-medium flex items-center">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                    FCP
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">首次内容绘制</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" id="fcp">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="fcpTrend">-</td>
+              </tr>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <div class="font-medium flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    LCP
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">最大内容绘制</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" id="lcp">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="lcpTrend">-</td>
+              </tr>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <div class="font-medium flex items-center">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                    CLS
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">累积布局偏移</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" id="cls">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="clsTrend">-</td>
+              </tr>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <div class="font-medium flex items-center">
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                    TTI
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">可交互时间</div>
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" id="tti">-</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm" id="ttiTrend">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- 最近报告区域 -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-100 dark:border-gray-700 dashboard-card transition-all duration-300">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            最近报告
+          </h3>
+          <button id="refreshBtn" class="inspire-btn inspire-btn-sm inspire-btn-primary dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            刷新
+          </button>
+        </div>
+        <div id="recentReports" class="space-y-3 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg transition-all duration-300">
+          <div class="animate-pulse flex space-x-4">
+            <div class="flex-1 space-y-2 py-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+
+  <!-- 页脚部分 -->
+  <footer class="bg-gray-800 text-white py-8 mt-12 rounded-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="md:flex md:justify-between">
+        <div class="mb-6 md:mb-0">
+          <h2 class="text-lg font-bold flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Lighthouse Dashboard
+          </h2>
+          <p class="mt-2 text-sm text-gray-400">使用Google Lighthouse技术自动监控网站性能</p>
+        </div>
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase">相关资源</h3>
+            <ul class="mt-4 space-y-2">
+              <li>
+                <a href="https://developers.google.com/web/tools/lighthouse" target="_blank" class="text-gray-400 hover:text-white">
+                  Lighthouse官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://web.dev/learn-web-vitals/" target="_blank" class="text-gray-400 hover:text-white">
+                  Web Vitals指标说明
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase">项目信息</h3>
+            <ul class="mt-4 space-y-2">
+              <li>
+                <a href="https://github.com/Duri686/lighthouse-dashboard" target="_blank" class="text-gray-400 hover:text-white">
+                  GitHub仓库
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/Duri686/lighthouse-dashboard/issues" target="_blank" class="text-gray-400 hover:text-white">
+                  提交问题
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-gray-700 pt-4">
+        <p class="text-sm text-gray-400">&copy; 2025 Lighthouse Dashboard. 基于Google Lighthouse构建。</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="metrics"></div>
+  <div id="details"></div>
+  <!-- 模块化的JavaScript文件 -->  
+  <script type="module" src="js/main.js"></script>
+  
+  <!-- 深色模式和标签切换脚本 -->
+  <script>
+    // 深色模式切换功能
+    document.addEventListener('DOMContentLoaded', () => {
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const lightIcon = document.getElementById('light-icon');
+      const darkIcon = document.getElementById('dark-icon');
+      
+      // 检查当前主题模式
+      const userTheme = localStorage.getItem('theme');
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      
+      // 初始化主题
+      const applyTheme = (theme) => {
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          darkIcon.classList.add('hidden');
+          lightIcon.classList.remove('hidden');
+        } else {
+          document.documentElement.classList.remove('dark');
+          lightIcon.classList.add('hidden');
+          darkIcon.classList.remove('hidden');
+        }
+      };
+      
+      // 初始化页面加载时的主题
+      const initTheme = () => {
+        // 优先使用用户设置的主题，如果没有则使用系统主题
+        if (userTheme) {
+          applyTheme(userTheme);
+        } else {
+          applyTheme(systemTheme);
+        }
+      };
+      
+      // 调用初始化函数
+      initTheme();
+      
+      // 点击切换主题
+      themeToggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          localStorage.setItem('theme', 'light');
+          applyTheme('light');
+        } else {
+          localStorage.setItem('theme', 'dark');
+          applyTheme('dark');
+        }
+      });
+      
+      // 标签切换功能修复
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const chartContainers = document.querySelectorAll('[id^="chart-"]');
+      
+      // 绑定点击事件到每个标签按钮
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // 移除所有标签的活动状态
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          
+          // 添加当前标签的活动状态
+          button.classList.add('active');
+          
+          // 获取对应的图表容器ID
+          const targetChartId = 'chart-' + button.id.split('-')[1];
+          
+          // 隐藏所有图表容器
+          chartContainers.forEach(container => {
+            container.classList.add('hidden');
+          });
+          
+          // 显示目标图表容器
+          document.getElementById(targetChartId).classList.remove('hidden');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
