@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-good: #0cce6b;
+  --color-average: #ffa400;
+  --color-poor: #ff4e42;
+  
+  /* 深色模式颜色 */
+  --color-bg-dark: #111827;
+  --color-card-dark: #1f2937;
+  --color-text-dark: #f3f4f6;
+  --color-text-secondary-dark: #9ca3af;
+  --color-border-dark: #374151;
+}
+
+.good { color: var(--color-good); }
+.average { color: var(--color-average); }
+.poor { color: var(--color-poor); }
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* 核心网页指标表格样式 */
+.core-metrics-table td .metric-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.core-metrics-table td .trend-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* 隐藏元素 */
+.hidden {
+  display: none !important;
+}
+
+/* 增强卡片效果 */
+.dashboard-card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 深色模式下卡片效果 */
+.dark .dashboard-card {
+  border: 1px solid var(--color-border-dark);
+  background-color: var(--color-card-dark);
+}
+.dark .dashboard-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}

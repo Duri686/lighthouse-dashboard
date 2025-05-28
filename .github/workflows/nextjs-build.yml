@@ -1,0 +1,70 @@
+name: 构建Next.js应用
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+      
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'next-app/package-lock.json'
+      
+      - name: 安装依赖
+        run: |
+          cd next-app
+          npm install
+      
+      - name: 构建Next.js应用
+        run: |
+          cd next-app
+          npm run build
+      
+      - name: 准备docs目录
+        run: |
+          mkdir -p docs
+          cp -r next-app/out/* docs/
+          if [ -d "reports" ]; then
+            mkdir -p docs/reports
+            cp -r reports/* docs/reports/
+          fi
+      
+      - name: 运行Lighthouse测试
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@v9
+        with:
+          urls: |
+            ${{ github.event.repository.homepage || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: '.lighthouserc.json'
+      
+      - name: 运行移动端Lighthouse测试
+        id: lighthouse-mobile
+        uses: treosh/lighthouse-ci-action@v9
+        with:
+          urls: |
+            ${{ github.event.repository.homepage || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: '.lighthouserc.mobile.json'
+      
+      - name: 处理报告数据
+        run: |
+          node process-report.js
+      
+      - name: 部署到GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs
+          branch: gh-pages
