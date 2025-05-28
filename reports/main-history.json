@@ -203,7 +203,7 @@
       "date": "20250528",
       "desktop": {
         "scores": {
-          "performance": 0.55,
+          "performance": 0.62,
           "accessibility": 0.72,
           "best-practices": 0.78,
           "seo": 0.85
@@ -211,18 +211,18 @@
         "metrics": {
           "fcp": 2617,
           "lcp": 2617,
-          "tbt": 296,
+          "tbt": 173,
           "cls": 0,
-          "tti": 5723,
-          "si": 22163,
-          "serverResponseTime": 524,
-          "totalByteWeight": 10023773,
+          "tti": 5801,
+          "si": 18918,
+          "serverResponseTime": 321,
+          "totalByteWeight": 10039221,
           "resourceSizes": {
-            "js": 434186,
-            "css": 79259,
-            "image": 2927731,
-            "font": 118647,
-            "other": 6483384
+            "js": 433938,
+            "css": 79132,
+            "image": 2927705,
+            "font": 118616,
+            "other": 6499264
           }
         },
         "reportFiles": {
@@ -234,26 +234,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.32,
+          "performance": 0.33,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 5236,
-          "lcp": 7128,
-          "tbt": 1302,
+          "fcp": 5213,
+          "lcp": 6837,
+          "tbt": 1247,
           "cls": 0,
-          "tti": 20698,
-          "si": 35604,
-          "serverResponseTime": 326,
-          "totalByteWeight": 8411837,
+          "tti": 19848,
+          "si": 25132,
+          "serverResponseTime": 309,
+          "totalByteWeight": 7114128,
           "resourceSizes": {
-            "js": 439902,
-            "css": 81131,
-            "image": 2412334,
-            "font": 117243,
-            "other": 5383545
+            "js": 439214,
+            "css": 81011,
+            "image": 2412428,
+            "font": 117246,
+            "other": 4086547
           }
         },
         "reportFiles": {
