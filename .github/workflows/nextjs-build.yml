@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# 设置权限
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,8 +43,50 @@ jobs:
             cp -r reports/* docs/reports/
           fi
       
-      - name: 部署到GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: docs
-          branch: gh-pages
+      - name: 提交docs目录到main分支
+        run: |
+          echo "===== [GIT] 提交和推送docs目录到仓库 ====="
+          echo "[GIT] 配置Git用户信息"
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 首先获取最新更改
+          echo "[GIT] 获取最新仓库更改"
+          git fetch origin
+          
+          # 处理未暂存文件，先将所有更改暂存再拉取
+          echo "[GIT] 暂存本地更改以避免冲突"
+          git stash -u || true
+          
+          # 拉取最新代码
+          CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          echo "[GIT] 当前分支: $CURRENT_BRANCH"
+          echo "[GIT] 拉取最新代码"
+          git pull origin $CURRENT_BRANCH --ff-only || git pull origin $CURRENT_BRANCH
+          
+          # 如果有暂存的更改，恢复他们
+          echo "[GIT] 恢复暂存的更改"
+          git stash pop || true
+          
+          # 添加docs目录
+          echo "[GIT] 添加docs目录到暂存区"
+          git add docs
+          
+          # 检查是否有更改需要提交
+          echo "[GIT] 检查是否有更改需要提交"
+          if git diff --cached --quiet; then
+            echo "[GIT] 没有检测到需要提交的更改"
+            exit 0
+          else
+            COMMIT_MSG="更新构建的docs目录 $(date +"%Y-%m-%d %H:%M:%S")"
+            echo "[GIT] 提交更改: $COMMIT_MSG"
+            git commit -m "$COMMIT_MSG"
+            
+            echo "[GIT] 推送更改到远程仓库: origin/$CURRENT_BRANCH"
+            git push origin HEAD:$CURRENT_BRANCH
+            echo "[GIT] 成功推送docs目录更新到仓库"
+          fi
+          
+          echo "===== [GIT] 提交和推送完成 ====="
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
