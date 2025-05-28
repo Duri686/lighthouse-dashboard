@@ -1,23 +1,2 @@
-# 依赖目录
 node_modules/
-
-# Lighthouse CI
 .lighthouseci/
-
-# Next.js构建输出
-.next/
-next-app/.next/
-next-app/out/
-
-# 构建产物
-docs/
-
-# 日志
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# 操作系统文件
-.DS_Store
-Thumbs.db
