@@ -203,26 +203,26 @@
       "date": "20250528",
       "desktop": {
         "scores": {
-          "performance": 0.62,
+          "performance": 0.58,
           "accessibility": 0.72,
           "best-practices": 0.78,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2617,
-          "lcp": 2617,
-          "tbt": 173,
+          "fcp": 3019,
+          "lcp": 3019,
+          "tbt": 200,
           "cls": 0,
-          "tti": 5801,
-          "si": 18918,
-          "serverResponseTime": 321,
-          "totalByteWeight": 10039221,
+          "tti": 6148,
+          "si": 11735,
+          "serverResponseTime": 392,
+          "totalByteWeight": 10027315,
           "resourceSizes": {
-            "js": 433938,
-            "css": 79132,
-            "image": 2927705,
-            "font": 118616,
-            "other": 6499264
+            "js": 433540,
+            "css": 79268,
+            "image": 2927787,
+            "font": 118628,
+            "other": 6487526
           }
         },
         "reportFiles": {
@@ -234,26 +234,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.33,
+          "performance": 0.34,
           "accessibility": 0.74,
           "best-practices": 0.75,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 5213,
-          "lcp": 6837,
-          "tbt": 1247,
+          "fcp": 5195,
+          "lcp": 6988,
+          "tbt": 1163,
           "cls": 0,
-          "tti": 19848,
-          "si": 25132,
-          "serverResponseTime": 309,
-          "totalByteWeight": 7114128,
+          "tti": 20130,
+          "si": 24642,
+          "serverResponseTime": 360,
+          "totalByteWeight": 7113970,
           "resourceSizes": {
-            "js": 439214,
-            "css": 81011,
-            "image": 2412428,
+            "js": 438698,
+            "css": 80914,
+            "image": 2412483,
             "font": 117246,
-            "other": 4086547
+            "other": 4086947
           }
         },
         "reportFiles": {
