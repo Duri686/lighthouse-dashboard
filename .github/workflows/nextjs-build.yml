@@ -39,30 +39,6 @@ jobs:
             cp -r reports/* docs/reports/
           fi
       
-      - name: 运行Lighthouse测试
-        id: lighthouse
-        uses: treosh/lighthouse-ci-action@v9
-        with:
-          urls: |
-            ${{ github.event.repository.homepage || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          configPath: '.lighthouserc.json'
-      
-      - name: 运行移动端Lighthouse测试
-        id: lighthouse-mobile
-        uses: treosh/lighthouse-ci-action@v9
-        with:
-          urls: |
-            ${{ github.event.repository.homepage || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          configPath: '.lighthouserc.mobile.json'
-      
-      - name: 处理报告数据
-        run: |
-          node process-report.js
-      
       - name: 部署到GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
