@@ -929,26 +929,26 @@
       "date": "20250630",
       "desktop": {
         "scores": {
-          "performance": 0.46,
+          "performance": 0.34,
           "accessibility": 0.75,
           "best-practices": 0.74,
           "seo": 0.83
         },
         "metrics": {
-          "fcp": 2177,
-          "lcp": 2177,
-          "tbt": 990,
-          "cls": 0.003,
-          "tti": 10694,
-          "si": 2848,
-          "serverResponseTime": 259,
-          "totalByteWeight": 27180344,
+          "fcp": 3186,
+          "lcp": 3186,
+          "tbt": 2298,
+          "cls": 0.002,
+          "tti": 12079,
+          "si": 3908,
+          "serverResponseTime": 336,
+          "totalByteWeight": 27128878,
           "resourceSizes": {
-            "js": 695293,
-            "css": 110315,
-            "image": 6358275,
-            "font": 2147659,
-            "other": 23595965
+            "js": 689425,
+            "css": 106137,
+            "image": 6358495,
+            "font": 2147548,
+            "other": 23540191
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.31,
+          "performance": 0.34,
           "accessibility": 0.72,
           "best-practices": 0.75,
           "seo": 0.92
         },
         "metrics": {
-          "fcp": 4470,
-          "lcp": 5785,
-          "tbt": 2660,
+          "fcp": 3957,
+          "lcp": 8332,
+          "tbt": 1169,
           "cls": 0.002,
-          "tti": 31792,
-          "si": 45271,
-          "serverResponseTime": 413,
-          "totalByteWeight": 22231271,
+          "tti": 43085,
+          "si": 37122,
+          "serverResponseTime": 379,
+          "totalByteWeight": 18839440,
           "resourceSizes": {
-            "js": 668375,
-            "css": 101375,
-            "image": 4418055,
-            "font": 2147938,
-            "other": 25878090
+            "js": 676149,
+            "css": 110322,
+            "image": 4418278,
+            "font": 2147762,
+            "other": 25306979
           }
         },
         "reportFiles": {
