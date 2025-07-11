@@ -935,20 +935,20 @@
           "seo": 0.83
         },
         "metrics": {
-          "fcp": 3222,
-          "lcp": 3222,
-          "tbt": 1255,
+          "fcp": 3188,
+          "lcp": 3188,
+          "tbt": 1820,
           "cls": 0.002,
-          "tti": 12388,
-          "si": 3595,
-          "serverResponseTime": 416,
-          "totalByteWeight": 19162055,
+          "tti": 12634,
+          "si": 3382,
+          "serverResponseTime": 361,
+          "totalByteWeight": 21725004,
           "resourceSizes": {
-            "js": 659312,
-            "css": 106930,
-            "image": 6424670,
-            "font": 2147522,
-            "other": 23257941
+            "js": 685809,
+            "css": 106358,
+            "image": 6424750,
+            "font": 2147497,
+            "other": 23397761
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.34,
+          "performance": 0.39,
           "accessibility": 0.72,
           "best-practices": 0.75,
           "seo": 0.92
         },
         "metrics": {
-          "fcp": 3965,
-          "lcp": 5318,
-          "tbt": 2618,
+          "fcp": 4209,
+          "lcp": 5474,
+          "tbt": 1082,
           "cls": 0.002,
-          "tti": 45350,
-          "si": 45229,
-          "serverResponseTime": 369,
-          "totalByteWeight": 18874182,
+          "tti": 35828,
+          "si": 44463,
+          "serverResponseTime": 358,
+          "totalByteWeight": 19645201,
           "resourceSizes": {
-            "js": 674569,
-            "css": 102098,
-            "image": 4484921,
-            "font": 2147778,
-            "other": 22451113
+            "js": 690912,
+            "css": 101391,
+            "image": 4485747,
+            "font": 2147933,
+            "other": 26235426
           }
         },
         "reportFiles": {
