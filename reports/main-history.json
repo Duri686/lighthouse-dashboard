@@ -2,72 +2,6 @@
   "reports": [
     {
       "url": "https://www.fadada.com",
-      "date": "20260104",
-      "desktop": {
-        "scores": {
-          "performance": 0.51,
-          "accessibility": 0.76,
-          "best-practices": 0.96,
-          "seo": 0.85
-        },
-        "metrics": {
-          "fcp": 2358,
-          "lcp": 8371,
-          "tbt": 192,
-          "cls": 0.001,
-          "tti": 3409,
-          "si": 8739,
-          "serverResponseTime": 392,
-          "totalByteWeight": 10046871,
-          "resourceSizes": {
-            "js": 703696,
-            "css": 79287,
-            "image": 3403808,
-            "font": 102833,
-            "other": 5993525
-          }
-        },
-        "reportFiles": {
-          "html": "reports/20260104/main/fadada/lhr-fadada-desktop.report.html",
-          "json": "reports/20260104/main/fadada/lhr-fadada-desktop.report.json",
-          "fullHtmlPath": "reports/20260104/main/fadada/lhr-fadada-desktop.report.html",
-          "fullJsonPath": "reports/20260104/main/fadada/lhr-fadada-desktop.report.json"
-        }
-      },
-      "mobile": {
-        "scores": {
-          "performance": 0.27,
-          "accessibility": 0.75,
-          "best-practices": 0.96,
-          "seo": 0.85
-        },
-        "metrics": {
-          "fcp": 4481,
-          "lcp": 73594,
-          "tbt": 13349,
-          "cls": 0.008,
-          "tti": 55213,
-          "si": 66691,
-          "serverResponseTime": 275,
-          "totalByteWeight": 37919940,
-          "resourceSizes": {
-            "js": 679685,
-            "css": 78775,
-            "image": 3161332,
-            "font": 103067,
-            "other": 34133359
-          }
-        },
-        "reportFiles": {
-          "html": "reports/20260104/main/fadada/lhr-fadada-mobile.report.html",
-          "json": "reports/20260104/main/fadada/lhr-fadada-mobile.report.json",
-          "fullHtmlPath": "reports/20260104/main/fadada/lhr-fadada-mobile.report.html",
-          "fullJsonPath": "reports/20260104/main/fadada/lhr-fadada-mobile.report.json"
-        }
-      }
-    },
-    {
-      "url": "https://www.fadada.com",
       "date": "20260105",
       "desktop": {
         "scores": {
@@ -987,6 +921,72 @@
           "json": "reports/20260118/main/fadada/lhr-fadada-mobile.report.json",
           "fullHtmlPath": "reports/20260118/main/fadada/lhr-fadada-mobile.report.html",
           "fullJsonPath": "reports/20260118/main/fadada/lhr-fadada-mobile.report.json"
+        }
+      }
+    },
+    {
+      "url": "https://www.fadada.com",
+      "date": "20260119",
+      "desktop": {
+        "scores": {
+          "performance": 0.27,
+          "accessibility": 0.76,
+          "best-practices": 0.96,
+          "seo": 0.85
+        },
+        "metrics": {
+          "fcp": 2359,
+          "lcp": 11029,
+          "tbt": 1082,
+          "cls": 0.053,
+          "tti": 10154,
+          "si": 10146,
+          "serverResponseTime": 357,
+          "totalByteWeight": 10396770,
+          "resourceSizes": {
+            "js": 703696,
+            "css": 78703,
+            "image": 3415563,
+            "font": 102820,
+            "other": 6332266
+          }
+        },
+        "reportFiles": {
+          "html": "reports/20260119/main/fadada/lhr-fadada-desktop.report.html",
+          "json": "reports/20260119/main/fadada/lhr-fadada-desktop.report.json",
+          "fullHtmlPath": "reports/20260119/main/fadada/lhr-fadada-desktop.report.html",
+          "fullJsonPath": "reports/20260119/main/fadada/lhr-fadada-desktop.report.json"
+        }
+      },
+      "mobile": {
+        "scores": {
+          "performance": 0.27,
+          "accessibility": 0.75,
+          "best-practices": 0.96,
+          "seo": 0.85
+        },
+        "metrics": {
+          "fcp": 4171,
+          "lcp": 74089,
+          "tbt": 13057,
+          "cls": 0.008,
+          "tti": 63978,
+          "si": 66611,
+          "serverResponseTime": 451,
+          "totalByteWeight": 38757698,
+          "resourceSizes": {
+            "js": 739381,
+            "css": 78304,
+            "image": 3172930,
+            "font": 103066,
+            "other": 34900295
+          }
+        },
+        "reportFiles": {
+          "html": "reports/20260119/main/fadada/lhr-fadada-mobile.report.html",
+          "json": "reports/20260119/main/fadada/lhr-fadada-mobile.report.json",
+          "fullHtmlPath": "reports/20260119/main/fadada/lhr-fadada-mobile.report.html",
+          "fullJsonPath": "reports/20260119/main/fadada/lhr-fadada-mobile.report.json"
         }
       }
     }
