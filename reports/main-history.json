@@ -929,26 +929,26 @@
       "date": "20260205",
       "desktop": {
         "scores": {
-          "performance": 0.26,
+          "performance": 0.27,
           "accessibility": 0.76,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2865,
-          "lcp": 13037,
-          "tbt": 1261,
+          "fcp": 2743,
+          "lcp": 15854,
+          "tbt": 931,
           "cls": 0.053,
-          "tti": 10214,
-          "si": 11942,
-          "serverResponseTime": 450,
-          "totalByteWeight": 10383131,
+          "tti": 10163,
+          "si": 13564,
+          "serverResponseTime": 320,
+          "totalByteWeight": 10573215,
           "resourceSizes": {
-            "js": 705230,
-            "css": 79334,
-            "image": 3414994,
-            "font": 102829,
-            "other": 6317022
+            "js": 729981,
+            "css": 79193,
+            "image": 3252229,
+            "font": 102822,
+            "other": 6644615
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.27,
+          "performance": 0.25,
           "accessibility": 0.75,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 4287,
-          "lcp": 73723,
-          "tbt": 12037,
+          "fcp": 7438,
+          "lcp": 68741,
+          "tbt": 11726,
           "cls": 0.008,
-          "tti": 62933,
-          "si": 59337,
-          "serverResponseTime": 284,
-          "totalByteWeight": 38141827,
+          "tti": 64087,
+          "si": 54459,
+          "serverResponseTime": 1637,
+          "totalByteWeight": 38734260,
           "resourceSizes": {
-            "js": 680735,
-            "css": 78630,
-            "image": 3172991,
-            "font": 103055,
-            "other": 34342694
+            "js": 509353,
+            "css": 33409,
+            "image": 3128763,
+            "font": 103061,
+            "other": 34963140
           }
         },
         "reportFiles": {
