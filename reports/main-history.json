@@ -929,26 +929,26 @@
       "date": "20260316",
       "desktop": {
         "scores": {
-          "performance": 0.56,
+          "performance": 0.25,
           "accessibility": 0.76,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2640,
-          "lcp": 6890,
-          "tbt": 74,
-          "cls": 0,
-          "tti": 3583,
-          "si": 7647,
-          "serverResponseTime": 360,
-          "totalByteWeight": 11516306,
+          "fcp": 3117,
+          "lcp": 10071,
+          "tbt": 1709,
+          "cls": 0.053,
+          "tti": 9654,
+          "si": 9647,
+          "serverResponseTime": 425,
+          "totalByteWeight": 10069200,
           "resourceSizes": {
-            "js": 681210,
-            "css": 77177,
-            "image": 3342237,
-            "font": 102830,
-            "other": 7631686
+            "js": 710231,
+            "css": 78355,
+            "image": 3342238,
+            "font": 102832,
+            "other": 6364279
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0,
+          "performance": 0.26,
           "accessibility": 0.75,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 4389,
-          "lcp": 13894,
-          "tbt": 0,
+          "fcp": 4540,
+          "lcp": 85521,
+          "tbt": 20315,
           "cls": 0.008,
-          "tti": 0,
-          "si": 64812,
-          "serverResponseTime": 474,
-          "totalByteWeight": 38486829,
+          "tti": 63978,
+          "si": 68932,
+          "serverResponseTime": 350,
+          "totalByteWeight": 38741551,
           "resourceSizes": {
-            "js": 686812,
-            "css": 77274,
-            "image": 3232766,
-            "font": 102933,
-            "other": 34623341
+            "js": 681659,
+            "css": 77311,
+            "image": 3233273,
+            "font": 102951,
+            "other": 34882654
           }
         },
         "reportFiles": {
