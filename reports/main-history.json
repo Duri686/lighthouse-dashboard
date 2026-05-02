@@ -929,26 +929,26 @@
       "date": "20260502",
       "desktop": {
         "scores": {
-          "performance": 0.45,
+          "performance": 0.57,
           "accessibility": 0.71,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2906,
-          "lcp": 19146,
-          "tbt": 275,
-          "cls": 0.051,
-          "tti": 14147,
-          "si": 16580,
-          "serverResponseTime": 640,
-          "totalByteWeight": 24470417,
+          "fcp": 2110,
+          "lcp": 7756,
+          "tbt": 40,
+          "cls": 0.067,
+          "tti": 2946,
+          "si": 8962,
+          "serverResponseTime": 335,
+          "totalByteWeight": 24999862,
           "resourceSizes": {
-            "js": 735608,
-            "css": 79719,
-            "image": 3965959,
-            "font": 102825,
-            "other": 19827794
+            "js": 729833,
+            "css": 79184,
+            "image": 3965388,
+            "font": 102826,
+            "other": 20364119
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.26,
+          "performance": 0.27,
           "accessibility": 0.75,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 5154,
-          "lcp": 8453,
-          "tbt": 23505,
-          "cls": 0,
-          "tti": 83241,
-          "si": 66053,
-          "serverResponseTime": 441,
-          "totalByteWeight": 55155386,
+          "fcp": 4131,
+          "lcp": 86460,
+          "tbt": 15269,
+          "cls": 0.001,
+          "tti": 65478,
+          "si": 66771,
+          "serverResponseTime": 513,
+          "totalByteWeight": 54953731,
           "resourceSizes": {
-            "js": 736114,
-            "css": 79785,
-            "image": 3307730,
-            "font": 103070,
-            "other": 51170175
+            "js": 757476,
+            "css": 80571,
+            "image": 3307510,
+            "font": 103068,
+            "other": 50946594
           }
         },
         "reportFiles": {
