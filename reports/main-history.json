@@ -929,26 +929,26 @@
       "date": "20260509",
       "desktop": {
         "scores": {
-          "performance": 0.31,
+          "performance": 0.52,
           "accessibility": 0.71,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2681,
-          "lcp": 3887,
-          "tbt": 1133,
-          "cls": 0.05,
-          "tti": 9916,
-          "si": 10214,
-          "serverResponseTime": 361,
-          "totalByteWeight": 16475597,
+          "fcp": 2745,
+          "lcp": 8967,
+          "tbt": 168,
+          "cls": 0.001,
+          "tti": 8756,
+          "si": 9684,
+          "serverResponseTime": 538,
+          "totalByteWeight": 25902582,
           "resourceSizes": {
-            "js": 734211,
-            "css": 80408,
-            "image": 3965993,
-            "font": 102823,
-            "other": 11833650
+            "js": 731060,
+            "css": 79585,
+            "image": 3965601,
+            "font": 102819,
+            "other": 21297809
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.27,
+          "performance": 0.26,
           "accessibility": 0.75,
           "best-practices": 0.96,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 4307,
-          "lcp": 87374,
-          "tbt": 23862,
-          "cls": 0.001,
-          "tti": 88563,
-          "si": 69856,
-          "serverResponseTime": 516,
-          "totalByteWeight": 52657682,
+          "fcp": 5148,
+          "lcp": 8191,
+          "tbt": 9931,
+          "cls": 0,
+          "tti": 137406,
+          "si": 53072,
+          "serverResponseTime": 492,
+          "totalByteWeight": 50162356,
           "resourceSizes": {
-            "js": 757164,
-            "css": 80459,
-            "image": 3307399,
-            "font": 103048,
-            "other": 48651100
+            "js": 732557,
+            "css": 80201,
+            "image": 3307541,
+            "font": 103057,
+            "other": 46180488
           }
         },
         "reportFiles": {
