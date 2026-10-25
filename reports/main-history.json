@@ -929,26 +929,26 @@
       "date": "20261025",
       "desktop": {
         "scores": {
-          "performance": 0.46,
+          "performance": 0.3,
           "accessibility": 0.44,
           "best-practices": 0.56,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 2407,
-          "lcp": 5020,
-          "tbt": 319,
+          "fcp": 2461,
+          "lcp": 5908,
+          "tbt": 840,
           "cls": 0.002,
-          "tti": 4997,
-          "si": 4864,
-          "serverResponseTime": 370,
-          "totalByteWeight": 27102052,
+          "tti": 5870,
+          "si": 5661,
+          "serverResponseTime": 348,
+          "totalByteWeight": 22131308,
           "resourceSizes": {
-            "js": 554762,
-            "css": 35114,
-            "image": 5393247,
-            "font": 102840,
-            "other": 21016379
+            "js": 695190,
+            "css": 35445,
+            "image": 5393263,
+            "font": 102843,
+            "other": 16767445
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.47,
+          "performance": 0.41,
           "accessibility": 0.71,
           "best-practices": 0.57,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 4421,
-          "lcp": 78251,
-          "tbt": 383,
+          "fcp": 4214,
+          "lcp": 68152,
+          "tbt": 633,
           "cls": 0,
-          "tti": 73773,
-          "si": 58210,
-          "serverResponseTime": 282,
-          "totalByteWeight": 49224896,
+          "tti": 66414,
+          "si": 64229,
+          "serverResponseTime": 266,
+          "totalByteWeight": 50884185,
           "resourceSizes": {
-            "js": 732107,
-            "css": 68806,
-            "image": 4227973,
-            "font": 102841,
-            "other": 44302490
+            "js": 747700,
+            "css": 70037,
+            "image": 4227992,
+            "font": 102851,
+            "other": 45944926
           }
         },
         "reportFiles": {
