@@ -929,26 +929,26 @@
       "date": "20261120",
       "desktop": {
         "scores": {
-          "performance": 0.61,
+          "performance": 0.34,
           "accessibility": 0.44,
           "best-practices": 0.56,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 1964,
-          "lcp": 4880,
-          "tbt": 3,
+          "fcp": 4105,
+          "lcp": 6781,
+          "tbt": 519,
           "cls": 0.002,
-          "tti": 4176,
-          "si": 4703,
-          "serverResponseTime": 305,
-          "totalByteWeight": 21718793,
+          "tti": 6586,
+          "si": 6639,
+          "serverResponseTime": 364,
+          "totalByteWeight": 21367101,
           "resourceSizes": {
-            "js": 532790,
-            "css": 35028,
-            "image": 5462797,
-            "font": 102631,
-            "other": 15780828
+            "js": 741113,
+            "css": 71717,
+            "image": 5462699,
+            "font": 102626,
+            "other": 15899673
           }
         },
         "reportFiles": {
@@ -960,26 +960,26 @@
       },
       "mobile": {
         "scores": {
-          "performance": 0.51,
+          "performance": 0.47,
           "accessibility": 0.71,
           "best-practices": 0.57,
           "seo": 0.85
         },
         "metrics": {
-          "fcp": 4404,
-          "lcp": 40236,
-          "tbt": 271,
+          "fcp": 4344,
+          "lcp": 45588,
+          "tbt": 396,
           "cls": 0,
-          "tti": 38107,
-          "si": 38002,
+          "tti": 43515,
+          "si": 43050,
           "serverResponseTime": 562,
-          "totalByteWeight": 51039131,
+          "totalByteWeight": 51340115,
           "resourceSizes": {
-            "js": 709707,
-            "css": 71785,
-            "image": 4297364,
+            "js": 709831,
+            "css": 71818,
+            "image": 4297621,
             "font": 102853,
-            "other": 46069998
+            "other": 46370568
           }
         },
         "reportFiles": {
